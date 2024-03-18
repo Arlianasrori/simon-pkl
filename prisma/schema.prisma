@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum jenis_kelamin {
+  laki
+  perempuan
+}
+model admin {
+  id Int @id
+  username String @db.VarChar(255)
+  password String @db.VarChar(255)
+}
+model siswa {
+  id Int @id
+  nisn Int
+  nama String @db.VarChar(255)
+  kelas String @db.VarChar(255)
+  jurusan String @db.VarChar(255)
+  jenis_kelamin jenis_kelamin
+  no_telepon String @db.VarChar(12)
+  id_guru_pembimbing Int
+  id_dudi Int
+  id_pembimbing_dudi Int
+  tanggal_masuk DateTime
+  tanggal_keluar DateTime
+  password String @db.VarChar(255)
+}
+model guru_pembimbing {
+  id Int @id
+  nip Int
+  nama String @db.VarChar(255)
+  no_telepon String @db.VarChar(12)
+  jenis_kelamin jenis_kelamin
+  tempat_lahir String @db.VarChar(255)
+  tanggal_lahir DateTime
+  agama String @db.VarChar(255)
+  password String @db.VarChar(255)
+
+}
+model alamat_guru_Pembimbing {
+  id_guru_Pembimbing Int @id
+  detail_tempat String @db.VarChar(255)
+  desa String @db.VarChar(255)
+  kecamatan String @db.VarChar(255)
+  provinsi String @db.VarChar(255)
+  negara String @db.VarChar(255)
+}
+model Pembimbing_dudi {
+  id Int @id
+  id_dudi Int
+  username String @db.VarChar(255)
+  nama_instansi String @db.VarChar(255)
+  no_telepon String @db.VarChar(12)
+  password String @db.VarChar(255)
+  jenis_kelamin jenis_kelamin
+  agama String @db.VarChar(255)
+}
+model dudi {
+  id Int @id
+  nama_instansi_perusahaan String @db.VarChar(255)
+  username String @db.VarChar(255)
+  password String @db.VarChar(255)
+  no_telepon String @db.VarChar(12)
+  bidang String @db.VarChar(255)
+  catatan String @db.VarChar(1500)
+}
+model alamat_pembimbing_dudi {
+  id_pembimbing_dudi Int @id
+  detail_tempat String @db.VarChar(255)
+  desa String @db.VarChar(255)
+  kecamatan String @db.VarChar(255)
+  provinsi String @db.VarChar(255)
+  negara String @db.VarChar(255)
+}
+model alamat_dudi {
+  id_dudi Int @id
+  detail_tempat String @db.VarChar(255)
+  desa String @db.VarChar(255)
+  kecamatan String @db.VarChar(255)
+  provinsi String @db.VarChar(255)
+  negara String @db.VarChar(255)
+}
+enum status_pengajuan {
+  proses 
+  diterima
+  ditolak
+}
+model pangajuan_pkl {
+  id Int @id
+  id_siswa Int
+  id_dudi Int
+  status status_pengajuan 
+  waktu_pengajuan DateTime
+}
+model absen {
+  id Int @id
+  id_siswa Int
+  id_dudi Int
+  id_pembimbing_dudi Int
+  tanggal DateTime
+  absen_masuk DateTime
+  absen_pulang DateTime
+  status status_absen
+  keterangan String @db.VarChar(1500)
+}
+model laporan_pkl {
+  id Int @id
+  id_siswa Int
+  id_dudi Int
+  id_pembimbing_dudi Int
+  tanggal DateTime
+  keterangan String @db.VarChar(1500)
+  file_laporan String @db.VarChar(1500)
+}
+model laporan_siswa_pkl {
+  id Int @id
+  id_siswa Int
+  id_dudi Int
+  id_pembimbing_dudi Int
+  tanggal DateTime
+  topik_pekerjaan String @db.VarChar(255)
+  rujukan_kompetensi_dasar String @db.VarChar(255)
+  dokumentasi String @db.VarChar(1500)
+}
+model kunjungan_guru_pembimbing_pkl {
+  id Int @id
+  id_guru_pembimbing Int
+  id_dudi Int
+  id_pembimbing_dudi Int
+  tanggal_kunjungan DateTime
+  catatan String @db.VarChar(1500)
+}
+
+enum status_absen {
+  datang
+  pulang
+}
