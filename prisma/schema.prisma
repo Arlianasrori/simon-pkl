@@ -24,18 +24,37 @@ model admin {
 }
 model siswa {
   id Int @id
-  nisn Int
+  nis Int
   nama String @db.VarChar(255)
   kelas String @db.VarChar(255)
   jurusan String @db.VarChar(255)
   jenis_kelamin jenis_kelamin
   no_telepon String @db.VarChar(12)
   id_guru_pembimbing Int
-  id_dudi Int
-  id_pembimbing_dudi Int
-  tanggal_masuk DateTime
-  tanggal_keluar DateTime
+  id_dudi Int?
+  id_pembimbing_dudi Int?
+  tanggal_masuk DateTime?
+  tanggal_keluar DateTime?
   password String @db.VarChar(255)
+
+  alamat alamat_siswa?
+  pengajuan_pkl pangajuan_pkl[]
+  absen absen[]
+  laporan_pkl laporan_pkl[]
+  laporans_siswa_pkl laporan_siswa_pkl[]
+  guru_pembimbing guru_pembimbing @relation(fields: [id_guru_pembimbing],references: [id])
+  dudi dudi? @relation(fields: [id_dudi],references: [id])
+  pembimbing_dudi Pembimbing_dudi? @relation(fields: [id_pembimbing_dudi],references: [id])
+}
+model alamat_siswa {
+  id_siswa Int @id
+  detail_tempat String @db.VarChar(255)
+  desa String @db.VarChar(255)
+  kecamatan String @db.VarChar(255)
+  provinsi String @db.VarChar(255)
+  negara String @db.VarChar(255)
+
+  siswa siswa @relation(fields: [id_siswa],references: [id])
 }
 model guru_pembimbing {
   id Int @id
@@ -48,6 +67,10 @@ model guru_pembimbing {
   agama String @db.VarChar(255)
   password String @db.VarChar(255)
 
+  siswa siswa[]
+  alamat alamat_guru_Pembimbing?
+  kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
+
 }
 model alamat_guru_Pembimbing {
   id_guru_Pembimbing Int @id
@@ -56,6 +79,8 @@ model alamat_guru_Pembimbing {
   kecamatan String @db.VarChar(255)
   provinsi String @db.VarChar(255)
   negara String @db.VarChar(255)
+
+  guru_pembimbing guru_pembimbing @relation(fields: [id_guru_Pembimbing],references: [id])
 }
 model Pembimbing_dudi {
   id Int @id
@@ -66,6 +91,13 @@ model Pembimbing_dudi {
   password String @db.VarChar(255)
   jenis_kelamin jenis_kelamin
   agama String @db.VarChar(255)
+
+  siswa siswa[]
+  alamat alamat_pembimbing_dudi?
+  absen absen[]
+  laporan_pkl laporan_pkl[]
+  laporans_siswa_pkl laporan_siswa_pkl[]
+  kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
 }
 model dudi {
   id Int @id
@@ -75,6 +107,14 @@ model dudi {
   no_telepon String @db.VarChar(12)
   bidang String @db.VarChar(255)
   catatan String @db.VarChar(1500)
+
+  alamat alamat_dudi?
+  siswa siswa[]
+  pengajuan_pkl pangajuan_pkl[]
+  absen absen[]
+  laporan_pkl laporan_pkl[]
+  laporans_siswa_pkl laporan_siswa_pkl[]
+  kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
 }
 model alamat_pembimbing_dudi {
   id_pembimbing_dudi Int @id
@@ -83,6 +123,8 @@ model alamat_pembimbing_dudi {
   kecamatan String @db.VarChar(255)
   provinsi String @db.VarChar(255)
   negara String @db.VarChar(255)
+
+  pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id])
 }
 model alamat_dudi {
   id_dudi Int @id
@@ -91,6 +133,8 @@ model alamat_dudi {
   kecamatan String @db.VarChar(255)
   provinsi String @db.VarChar(255)
   negara String @db.VarChar(255)
+
+  dudi dudi @relation(fields: [id_dudi],references: [id])
 }
 enum status_pengajuan {
   proses 
@@ -102,7 +146,10 @@ model pangajuan_pkl {
   id_siswa Int
   id_dudi Int
   status status_pengajuan 
-  waktu_pengajuan DateTime
+  waktu_pengajuan DateTime @default(now())
+
+  siswa siswa @relation(fields: [id_siswa],references: [id])
+  dudi dudi @relation(fields: [id_dudi],references: [id])
 }
 model absen {
   id Int @id
@@ -114,6 +161,10 @@ model absen {
   absen_pulang DateTime
   status status_absen
   keterangan String @db.VarChar(1500)
+
+  siswa siswa @relation(fields: [id_siswa],references: [id])
+  dudi dudi @relation(fields: [id_dudi],references: [id])
+  pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id])
 }
 model laporan_pkl {
   id Int @id
@@ -123,6 +174,10 @@ model laporan_pkl {
   tanggal DateTime
   keterangan String @db.VarChar(1500)
   file_laporan String @db.VarChar(1500)
+
+  siswa siswa @relation(fields: [id_siswa],references: [id])
+  dudi dudi @relation(fields: [id_dudi],references: [id])
+  pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id])
 }
 model laporan_siswa_pkl {
   id Int @id
@@ -133,6 +188,10 @@ model laporan_siswa_pkl {
   topik_pekerjaan String @db.VarChar(255)
   rujukan_kompetensi_dasar String @db.VarChar(255)
   dokumentasi String @db.VarChar(1500)
+
+  siswa siswa @relation(fields: [id_siswa],references: [id])
+  dudi dudi @relation(fields: [id_dudi],references: [id])
+  pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id])
 }
 model kunjungan_guru_pembimbing_pkl {
   id Int @id
@@ -141,6 +200,10 @@ model kunjungan_guru_pembimbing_pkl {
   id_pembimbing_dudi Int
   tanggal_kunjungan DateTime
   catatan String @db.VarChar(1500)
+
+ dudi dudi @relation(fields: [id_dudi],references: [id])
+ guru_pembimbing guru_pembimbing @relation(fields: [id_guru_pembimbing],references: [id])
+ pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id])
 }
 
 enum status_absen {
