@@ -86,8 +86,8 @@ model alamat_guru_Pembimbing {
 model Pembimbing_dudi {
   id Int @id
   id_dudi Int
+  nama String @db.VarChar(255)
   username String @db.VarChar(255)
-  nama_instansi String @db.VarChar(255)
   no_telepon String @db.VarChar(12) @unique
   password String @db.VarChar(255)
   jenis_kelamin jenis_kelamin
@@ -99,6 +99,8 @@ model Pembimbing_dudi {
   laporan_pkl laporan_pkl[]
   laporans_siswa_pkl laporan_siswa_pkl[]
   kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
+
+  dudi dudi @relation(fields: [id_dudi],references: [id])
 }
 model dudi {
   id Int @id
@@ -114,6 +116,7 @@ model dudi {
   laporan_pkl laporan_pkl[]
   laporans_siswa_pkl laporan_siswa_pkl[]
   kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
+  pembimbing_dudi Pembimbing_dudi[]
 }
 model alamat_pembimbing_dudi {
   id_pembimbing_dudi Int @id

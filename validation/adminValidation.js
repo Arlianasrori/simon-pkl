@@ -1,7 +1,7 @@
 import joi from "joi"
 
-// siswa Validation 
 
+// siswa Validation 
 const addSiswaValidation = joi.object({
   id : joi.number().required(),
   nis : joi.number().required(),
@@ -22,8 +22,8 @@ const addAlamatSiswaValidation = joi.object({
   negara : joi.string().max(255).required(),
 })
 
-// guruPembimbing validation
 
+// guruPembimbing validation
 const addGuruPembimbingValidation = joi.object({
     id : joi.number().required(),
     nip : joi.number().required(),
@@ -44,9 +44,10 @@ const addAlamatGuruValidation = joi.object({
   negara : joi.string().max(255).required(),
 })
 
-// dudi validation
 
+// dudi validation
 const addDudiValidation = joi.object({
+  id : joi.number().required(),
   nama_instansi_perusahaan : joi.string().max(255).required(),
   no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).required(),
   bidang : joi.string().max(255).required(),
@@ -61,11 +62,33 @@ const addAlamatDudiValidation = joi.object({
   negara : joi.string().max(255).required(),
 })
 
+
+// pembimbing dudi validation
+const addPembimbingDudiValidation = joi.object({
+  id : joi.number().required(),
+  id_dudi : joi.number().required(),
+  nama : joi.string().max(255).required(),
+  username : joi.string().max(255).required(),
+  no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).required(),
+  password : joi.string().max(255).required(),
+  jenis_kelamin : joi.valid("laki","perempuan").required(),
+  agama : joi.string().max(255).required()
+})
+const addAlamatPembimbingDudiValidation = joi.object({
+  id_pembimbing_dudi : joi.number().required(),
+  detail_tempat : joi.string().max(500).required(),
+  desa : joi.string().max(255).required(),
+  kecamatan : joi.string().max(255).required(),
+  provinsi : joi.string().max(255).required(),
+  negara : joi.string().max(255).required(),
+})
 export default {
     addSiswaValidation ,
     addGuruPembimbingValidation,
     addAlamatGuruValidation,
     addAlamatSiswaValidation,
     addAlamatDudiValidation,
-    addDudiValidation
+    addDudiValidation,
+    addAlamatPembimbingDudiValidation,
+    addPembimbingDudiValidation
 }

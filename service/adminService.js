@@ -5,6 +5,9 @@ import responseError from "../error/responseError.js"
 import generateId from "../utils/generateIdUtils.js"
 import bcrypt from "bcryptjs"
 
+
+
+// siswa service
 const addSiswa = async (siswa,alamat) => {
     siswa.id = generateId()
     alamat.id_siswa = siswa.id
@@ -13,7 +16,7 @@ const addSiswa = async (siswa,alamat) => {
 
     siswa.password = await bcrypt.hash(siswa.password,10)
 
-    const findSiswa = await db.siswa.findUnique({
+    const findSiswa = await db.siswa.findFirst({
        where : {
         OR : [
             {
@@ -30,6 +33,16 @@ const addSiswa = async (siswa,alamat) => {
         throw new responseError(400,"siswa sudah terdaftar")
     }
     
+    const findGuruPembimbing = await db.guru_pembimbing.findUnique({
+        where : {
+            id : siswa.id_guru_pembimbing
+        }
+    })
+
+    if(!findGuruPembimbing) {
+        throw new responseError(404,"guru pembimbing tidak ditemukan")
+    }
+
     return db.$transaction(async (tx) => {
         const addSiswa = await tx.siswa.create({
             data : siswa,
@@ -48,6 +61,9 @@ const addSiswa = async (siswa,alamat) => {
         return {siswa : addSiswa,alamat : addAlamatSiswa}
     })
 }
+
+
+// guru pembimbing service
 const addGuruPembimbing = async (guru,alamat) => {
     guru.id = generateId()
     alamat.id_guru_Pembimbing = guru.id
@@ -56,7 +72,7 @@ const addGuruPembimbing = async (guru,alamat) => {
 
     guru.password = await bcrypt.hash(guru.password,10)
 
-    const findGuruPembimbing = await db.guru_pembimbing.findUnique({
+    const findGuruPembimbing = await db.guru_pembimbing.findFirst({
        where : {
         OR : [
             {
@@ -93,6 +109,8 @@ const addGuruPembimbing = async (guru,alamat) => {
     })
 }
 
+
+// dudi service
 const addDudi = async (dudi,alamat) => {
     dudi.id = generateId()
     alamat.id_dudi = dudi.id
@@ -128,15 +146,75 @@ const addDudi = async (dudi,alamat) => {
                 catatan : true
             }
         })
-        const addAlamatDudi= await tx.alamat_guru_Pembimbing.create({
+        const addAlamatDudi= await tx.alamat_dudi.create({
             data : alamat
         })
 
         return {dudi : addDudi,alamat : addAlamatDudi}
     })
 }
+
+
+// pembimbing dudi service
+const addPembimbingDudi = async (PembimbingDudi,alamat) => {
+    console.log(PembimbingDudi);
+    PembimbingDudi.id = generateId()
+    alamat.id_pembimbing_dudi = PembimbingDudi.id
+
+    PembimbingDudi = await validate(adminValidation.addPembimbingDudiValidation,PembimbingDudi)
+    alamat = await validate(adminValidation.addAlamatPembimbingDudiValidation,alamat)
+    console.log(PembimbingDudi);
+    const findPembimbingDudi = await db.pembimbing_dudi.findFirst({
+        where : {
+            OR : [
+                {
+                    id : PembimbingDudi.id
+                },
+                {
+                    username : PembimbingDudi.username
+                }
+            ]
+        }
+    })
+
+    if(findPembimbingDudi) {
+        throw new responseError(400,"data pembimbing dudi telah ditambahkan")
+    }
+
+    const findDudi = await db.dudi.findUnique({
+        where : {
+            id : PembimbingDudi.id_dudi
+        }
+    })
+
+    if(!findDudi) {
+        throw new responseError(404,"data dudi tidak ditemukan")
+    }
+
+    return db.$transaction(async (tx) => {
+        const addPembimbingDudi = await tx.pembimbing_dudi.create({
+            data : PembimbingDudi,
+            select : {
+                id : true,
+                nama : true,
+                username : true,
+                agama : true,
+                jenis_kelamin : true,
+                no_telepon : true,
+                siswa : true,
+                dudi : true
+            }
+        })
+        const addAlamatDudi= await tx.alamat_pembimbing_dudi.create({
+            data : alamat
+        })
+
+        return {pembimbingDudi : addPembimbingDudi,alamat : addAlamatDudi}
+    })
+}
 export default {
     addSiswa,
     addGuruPembimbing,
-    addDudi
+    addDudi,
+    addPembimbingDudi
 }
