@@ -3,17 +3,26 @@ import { validate } from "../validation/validate.js"
 import { db } from "../config/prismaClient.js"
 import responseError from "../error/responseError.js"
 import generateId from "../utils/generateIdUtils.js"
-import alamatValidation from "../utils/addalamatValidation.js"
+import bcrypt from "bcryptjs"
 
 const addSiswa = async (siswa,alamat) => {
     siswa.id = generateId()
     alamat.id_siswa = siswa.id
     siswa = await validate(adminValidation.addSiswaValidation,siswa)
-    alamat = await alamatValidation("id_siswa",alamat)
+    alamat = await validate(adminValidation.addAlamatSiswaValidation,alamat)
+
+    siswa.password = await bcrypt.hash(siswa.password,10)
 
     const findSiswa = await db.siswa.findUnique({
        where : {
-        nis : siswa.nis
+        OR : [
+            {
+                id : siswa.id
+            },
+            {
+                nis : siswa.nis
+            }
+        ]
        }
     })
 
@@ -41,13 +50,22 @@ const addSiswa = async (siswa,alamat) => {
 }
 const addGuruPembimbing = async (guru,alamat) => {
     guru.id = generateId()
-    alamat.id_guru = guru.id
+    alamat.id_guru_Pembimbing = guru.id
     guru = await validate(adminValidation.addGuruPembimbingValidation,guru)
-    alamat = await alamatValidation("id_guru",alamat)
+    alamat = await validate(adminValidation.addAlamatGuruValidation,alamat)
+
+    guru.password = await bcrypt.hash(guru.password,10)
 
     const findGuruPembimbing = await db.guru_pembimbing.findUnique({
        where : {
-        nip : guru.nip
+        OR : [
+            {
+                id : guru.id
+            },
+            {
+                nip : guru.nip
+            }
+        ]
        }
     })
 
@@ -67,14 +85,58 @@ const addGuruPembimbing = async (guru,alamat) => {
                 tempat_lahir : true,
             }
         })
-        const addAlamatGuruPembimbing= await tx.alamat_siswa.create({
+        const addAlamatGuruPembimbing= await tx.alamat_guru_Pembimbing.create({
             data : alamat
         })
 
         return {guru : addGuruPembimbimg,alamat : addAlamatGuruPembimbing}
     })
 }
+
+const addDudi = async (dudi,alamat) => {
+    dudi.id = generateId()
+    alamat.id_dudi = dudi.id
+
+    dudi = await validate(adminValidation.addDudiValidation,dudi)
+    alamat = await validate(adminValidation.addAlamatDudiValidation,alamat)
+
+    const findDudi = await db.dudi.findFirst({
+        where : {
+            OR : [
+                {
+                    id : dudi.id
+                },
+                {
+                    nama_instansi_perusahaan : dudi.nama_instansi_perusahaan
+                }
+            ]
+        }
+    })
+
+    if(findDudi) {
+        throw new responseError(400,"data dudi telah ditambahkan")
+    }
+
+    return db.$transaction(async (tx) => {
+        const addDudi = await tx.dudi.create({
+            data : dudi,
+            select : {
+                id : true,
+                nama_instansi_perusahaan : true,
+                no_telepon : true,
+                bidang : true,
+                catatan : true
+            }
+        })
+        const addAlamatDudi= await tx.alamat_guru_Pembimbing.create({
+            data : alamat
+        })
+
+        return {dudi : addDudi,alamat : addAlamatDudi}
+    })
+}
 export default {
     addSiswa,
-    addGuruPembimbing
+    addGuruPembimbing,
+    addDudi
 }

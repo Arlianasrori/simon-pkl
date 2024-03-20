@@ -22,14 +22,15 @@ model admin {
   username String @db.VarChar(255)
   password String @db.VarChar(255)
 }
+// siswa get dudi, get dudi by name by alamat,get data diri sendiri, pengajuan Pkl,get data pengjuan pkl
 model siswa {
   id Int @id
-  nis Int
+  nis Int @unique
   nama String @db.VarChar(255)
   kelas String @db.VarChar(255)
   jurusan String @db.VarChar(255)
   jenis_kelamin jenis_kelamin
-  no_telepon String @db.VarChar(12)
+  no_telepon String @db.VarChar(12) @unique
   id_guru_pembimbing Int
   id_dudi Int?
   id_pembimbing_dudi Int?
@@ -58,12 +59,12 @@ model alamat_siswa {
 }
 model guru_pembimbing {
   id Int @id
-  nip Int
+  nip Int @unique
   nama String @db.VarChar(255)
-  no_telepon String @db.VarChar(12)
+  no_telepon String @db.VarChar(12) @unique
   jenis_kelamin jenis_kelamin
   tempat_lahir String @db.VarChar(255)
-  tanggal_lahir DateTime
+  tanggal_lahir String
   agama String @db.VarChar(255)
   password String @db.VarChar(255)
 
@@ -87,7 +88,7 @@ model Pembimbing_dudi {
   id_dudi Int
   username String @db.VarChar(255)
   nama_instansi String @db.VarChar(255)
-  no_telepon String @db.VarChar(12)
+  no_telepon String @db.VarChar(12) @unique
   password String @db.VarChar(255)
   jenis_kelamin jenis_kelamin
   agama String @db.VarChar(255)
@@ -101,10 +102,8 @@ model Pembimbing_dudi {
 }
 model dudi {
   id Int @id
-  nama_instansi_perusahaan String @db.VarChar(255)
-  username String @db.VarChar(255)
-  password String @db.VarChar(255)
-  no_telepon String @db.VarChar(12)
+  nama_instansi_perusahaan String @db.VarChar(255) @unique
+  no_telepon String @db.VarChar(12) 
   bidang String @db.VarChar(255)
   catatan String @db.VarChar(1500)
 

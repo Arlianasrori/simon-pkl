@@ -30,7 +30,23 @@ const addGuruPembimbing = async (req,res,next) => {
         next(error)
     }
 }
+const addDudi = async (req,res,next) => {
+    try {
+        const dudi = req.body.dudi
+        const alamat = req.body.alamat
+
+        const result = await adminService.addDudi(dudi,alamat)
+
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 export default {
     addSiswa,
-    addGuruPembimbing
+    addGuruPembimbing,
+    addDudi
 }
