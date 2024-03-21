@@ -62,6 +62,111 @@ const addSiswa = async (siswa,alamat) => {
     })
 }
 
+const findAllSiswa = async () => {
+    const siswa = await db.siswa.findMany()
+
+    if(!siswa[0]) {
+        return "data siswa kosong,silahka tambahkan data siswa"
+    }
+
+    return siswa
+}
+const searchSiswa = async (query) => {
+    query = await validate(adminValidation.searchSiswaValidation,query)
+
+    const findSiswa = await db.siswa.findFirst({
+        where : {
+            OR : [
+                {
+                    nama : {
+                        contains : query.nama
+                    }
+                },
+                {
+                    nama : {
+                        contains : query.nama
+                    }
+                },
+            ]
+        }
+    })
+}
+
+const updateSiswa = async (data,identify) => {
+    data = await validate(adminValidation.updateSiswaValidation,data)
+
+    const findSiswa = await db.siswa.findFirst({
+        where : {
+            OR : [
+                {
+                    id : identify
+                },
+                {
+                    nis : identify
+                }
+            ]
+        }
+    })
+
+    if(!findSiswa) {
+        throw new responseError(404,"siswa tidak ditemukan")
+    }
+    return db.siswa.update({
+        where : {
+            id : findSiswa.id
+        },
+        data : data
+    })
+}
+const deleteSiswa = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findSiswa = await db.siswa.findUnique({
+        where : {
+           id : id
+        }
+    })
+
+    if(!findSiswa) {
+        throw new responseError(404,"siswa tidak ditemukan")
+    }
+    return db.siswa.delete({
+        where : {
+            id : findSiswa.id
+        }
+    })
+}
+const updateAlamatSiswa = async (data,id) => {
+    data = await validate(adminValidation.updateAlamatValidation,data)
+    id = await validate(adminValidation.idValidation,id)
+
+    const findSiswa = await db.siswa.findUnique({
+        where : {
+           id : id
+        }
+    })
+
+    if(!findSiswa) {
+        throw new responseError(404,"siswa tidak ditemukan")
+    }
+
+    const findAlamatsiswa = await db.alamat_siswa.findUnique({
+        where : {
+            id_siswa : id
+        }
+    })
+
+    if(!findAlamatsiswa) {
+        throw new responseError(404,"alamat siswa tidak ditemukan")
+    }
+    return db.alamat_siswa.update({
+        where : {
+            id : findSiswa.id
+        },
+        data : data
+    })
+}
+
 
 // guru pembimbing service
 const addGuruPembimbing = async (guru,alamat) => {
@@ -216,5 +321,9 @@ export default {
     addSiswa,
     addGuruPembimbing,
     addDudi,
-    addPembimbingDudi
+    addPembimbingDudi,
+    findAllSiswa,
+    updateSiswa,
+    deleteSiswa,
+    updateAlamatSiswa
 }

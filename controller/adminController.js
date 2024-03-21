@@ -17,6 +17,59 @@ const addSiswa = async (req,res,next) => {
         next(error)
     }
 }
+const findAllSiswa = async (req,res,next) => {
+    try {
+        const result = await adminService.findAllSiswa()
+
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const updateSiswa = async (req,res,next) => {
+    try {
+        const data = req.body
+        const identify = req.params.identify
+        const result = await adminService.findAllSiswa(data,identify)
+
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const deleteSiswa = async (req,res,next) => {
+    try {
+        const id = req.params.id
+        const result = await adminService.findAllSiswa(data,id)
+
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const updateAlamatSiswa = async (req,res,next) => {
+    try {
+        const data = req.body
+        const id = req.params.id
+        const result = await adminService.updateAlamatSiswa(data,id)
+
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 
 
 // guru pembimbing controller
@@ -75,5 +128,9 @@ export default {
     addSiswa,
     addGuruPembimbing,
     addDudi,
-    addPembimbingDudi
+    addPembimbingDudi,
+    findAllSiswa,
+    updateSiswa,
+    deleteSiswa,
+    updateAlamatSiswa
 }
