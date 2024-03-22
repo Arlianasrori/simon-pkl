@@ -29,11 +29,24 @@ const findAllSiswa = async (req,res,next) => {
         next(error)
     }
 }
+const findsiswafilter = async (req,res,next) => {
+    try {
+        const queryFilter = req.body
+        const result = await adminService.findSiswaFilter(queryFilter)
+       
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 const updateSiswa = async (req,res,next) => {
     try {
         const data = req.body
-        const identify = req.params.identify
-        const result = await adminService.findAllSiswa(data,identify)
+        const identify = parseInt(req.params.identify)
+        const result = await adminService.updateSiswa(data,identify)
 
         res.status(201).json({
             msg : "succes",
@@ -45,8 +58,8 @@ const updateSiswa = async (req,res,next) => {
 }
 const deleteSiswa = async (req,res,next) => {
     try {
-        const id = req.params.id
-        const result = await adminService.findAllSiswa(data,id)
+        const id = parseInt(req.params.id)
+        const result = await adminService.deleteSiswa(id)
 
         res.status(201).json({
             msg : "succes",
@@ -59,7 +72,7 @@ const deleteSiswa = async (req,res,next) => {
 const updateAlamatSiswa = async (req,res,next) => {
     try {
         const data = req.body
-        const id = req.params.id
+        const id = parseInt(req.params.id)
         const result = await adminService.updateAlamatSiswa(data,id)
 
         res.status(201).json({
@@ -89,6 +102,61 @@ const addGuruPembimbing = async (req,res,next) => {
     }
 }
 
+const findAllGuruPembimbing = async (req,res,next) => {
+    try {
+        const result = await adminService.findAllGuruPembimbing()
+
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const findGuruPembimbingById = async (req,res,next) => {
+    try {
+        const id = parseInt(req.params.id)
+        const result = await adminService.findGuruPembimbingById(id)
+
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const updateGuruPembimbing = async (req,res,next) => {
+    try {
+        const identify = parseInt(req.params.identify)
+        const data = req.body
+        const result = await adminService.updateGuruPembimbing(identify,data)
+
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const deleteGuruPembimbing = async (req,res,next) => {
+    try {
+        const identify = parseInt(req.params.identify)
+        const result = await adminService.deleteGuruPembimbing(identify)
+
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+
 
 // dudi controller
 const addDudi = async (req,res,next) => {
@@ -97,6 +165,31 @@ const addDudi = async (req,res,next) => {
         const alamat = req.body.alamat
 
         const result = await adminService.addDudi(dudi,alamat)
+
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const findAllDudi = async (req,res,next) => {
+    try {
+        const result = await adminService.findAllDudi()
+
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const findDudiById = async (req,res,next) => {
+    try {
+        const id = parseInt(req.params.id)
+        const result = await adminService.findAllDudi(id)
 
         res.status(201).json({
             msg : "succes",
@@ -125,12 +218,29 @@ const addPembimbingDudi = async (req,res,next) => {
     }
 }
 export default {
+    // siswa
     addSiswa,
-    addGuruPembimbing,
-    addDudi,
-    addPembimbingDudi,
     findAllSiswa,
     updateSiswa,
     deleteSiswa,
-    updateAlamatSiswa
+    updateAlamatSiswa,
+    findsiswafilter,
+
+
+    // guru pembimbing
+    addGuruPembimbing,
+    findAllGuruPembimbing,
+    updateGuruPembimbing,
+    deleteGuruPembimbing,
+    findGuruPembimbingById,
+
+
+    // dudi
+    addDudi,
+    findAllDudi,
+    findDudiById,
+
+
+    // pembimbing dudi
+    addPembimbingDudi,
 }

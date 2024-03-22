@@ -4,7 +4,9 @@ import { db } from "../config/prismaClient.js"
 import responseError from "../error/responseError.js"
 import generateId from "../utils/generateIdUtils.js"
 import bcrypt from "bcryptjs"
-
+import { selectSiswaObject } from "../utils/siswaSelect.js"
+import { selectGuruPembimbingPbject } from "../utils/guruPembimbingSelect.js"
+import { selectDudiObject } from "../utils/dudiSelect.js"
 
 
 // siswa service
@@ -46,13 +48,7 @@ const addSiswa = async (siswa,alamat) => {
     return db.$transaction(async (tx) => {
         const addSiswa = await tx.siswa.create({
             data : siswa,
-            select : {
-                nama : true,
-                nis : true,
-                guru_pembimbing : true,
-                jurusan : true,
-                kelas : true,
-            }
+            select : selectSiswaObject
         })
         const addAlamatSiswa = await tx.alamat_siswa.create({
             data : alamat
@@ -63,33 +59,43 @@ const addSiswa = async (siswa,alamat) => {
 }
 
 const findAllSiswa = async () => {
-    const siswa = await db.siswa.findMany()
-
-    if(!siswa[0]) {
-        return "data siswa kosong,silahka tambahkan data siswa"
-    }
-
-    return siswa
+    return db.siswa.findMany({
+        select : selectSiswaObject
+    })
 }
-const searchSiswa = async (query) => {
+const findSiswaFilter = async (query) => {
     query = await validate(adminValidation.searchSiswaValidation,query)
 
-    const findSiswa = await db.siswa.findFirst({
+    const findSiswa = await db.siswa.findMany({
         where : {
-            OR : [
+            AND : [
                 {
                     nama : {
-                        contains : query.nama
+                        contains : query.nama,
+                        mode : 'insensitive'
                     }
                 },
                 {
-                    nama : {
-                        contains : query.nama
+                    kelas : {
+                        contains : query.kelas,
+                        mode : 'insensitive'
                     }
+                },
+                {
+                    jurusan : {
+                        contains : query.jurusan,
+                        mode : "insensitive"
+                    }
+                },
+                {
+                    jenis_kelamin : query.jenis_kelamin
                 },
             ]
-        }
+        },
+        select : selectSiswaObject
     })
+
+    return {count : findSiswa.length,data : findSiswa}
 }
 
 const updateSiswa = async (data,identify) => {
@@ -115,7 +121,8 @@ const updateSiswa = async (data,identify) => {
         where : {
             id : findSiswa.id
         },
-        data : data
+        data : data,
+        select : selectSiswaObject
     })
 }
 const deleteSiswa = async (id) => {
@@ -133,7 +140,8 @@ const deleteSiswa = async (id) => {
     return db.siswa.delete({
         where : {
             id : findSiswa.id
-        }
+        },
+        select : selectSiswaObject
     })
 }
 const updateAlamatSiswa = async (data,id) => {
@@ -161,7 +169,7 @@ const updateAlamatSiswa = async (data,id) => {
     }
     return db.alamat_siswa.update({
         where : {
-            id : findSiswa.id
+            id_siswa : findSiswa.id
         },
         data : data
     })
@@ -198,6 +206,7 @@ const addGuruPembimbing = async (guru,alamat) => {
         const addGuruPembimbimg = await tx.guru_pembimbing.create({
             data : guru,
             select : {
+                id : true,
                 nama : true,
                 nip : true,
                 agama : true,
@@ -212,6 +221,83 @@ const addGuruPembimbing = async (guru,alamat) => {
 
         return {guru : addGuruPembimbimg,alamat : addAlamatGuruPembimbing}
     })
+}
+
+const updateGuruPembimbing = async (identify,data) => {
+    data = await validate(adminValidation.updateGuruPembimbingValidation,data)
+
+    const findGuruPembimbing = await db.guru_pembimbing.findFirst({
+        where : {
+            OR : [
+                {
+                    id : identify
+                },
+                {
+                    nip : identify
+                }
+            ]
+        }
+    })
+
+    if(!findGuruPembimbing) {
+        throw new responseError(404,"guru pembimbing tidak ditemukan")
+    }
+    return db.guru_pembimbing.update({
+        where : {
+            id : findGuruPembimbing.id
+        },
+        data : data,
+        select : selectGuruPembimbingPbject
+    })
+}
+
+const deleteGuruPembimbing = async (identify) => {
+    identify = await validate(adminValidation.idValidation,identify)
+
+    const findGuruPembimbing = await db.guru_pembimbing.findUnique({
+        where : {
+            id : identify
+        },
+        select : {
+            id : true,
+            siswa : true
+        }
+    })
+
+    if(!findGuruPembimbing) {
+        throw new responseError(404,"data guru pembimbing tidak ditemukan")
+    }
+
+    if(findGuruPembimbing.siswa[0]) {
+        throw new responseError(400,"guru pembimbing ini masih memiliki siswa yang dibimbing")
+    }
+    return db.guru_pembimbing.delete({
+        where : {
+            id : identify
+        },
+        select : selectGuruPembimbingPbject
+    })
+}
+
+const findAllGuruPembimbing = async () => {
+    return db.guru_pembimbing.findMany({
+        select : selectGuruPembimbingPbject
+    })
+}
+const findGuruPembimbingById = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findGuruPembimbing = await db.guru_pembimbing.findUnique({
+        where : {
+            id : id
+        },
+        select : selectGuruPembimbingPbject
+    })
+
+    if(!findGuruPembimbing) {
+        throw new responseError(404,"data guru pembimbing tidak ditemukan")
+    }
+    return findGuruPembimbing
 }
 
 
@@ -257,6 +343,29 @@ const addDudi = async (dudi,alamat) => {
 
         return {dudi : addDudi,alamat : addAlamatDudi}
     })
+}
+
+const findAllDudi = async () => {
+    return db.dudi.findMany({
+        select : selectDudiObject
+    })
+}
+
+const findDudiById = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findDudi = await db.dudi.findUnique({
+        where : {
+            id : id
+        },
+        select : selectDudiObject
+    })
+
+    if(!findDudi) {
+        throw new responseError(404,"data dudi tidak ditemukan")
+    }
+
+    return findDudi
 }
 
 
@@ -318,12 +427,28 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
     })
 }
 export default {
+    // siswa
     addSiswa,
-    addGuruPembimbing,
-    addDudi,
-    addPembimbingDudi,
     findAllSiswa,
     updateSiswa,
     deleteSiswa,
-    updateAlamatSiswa
+    updateAlamatSiswa,
+    findSiswaFilter,
+
+
+    // guru pembimbing
+    addGuruPembimbing,
+    findAllGuruPembimbing,
+    updateGuruPembimbing,
+    deleteGuruPembimbing,
+    findGuruPembimbingById,
+
+    // dudi
+    addDudi,
+    findAllDudi,
+    findDudiById,
+
+
+    // pembimbing dudi
+    addPembimbingDudi,
 }

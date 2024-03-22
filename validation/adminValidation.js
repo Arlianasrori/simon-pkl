@@ -49,7 +49,7 @@ const updateAlamatValidation = joi.object({
   negara : joi.string().max(255).optional(),
 })
 
-const idValidation = joi.string().max(255).required()
+const idValidation = joi.number().required()
 
 
 // guruPembimbing validation
@@ -72,6 +72,17 @@ const addAlamatGuruValidation = joi.object({
   provinsi : joi.string().max(255).required(),
   negara : joi.string().max(255).required(),
 })
+const updateGuruPembimbingValidation = joi.object({
+  nip : joi.number().optional(),
+  nama : joi.string().max(255).optional(),
+  no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).optional(),
+  jenis_kelamin : joi.valid("laki","perempuan").optional(),
+  tempat_lahir : joi.string().max(255).optional(),
+  tanggal_lahir : joi.string().max(255).optional(),
+  agama : joi.string().max(255).optional(),
+  password : joi.string().max(255).optional(),
+})
+
 
 
 // dudi validation
@@ -112,16 +123,32 @@ const addAlamatPembimbingDudiValidation = joi.object({
   negara : joi.string().max(255).required(),
 })
 export default {
-    addSiswaValidation ,
-    addGuruPembimbingValidation,
-    addAlamatGuruValidation,
-    addAlamatSiswaValidation,
-    addAlamatDudiValidation,
-    addDudiValidation,
-    addAlamatPembimbingDudiValidation,
-    addPembimbingDudiValidation,
-    updateSiswaValidation,
+  // public
     idValidation,
     updateAlamatValidation,
-    searchSiswaValidation
+
+
+    
+  // siswa
+    addSiswaValidation ,
+    updateSiswaValidation,
+    addAlamatSiswaValidation,
+    searchSiswaValidation,
+
+
+    // guru pembimbing
+    addGuruPembimbingValidation,
+    addAlamatGuruValidation,
+    updateGuruPembimbingValidation,
+
+
+
+    // dudi
+    addAlamatDudiValidation,
+    addDudiValidation,
+
+
+    // pemibimbing dudi
+    addAlamatPembimbingDudiValidation,
+    addPembimbingDudiValidation,
 }
