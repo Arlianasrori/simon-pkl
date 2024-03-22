@@ -22,7 +22,7 @@ model admin {
   username String @db.VarChar(255)
   password String @db.VarChar(255)
 }
-// siswa get dudi, get dudi by name by alamat,get data diri sendiri, pengajuan Pkl,get data pengjuan pkl
+
 model siswa {
   id Int @id
   nis Int @unique
@@ -55,7 +55,7 @@ model alamat_siswa {
   provinsi String @db.VarChar(255)
   negara String @db.VarChar(255)
 
-  siswa siswa @relation(fields: [id_siswa],references: [id])
+  siswa siswa @relation(fields: [id_siswa],references: [id],onDelete: Cascade)
 }
 model guru_pembimbing {
   id Int @id
@@ -81,13 +81,13 @@ model alamat_guru_Pembimbing {
   provinsi String @db.VarChar(255)
   negara String @db.VarChar(255)
 
-  guru_pembimbing guru_pembimbing @relation(fields: [id_guru_Pembimbing],references: [id])
+  guru_pembimbing guru_pembimbing @relation(fields: [id_guru_Pembimbing],references: [id],onDelete: Cascade)
 }
 model Pembimbing_dudi {
   id Int @id
   id_dudi Int
+  nama String @db.VarChar(255)
   username String @db.VarChar(255)
-  nama_instansi String @db.VarChar(255)
   no_telepon String @db.VarChar(12) @unique
   password String @db.VarChar(255)
   jenis_kelamin jenis_kelamin
@@ -99,6 +99,8 @@ model Pembimbing_dudi {
   laporan_pkl laporan_pkl[]
   laporans_siswa_pkl laporan_siswa_pkl[]
   kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
+
+  dudi dudi @relation(fields: [id_dudi],references: [id])
 }
 model dudi {
   id Int @id
@@ -114,6 +116,7 @@ model dudi {
   laporan_pkl laporan_pkl[]
   laporans_siswa_pkl laporan_siswa_pkl[]
   kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
+  pembimbing_dudi Pembimbing_dudi[]
 }
 model alamat_pembimbing_dudi {
   id_pembimbing_dudi Int @id
@@ -123,7 +126,7 @@ model alamat_pembimbing_dudi {
   provinsi String @db.VarChar(255)
   negara String @db.VarChar(255)
 
-  pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id])
+  pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id],onDelete: Cascade)
 }
 model alamat_dudi {
   id_dudi Int @id
@@ -133,7 +136,7 @@ model alamat_dudi {
   provinsi String @db.VarChar(255)
   negara String @db.VarChar(255)
 
-  dudi dudi @relation(fields: [id_dudi],references: [id])
+  dudi dudi @relation(fields: [id_dudi],references: [id],onDelete: Cascade)
 }
 enum status_pengajuan {
   proses 
