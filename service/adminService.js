@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs"
 import { selectSiswaObject } from "../utils/siswaSelect.js"
 import { selectGuruPembimbingPbject } from "../utils/guruPembimbingSelect.js"
 import { selectDudiObject } from "../utils/dudiSelect.js"
+import { selectPebimbingDudiObject } from "../utils/pembimbingDudiSelect.js"
 
 
 // siswa service
@@ -44,7 +45,7 @@ const addSiswa = async (siswa,alamat) => {
     if(!findGuruPembimbing) {
         throw new responseError(404,"guru pembimbing tidak ditemukan")
     }
-
+    siswa.status = "belum_pkl"
     return db.$transaction(async (tx) => {
         const addSiswa = await tx.siswa.create({
             data : siswa,
@@ -60,6 +61,15 @@ const addSiswa = async (siswa,alamat) => {
 
 const findAllSiswa = async () => {
     return db.siswa.findMany({
+        select : selectSiswaObject
+    })
+}
+const findSiswaHaventPkl = async () => {
+    return db.siswa.findMany({
+        where : {
+            status : "belum_pkl"
+           
+        },
         select : selectSiswaObject
     })
 }
@@ -250,7 +260,36 @@ const updateGuruPembimbing = async (identify,data) => {
         select : selectGuruPembimbingPbject
     })
 }
+const updateAlamatGuruPembimbing= async (data,id) => {
+    data = await validate(adminValidation.updateAlamatValidation,data)
+    id = await validate(adminValidation.idValidation,id)
 
+    const findGuruPembimbing = await db.guru_pembimbing.findUnique({
+        where : {
+           id : id
+        }
+    })
+
+    if(!findGuruPembimbing) {
+        throw new responseError(404,"guru pembimbing tidak ditemukan")
+    }
+
+    const findAlamatGuruPembimbing= await db.alamat_guru_Pembimbing.findUnique({
+        where : {
+            id_guru_Pembimbing : id
+        }
+    })
+
+    if(!findAlamatGuruPembimbing) {
+        throw new responseError(404,"alamat guru pembimbing tidak ditemukan")
+    }
+    return db.alamat_guru_Pembimbing.update({
+        where : {
+            id_guru_Pembimbing : findGuruPembimbing.id
+        },
+        data : data
+    })
+}
 const deleteGuruPembimbing = async (identify) => {
     identify = await validate(adminValidation.idValidation,identify)
 
@@ -298,6 +337,83 @@ const findGuruPembimbingById = async (id) => {
         throw new responseError(404,"data guru pembimbing tidak ditemukan")
     }
     return findGuruPembimbing
+}
+const findGuruPembimbingfilter = async (query) => {
+    query = await validate(adminValidation.searchGuruPembimbingValidation,query)
+
+    const findGuruPembimbing = await db.guru_pembimbing.findMany({
+        where : {
+            AND : [
+                {
+                    nama : {
+                        contains : query.nama,
+                        mode : 'insensitive'
+                    }
+                },
+                {
+                    agama : {
+                        contains : query.agama,
+                        mode : 'insensitive'
+                    }
+                },
+                {
+                    jenis_kelamin : {
+                        contains : query.jenis_kelamin
+                    }
+                },
+                {
+                    nip : {
+                        contains : query.nip
+                    }
+                },
+                {
+                    alamat : {
+                        AND : [
+                            {
+                                negara : {
+                                    contains : query.negara,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                provinsi : {
+                                    contains : query.provinsi,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                kabupaten : {
+                                    contains : query.kabupaten,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                kecamatan : {
+                                    contains : query.kecamatan,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                desa : {
+                                    contains : query.desa,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                detail_tempat : {
+                                    contains : query.detail_tempat,
+                                    mode : "insensitive"
+                                }
+                            },
+                        ]
+                    }
+                }
+            ]
+        },
+        select : selectGuruPembimbingPbject
+    })
+
+    return {count : findGuruPembimbing.length,data : findGuruPembimbing}
 }
 
 
@@ -367,6 +483,158 @@ const findDudiById = async (id) => {
 
     return findDudi
 }
+const updateDudi = async (data,id) => {
+    id = await validate(adminValidation.idValidation,id)
+    data = await validate(adminValidation.updateDudiValidation,data)
+    console.log(data);
+    const findDudi = await db.dudi.findUnique({
+        where : {
+            id : id
+        },
+        select : selectDudiObject
+    })
+
+    if(!findDudi) {
+        throw new responseError(404,"data dudi tidak ditemukan")
+    }
+
+    return db.dudi.update({
+        where : {
+            id : id
+        },
+        data : data,
+        select : selectDudiObject
+    })
+}
+const updateAlamatDudi = async (data,id) => {
+    data = await validate(adminValidation.updateAlamatValidation,data)
+    id = await validate(adminValidation.idValidation,id)
+
+    const findDudi = await db.dudi.findUnique({
+        where : {
+           id : id
+        }
+    })
+
+    if(!findDudi) {
+        throw new responseError(404,"duditidak ditemukan")
+    }
+
+    const findAlamatDudi = await db.alamat_dudi.findUnique({
+        where : {
+            id_dudi : id
+        }
+    })
+
+    if(!findAlamatDudi) {
+        throw new responseError(404,"alamat dudi tidak ditemukan")
+    }
+    return db.alamat_dudi.update({
+        where : {
+            id_dudi : findDudi.id
+        },
+        data : data
+    })
+}
+const deleteDudi = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findDudi = await db.dudi.findUnique({
+        where : {
+            id : id
+        },
+        select : {
+            siswa : true,
+            pembimbing_dudi : true,
+            kunjungan_guru_pembimbing : true,
+            laporan_pkl : true,
+            laporans_siswa_pkl : true,
+            pengajuan_pkl : true
+        }
+    })
+
+    if(!findDudi) {
+        throw new responseError(404,"data dudi tidak ditemukan")
+    }
+
+    if(findDudi.pembimbing_dudi[0] || findDudi.siswa[0] || findDudi.kunjungan_guru_pembimbing[0] || findDudi.siswa[0] || findDudi.pengajuan_pkl[0] || findDudi.laporan_pkl[0] || findDudi.laporans_siswa_pkl[0]) {
+        throw new responseError(400,"dudi yang ingin dihapus masih terkait dengan hal lainnya seperti siswa,pemimbing dudi dan lainnya")
+    }
+    return db.dudi.delete({
+        where : {
+            id : id
+        },
+        select : selectDudiObject
+    })
+}
+
+const findDudiFilter = async (query) => {
+    query = await validate(adminValidation.searchDudiValidation,query)
+
+    const findDudi = await db.dudi.findMany({
+        where : {
+            AND : [
+                {
+                    nama_instansi_perusahaan : {
+                        contains : query.nama_instansi_perusahaan,
+                        mode : 'insensitive'
+                    }
+                },
+                {
+                    bidang : {
+                        contains : query.bidang,
+                        mode : 'insensitive'
+                    }
+                },
+                {
+                    alamat : {
+                        AND : [
+                            {
+                                negara : {
+                                    contains : query.negara,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                provinsi : {
+                                    contains : query.provinsi,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                kabupaten : {
+                                    contains : query.kabupaten,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                kecamatan : {
+                                    contains : query.kecamatan,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                desa : {
+                                    contains : query.desa,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                detail_tempat : {
+                                    contains : query.detail_tempat,
+                                    mode : "insensitive"
+                                }
+                            },
+                        ]
+                    }
+                }
+            ]
+        },
+        select : selectDudiObject
+    })
+
+    return {count : findDudi.length,data : findDudi}
+}
 
 
 // pembimbing dudi service
@@ -408,22 +676,238 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
     return db.$transaction(async (tx) => {
         const addPembimbingDudi = await tx.pembimbing_dudi.create({
             data : PembimbingDudi,
-            select : {
-                id : true,
-                nama : true,
-                username : true,
-                agama : true,
-                jenis_kelamin : true,
-                no_telepon : true,
-                siswa : true,
-                dudi : true
-            }
+            select : selectPebimbingDudiObject
         })
         const addAlamatDudi= await tx.alamat_pembimbing_dudi.create({
             data : alamat
         })
 
         return {pembimbingDudi : addPembimbingDudi,alamat : addAlamatDudi}
+    })
+}
+const findAllPembimbingDudi = async () => {
+    return db.pembimbing_dudi.findMany({
+        select : selectPebimbingDudiObject
+    })
+}
+const findPembimbingDudiById = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
+        where : {
+            id : id
+        },
+        select : selectPebimbingDudiObject
+    })
+
+    if(!findPembimbingDudi) {
+        throw new responseError(404,"data pembimbing dudi tidak ditemukan")
+    }
+    return findPembimbingDudi
+}
+const findPembimbingDudifilter = async (query) => {
+    query = await validate(adminValidation.searchPembimbingDudiValidation,query)
+
+    const findPembimbingDudi = await db.pembimbing_dudi.findMany({
+        where : {
+            AND : [
+                {
+                    nama : {
+                        contains : query.nama,
+                        mode : 'insensitive'
+                    }
+                },
+                {
+                    agama : {
+                        contains : query.agama,
+                        mode : 'insensitive'
+                    }
+                },
+                {
+                    jenis_kelamin : {
+                        contains : query.jenis_kelamin
+                    }
+                },
+                {
+                    alamat : {
+                        AND : [
+                            {
+                                negara : {
+                                    contains : query.negara,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                provinsi : {
+                                    contains : query.provinsi,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                kabupaten : {
+                                    contains : query.kabupaten,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                kecamatan : {
+                                    contains : query.kecamatan,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                desa : {
+                                    contains : query.desa,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                detail_tempat : {
+                                    contains : query.detail_tempat,
+                                    mode : "insensitive"
+                                }
+                            },
+                        ]
+                    }
+                }
+            ]
+        },
+        select : selectPebimbingDudiObject
+    })
+
+    return {count : findPembimbingDudi.length,data : findPembimbingDudi}
+}
+const updatePembimbingDudi = async (data,id) => {
+    id = await validate(adminValidation.idValidation,id)
+    data = await validate(adminValidation.updatePembimbingDudiValidation,data)
+
+    const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
+        where : {
+            id : id
+        },
+        select : selectPebimbingDudiObject
+    })
+
+    if(!findPembimbingDudi) {
+        throw new responseError(404,"data pembimbing dudi tidak ditemukan")
+    }
+    return db.pembimbing_dudi.update({
+        where : {
+            id : id
+        },
+        data : data,
+        select : selectPebimbingDudiObject
+    })
+}
+const updateAlamatPembimbiDudi = async (data,id) => {
+    data = await validate(adminValidation.updateAlamatValidation,data)
+    id = await validate(adminValidation.idValidation,id)
+
+    const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
+        where : {
+           id : id
+        }
+    })
+
+    if(!findPembimbingDudi) {
+        throw new responseError(404,"pembimbing dudi tidak ditemukan")
+    }
+
+    const findAlamatPembimbingDudi = await db.alamat_pembimbing_dudi.findUnique({
+        where : {
+            id_pembimbing_dudi : id
+        }
+    })
+
+    if(!findAlamatPembimbingDudi) {
+        throw new responseError(404,"alamat pembimbing dudi tidak ditemukan")
+    }
+    return db.alamat_pembimbing_dudi.update({
+        where : {
+            id_pembimbing_dudi : findPembimbingDudi.id
+        },
+        data : data
+    })
+}
+const deletePembimbingDudi = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
+        where : {
+            id : id
+        },
+        select : {
+            siswa : true,
+            laporan_pkl : true,
+            laporans_siswa_pkl : true,
+            absen : true,
+            kunjungan_guru_pembimbing : true
+        }
+    })
+
+    if(!findPembimbingDudi) {
+        throw new responseError(404,"data pembimbing dudi tidak ditemukan")
+    }
+
+    if(findPembimbingDudi.siswa[0] || findPembimbingDudi.laporan_pkl[0] || findPembimbingDudi.laporans_siswa_pkl[0] || findPembimbingDudi.absen[0] || findPembimbingDudi.kunjungan_guru_pembimbing[0]) {
+        throw new responseError(400,"pembimbing dudi masih terkait dengan beberapa hal seperti siswa,laporan dan lainnya")
+    }
+    return db.pembimbing_dudi.delete({
+        where : {
+            id : id
+        },
+        select : selectPebimbingDudiObject
+    })
+}
+
+// pengajuan PKL
+
+const findAllPengajuanPkl = async () => {
+    return db.pangajuan_pkl.findMany({
+        select : {
+            dudi : {
+                select : {
+                    nama_instansi_perusahaan : true,
+                    no_telepon : true,
+                    bidang : true,
+                    catatan : true
+                }
+            },
+            siswa : {
+                select : {
+                    nama : true,
+                    nis : true
+                }
+            },
+            status : true,
+            waktu_pengajuan : true
+        }
+    })
+}
+const findAllPengajuanPklFilter = async (query) => {
+    query = await validate(adminValidation.PengajuanPklfilterValidation,query)
+    return db.pangajuan_pkl.findMany({
+        where : {
+            status : query
+        },
+        select : {
+            dudi : {
+                select : {
+                    nama_instansi_perusahaan : true,
+                    no_telepon : true,
+                    bidang : true,
+                    catatan : true
+                }
+            },
+            siswa : {
+                select : {
+                    nama : true,
+                    nis : true
+                }
+            },
+            status : true,
+            waktu_pengajuan : true
+        }
     })
 }
 export default {
@@ -434,21 +918,38 @@ export default {
     deleteSiswa,
     updateAlamatSiswa,
     findSiswaFilter,
-
+    findSiswaHaventPkl,
 
     // guru pembimbing
     addGuruPembimbing,
     findAllGuruPembimbing,
     updateGuruPembimbing,
+    updateAlamatGuruPembimbing,
     deleteGuruPembimbing,
     findGuruPembimbingById,
+    findGuruPembimbingfilter,
 
     // dudi
     addDudi,
     findAllDudi,
     findDudiById,
+    updateDudi,
+    updateAlamatDudi,
+    deleteDudi,
+    findDudiFilter,
 
 
     // pembimbing dudi
     addPembimbingDudi,
+    findAllPembimbingDudi,
+    findPembimbingDudiById,
+    findPembimbingDudifilter,
+    updatePembimbingDudi,
+    updateAlamatPembimbiDudi,
+    deletePembimbingDudi,
+
+
+    // pengajuan pkl
+    findAllPengajuanPkl,
+    findAllPengajuanPklFilter
 }

@@ -2,6 +2,7 @@ export const selectSiswaObject = {
     id : true,
     nama : true,
     nis : true,
+    status : true,
     jenis_kelamin : true,
     guru_pembimbing : {
         select : {
