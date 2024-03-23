@@ -22,7 +22,10 @@ model admin {
   username String @db.VarChar(255)
   password String @db.VarChar(255)
 }
-
+enum status_pkl {
+  pkl
+  belum_pkl
+}
 model siswa {
   id Int @id
   nis Int @unique
@@ -37,6 +40,7 @@ model siswa {
   tanggal_masuk DateTime?
   tanggal_keluar DateTime?
   password String @db.VarChar(255)
+  status status_pkl
 
   alamat alamat_siswa?
   pengajuan_pkl pangajuan_pkl[]
@@ -52,11 +56,12 @@ model alamat_siswa {
   detail_tempat String @db.VarChar(255)
   desa String @db.VarChar(255)
   kecamatan String @db.VarChar(255)
+  kabupaten String @db.VarChar(255)
   provinsi String @db.VarChar(255)
   negara String @db.VarChar(255)
 
   siswa siswa @relation(fields: [id_siswa],references: [id],onDelete: Cascade)
-}
+} 
 model guru_pembimbing {
   id Int @id
   nip Int @unique
@@ -78,6 +83,7 @@ model alamat_guru_Pembimbing {
   detail_tempat String @db.VarChar(255)
   desa String @db.VarChar(255)
   kecamatan String @db.VarChar(255)
+  kabupaten String @db.VarChar(255)
   provinsi String @db.VarChar(255)
   negara String @db.VarChar(255)
 
@@ -123,6 +129,7 @@ model alamat_pembimbing_dudi {
   detail_tempat String @db.VarChar(255)
   desa String @db.VarChar(255)
   kecamatan String @db.VarChar(255)
+  kabupaten String @db.VarChar(255)
   provinsi String @db.VarChar(255)
   negara String @db.VarChar(255)
 
@@ -133,6 +140,7 @@ model alamat_dudi {
   detail_tempat String @db.VarChar(255)
   desa String @db.VarChar(255)
   kecamatan String @db.VarChar(255)
+  kabupaten String @db.VarChar(255)
   provinsi String @db.VarChar(255)
   negara String @db.VarChar(255)
 
