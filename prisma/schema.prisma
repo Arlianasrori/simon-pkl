@@ -196,7 +196,7 @@ model laporan_siswa_pkl {
   id_pembimbing_dudi Int
   tanggal DateTime
   topik_pekerjaan String @db.VarChar(255)
-  rujukan_kompetensi_dasar String @db.VarChar(255)
+  rujukanko_mpetensi_dasar String @db.VarChar(255)
   dokumentasi String @db.VarChar(1500)
 
   siswa siswa @relation(fields: [id_siswa],references: [id])

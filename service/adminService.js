@@ -867,7 +867,7 @@ const deletePembimbingDudi = async (id) => {
 // pengajuan PKL
 
 const findAllPengajuanPkl = async () => {
-    return db.pangajuan_pkl.findMany({
+    return db.pengajuan_pkl.findMany({
         select : {
             dudi : {
                 select : {
@@ -890,7 +890,7 @@ const findAllPengajuanPkl = async () => {
 }
 const findAllPengajuanPklFilter = async (query) => {
     query = await validate(adminValidation.PengajuanPklfilterValidation,query)
-    return db.pangajuan_pkl.findMany({
+    return db.pengajuan_pkl.findMany({
         where : {
             status : query
         },
@@ -917,7 +917,7 @@ const findAllPengajuanPklFilter = async (query) => {
 const findPengajuanPklById = async (id) => {
     id = await validate(adminValidation.idValidation,id)
 
-    const findPengajuanPkl = await db.pangajuan_pkl.findUnique({
+    const findPengajuanPkl = await db.pengajuan_pkl.findUnique({
         where : {
             id : id
         },
@@ -976,19 +976,13 @@ const findLaporanPklFilter = async (query) => {
         where : {
             AND : [
                 {
-                    id_dudi : {
-                        contains : query.id_dudi,
-                    }
+                    id_dudi : query.id_dudi 
                 },
                 {
-                    id_siswa : {
-                        contains : query.id_siswa
-                    }
+                    id_siswa :  query.id_siswa
                 },
                 {
-                    id_pembimbing_dudi : {
-                        contains : query.id_pembimbing_dudi
-                    }
+                    id_pembimbing_dudi : query.id_pembimbing_dudi
                 }
             ]
         },
@@ -1027,19 +1021,13 @@ const findLaporanPklSiswaFilter = async (query) => {
         where : {
             AND : [
                 {
-                    id_dudi : {
-                        contains : query.id_dudi,
-                    }
+                    id_dudi : query.id_dudi
                 },
                 {
-                    id_siswa : {
-                        contains : query.id_siswa
-                    }
+                    id_siswa : query.id_siswa
                 },
                 {
-                    id_pembimbing_dudi : {
-                        contains : query.id_pembimbing_dudi
-                    }
+                    id_pembimbing_dudi : query.id_pembimbing_dudi
                 }
             ]
         },
@@ -1078,19 +1066,13 @@ const findAbsenFilter = async (query) => {
         where : {
             AND : [
                 {
-                    id_dudi : {
-                        contains : query.id_dudi,
-                    }
+                    id_dudi : query.id_dudi
                 },
                 {
-                    id_siswa : {
-                        contains : query.id_siswa
-                    }
+                    id_siswa : query.id_siswa
                 },
                 {
-                    id_pembimbing_dudi : {
-                        contains : query.id_pembimbing_dudi
-                    }
+                    id_pembimbing_dudi : query.id_pembimbing_dudi
                 }
             ]
         },

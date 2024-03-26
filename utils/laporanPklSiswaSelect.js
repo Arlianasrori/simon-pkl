@@ -3,7 +3,6 @@ export const selectLaporanpklSiswaObject = {
     tanggal : true,
     topik_pekerjaan : true,
     rujukan_kompetensi_dasar : true,
-    keterangan : true,
     dokumentasi : true,
     dudi : true,
     siswa : {
