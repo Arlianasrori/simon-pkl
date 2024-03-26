@@ -4,7 +4,6 @@ import { dudiRouter } from "../routes/dudiRouter.js"
 import { siswaRouter } from "../routes/siswaRouter.js"
 import { guruPembimbingRouter } from "../routes/guruPembimbingRouter.js"
 import { errorMiddleware } from "../middleware/errorMiddleware.js"
-import axios from "axios"
 
 export const app = express()
 

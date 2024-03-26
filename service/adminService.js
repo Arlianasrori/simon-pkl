@@ -103,6 +103,48 @@ const findSiswaFilter = async (query) => {
                 {
                     jenis_kelamin : query.jenis_kelamin
                 },
+                {
+                    alamat : {
+                        AND : [
+                            {
+                                negara : {
+                                    contains : query.negara,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                provinsi : {
+                                    contains : query.provinsi,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                kabupaten : {
+                                    contains : query.kabupaten,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                kecamatan : {
+                                    contains : query.kecamatan,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                desa : {
+                                    contains : query.desa,
+                                    mode : "insensitive"
+                                }
+                            },
+                            {
+                                detail_tempat : {
+                                    contains : query.detail_tempat,
+                                    mode : "insensitive"
+                                }
+                            },
+                        ]
+                    }
+                }
             ]
         },
         select : selectSiswaObject

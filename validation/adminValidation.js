@@ -39,7 +39,13 @@ const searchSiswaValidation = joi.object({
   kelas : joi.string().max(255).optional(),
   jurusan : joi.string().max(255).optional(),
   jenis_kelamin : joi.valid("laki","perempuan").optional(),
-  id_guur_pembimbing : joi.number().optional(),
+  id_guru_pembimbing : joi.number().optional(),
+  detail_tempat : joi.string().max(500).optional(),
+  desa : joi.string().max(255).optional(),
+  kecamatan : joi.string().max(255).optional(),
+  kabupaten : joi.string().max(255).optional(),
+  provinsi : joi.string().max(255).optional(),
+  negara : joi.string().max(255).optional(),
 }) 
 
 const updateAlamatValidation = joi.object({
