@@ -184,6 +184,24 @@ const updatePembimbingDudiValidation = joi.object({
 // pengajuan pkl
 
 const PengajuanPklfilterValidation = joi.valid("proses","diterima","ditolak")
+
+
+// laporan pkl
+const searchLaporanPkl = joi.object({
+  id_dudi : joi.number().optional(),
+  id_siswa : joi.number().optional(),
+  id_pembimbing_dudi: joi.number().optional()
+})
+
+
+// laporan absen
+const searchAbsen = joi.object({
+  id_dudi : joi.number().optional(),
+  id_siswa : joi.number().optional(),
+  id_pembimbing_dudi: joi.number().optional()
+})
+
+
 export default {
   // public
     idValidation,
@@ -221,5 +239,13 @@ export default {
 
 
     // pengajuan pkl
-    PengajuanPklfilterValidation
+    PengajuanPklfilterValidation,
+
+
+    // laporan pkl
+    searchLaporanPkl,
+
+
+    // absen 
+    searchAbsen
 }

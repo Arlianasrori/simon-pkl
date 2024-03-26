@@ -8,6 +8,9 @@ import { selectSiswaObject } from "../utils/siswaSelect.js"
 import { selectGuruPembimbingPbject } from "../utils/guruPembimbingSelect.js"
 import { selectDudiObject } from "../utils/dudiSelect.js"
 import { selectPebimbingDudiObject } from "../utils/pembimbingDudiSelect.js"
+import { selectLaporanpklObject } from "../utils/laporanPklSelect.js"
+import { selectLaporanpklSiswaObject } from "../utils/laporanPklSiswaSelect.js"
+import { selectAbsenObject } from "../utils/absenSelect.js"
 
 
 // siswa service
@@ -864,7 +867,7 @@ const deletePembimbingDudi = async (id) => {
 // pengajuan PKL
 
 const findAllPengajuanPkl = async () => {
-    return db.pangajuan_pkl.findMany({
+    return db.pengajuan_pkl.findMany({
         select : {
             dudi : {
                 select : {
@@ -887,7 +890,7 @@ const findAllPengajuanPkl = async () => {
 }
 const findAllPengajuanPklFilter = async (query) => {
     query = await validate(adminValidation.PengajuanPklfilterValidation,query)
-    return db.pangajuan_pkl.findMany({
+    return db.pengajuan_pkl.findMany({
         where : {
             status : query
         },
@@ -910,6 +913,173 @@ const findAllPengajuanPklFilter = async (query) => {
             waktu_pengajuan : true
         }
     })
+}
+const findPengajuanPklById = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findPengajuanPkl = await db.pengajuan_pkl.findUnique({
+        where : {
+            id : id
+        },
+        select : {
+            dudi : {
+            select : {
+                nama_instansi_perusahaan : true,
+                no_telepon : true,
+                bidang : true,
+                catatan : true
+            }
+        },
+        siswa : {
+            select : {
+                nama : true,
+                nis : true
+            }
+        },
+        status : true,
+        waktu_pengajuan : true
+        }
+    })
+
+    if(!findPengajuanPkl) {
+        throw new responseError(404,"pengajuan pkl tidak ditemukan")
+    }
+}
+
+
+// laporan pembimbing dudi pkl
+
+const findAllLaporanPkl = async () => {
+    return db.laporan_pkl.findMany({
+        select : selectLaporanpklObject
+    })
+}
+const findLaporanPklById = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findLaporan = await db.laporan_pkl.findUnique({
+        where : {
+            id : id
+        },
+        select : selectLaporanpklObject
+    })
+
+    if(!findLaporan) {
+        throw new responseError(404,"laporan pkl tidak ditemukan")
+    }
+    return findLaporan
+}
+const findLaporanPklFilter = async (query) => {
+    query = await validate(adminValidation.searchLaporanPkl,query)
+
+    const findLaporan = await db.laporan_pkl.findMany({
+        where : {
+            AND : [
+                {
+                    id_dudi : query.id_dudi 
+                },
+                {
+                    id_siswa :  query.id_siswa
+                },
+                {
+                    id_pembimbing_dudi : query.id_pembimbing_dudi
+                }
+            ]
+        },
+        select : selectLaporanpklObject
+    })
+
+    return {count : findLaporan.length,data : findLaporan}
+}
+
+
+// laporan siswa pkl
+const findAllLaporanSiswaPkl = async () => {
+    return db.laporan_siswa_pkl.findMany({
+        select : selectLaporanpklSiswaObject
+    })
+}
+const findLaporanPklSiswaById = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findLaporan = await db.laporan_siswa_pkl.findUnique({
+        where : {
+            id : id
+        },
+        select : selectLaporanpklSiswaObject
+    })
+
+    if(!findLaporan) {
+        throw new responseError(404,"laporan pkl siswa tidak ditemukan")
+    }
+    return findLaporan
+}
+const findLaporanPklSiswaFilter = async (query) => {
+    query = await validate(adminValidation.searchLaporanPkl,query)
+
+    const findLaporan = await db.laporan_siswa_pkl.findMany({
+        where : {
+            AND : [
+                {
+                    id_dudi : query.id_dudi
+                },
+                {
+                    id_siswa : query.id_siswa
+                },
+                {
+                    id_pembimbing_dudi : query.id_pembimbing_dudi
+                }
+            ]
+        },
+        select : selectLaporanpklSiswaObject
+    })
+
+    return {count : findLaporan.length,data : findLaporan}
+}
+
+
+// absen
+const findAllAbsen = async () => {
+    return db.absen.findMany({
+        select : selectAbsenObject
+    })
+}
+const findAbsenById = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findAbsen = await db.absen.findUnique({
+        where : {
+            id : id
+        },
+        select : selectAbsenObject
+    })
+
+    if(!findAbsen) {
+        throw new responseError(404,"data absen tidak ditemukan")
+    }
+    return findAbsen
+}
+const findAbsenFilter = async (query) => {
+    query = await validate(adminValidation.searchAbsen,query)
+
+    const findAbsen = await db.absen.findMany({
+        where : {
+            AND : [
+                {
+                    id_dudi : query.id_dudi
+                },
+                {
+                    id_siswa : query.id_siswa
+                },
+                {
+                    id_pembimbing_dudi : query.id_pembimbing_dudi
+                }
+            ]
+        },
+        select : selectAbsenObject
+    })
+
+    return {count : findAbsen.length,data : findAbsen}
 }
 export default {
     // siswa
@@ -952,5 +1122,24 @@ export default {
 
     // pengajuan pkl
     findAllPengajuanPkl,
-    findAllPengajuanPklFilter
+    findAllPengajuanPklFilter,
+    findPengajuanPklById,
+
+
+    // laporan pkl
+    findAllLaporanPkl,
+    findLaporanPklById,
+    findLaporanPklFilter,
+
+
+    // laporan pkl siswa
+    findAllLaporanSiswaPkl,
+    findLaporanPklSiswaById,
+    findLaporanPklSiswaFilter,
+
+
+    // absen
+    findAllAbsen,
+    findAbsenById,
+    findAbsenFilter
 }

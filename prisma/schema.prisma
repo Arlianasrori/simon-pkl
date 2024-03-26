@@ -43,7 +43,7 @@ model siswa {
   status status_pkl
 
   alamat alamat_siswa?
-  pengajuan_pkl pangajuan_pkl[]
+  pengajuan_pkl pengajuan_pkl[]
   absen absen[]
   laporan_pkl laporan_pkl[]
   laporans_siswa_pkl laporan_siswa_pkl[]
@@ -117,7 +117,7 @@ model dudi {
 
   alamat alamat_dudi?
   siswa siswa[]
-  pengajuan_pkl pangajuan_pkl[]
+  pengajuan_pkl pengajuan_pkl[]
   absen absen[]
   laporan_pkl laporan_pkl[]
   laporans_siswa_pkl laporan_siswa_pkl[]
@@ -151,7 +151,7 @@ enum status_pengajuan {
   diterima
   ditolak
 }
-model pangajuan_pkl {
+model pengajuan_pkl {
   id Int @id
   id_siswa Int
   id_dudi Int
@@ -196,7 +196,7 @@ model laporan_siswa_pkl {
   id_pembimbing_dudi Int
   tanggal DateTime
   topik_pekerjaan String @db.VarChar(255)
-  rujukan_kompetensi_dasar String @db.VarChar(255)
+  rujukanko_mpetensi_dasar String @db.VarChar(255)
   dokumentasi String @db.VarChar(1500)
 
   siswa siswa @relation(fields: [id_siswa],references: [id])
