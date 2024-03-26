@@ -1,10 +1,6 @@
 import joi from "joi";
 
-const getSiswaValidation = joi.number().required();
-
-const getSiswaByNameValidation = joi.string().max(255).required();
-
-const getDudiByName = joi.string().max(255).required();
+const NameValidation = joi.string().max(255).required();
 
 const getDudiByAlamat = joi.object({
   detail_tempat: joi.string().max(255).optional(),
@@ -15,8 +11,6 @@ const getDudiByAlamat = joi.object({
 });
 
 export default {
-  getSiswaValidation,
-  getSiswaByNameValidation,
-  getDudiByName,
+  NameValidation,
   getDudiByAlamat,
 };

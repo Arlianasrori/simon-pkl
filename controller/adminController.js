@@ -9,7 +9,7 @@ const addSiswa = async (req,res,next) => {
 
         const result = await adminService.addSiswa(siswa,alamat)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -21,7 +21,7 @@ const findAllSiswa = async (req,res,next) => {
     try {
         const result = await adminService.findAllSiswa()
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -33,7 +33,7 @@ const findSiswaHaventPkl = async (req,res,next) => {
     try {
         const result = await adminService.findSiswaHaventPkl()
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -43,10 +43,10 @@ const findSiswaHaventPkl = async (req,res,next) => {
 }
 const findsiswafilter = async (req,res,next) => {
     try {
-        const queryFilter = req.body
+        const queryFilter = req.query
         const result = await adminService.findSiswaFilter(queryFilter)
        
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -60,7 +60,7 @@ const updateSiswa = async (req,res,next) => {
         const identify = parseInt(req.params.identify)
         const result = await adminService.updateSiswa(data,identify)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -73,7 +73,7 @@ const deleteSiswa = async (req,res,next) => {
         const id = parseInt(req.params.id)
         const result = await adminService.deleteSiswa(id)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -87,7 +87,7 @@ const updateAlamatSiswa = async (req,res,next) => {
         const id = parseInt(req.params.id)
         const result = await adminService.updateAlamatSiswa(data,id)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -105,7 +105,7 @@ const addGuruPembimbing = async (req,res,next) => {
 
         const result = await adminService.addGuruPembimbing(guru,alamat)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -118,7 +118,7 @@ const findAllGuruPembimbing = async (req,res,next) => {
     try {
         const result = await adminService.findAllGuruPembimbing()
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -131,7 +131,7 @@ const findGuruPembimbingById = async (req,res,next) => {
         const id = parseInt(req.params.id)
         const result = await adminService.findGuruPembimbingById(id)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -141,10 +141,10 @@ const findGuruPembimbingById = async (req,res,next) => {
 }
 const findGuruPembimbingFilter = async (req,res,next) => {
     try {
-        const query = req.body
+        const query = req.query
         const result = await adminService.findGuruPembimbingfilter(query)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -159,7 +159,7 @@ const updateGuruPembimbing = async (req,res,next) => {
         const data = req.body
         const result = await adminService.updateGuruPembimbing(identify,data)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -173,7 +173,7 @@ const updateAlamatGuruPembimbing = async (req,res,next) => {
         const data = req.body
         const result = await adminService.updateAlamatGuruPembimbing(data,identify)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -186,7 +186,7 @@ const deleteGuruPembimbing = async (req,res,next) => {
         const identify = parseInt(req.params.identify)
         const result = await adminService.deleteGuruPembimbing(identify)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -205,7 +205,7 @@ const addDudi = async (req,res,next) => {
 
         const result = await adminService.addDudi(dudi,alamat)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -217,7 +217,7 @@ const findAllDudi = async (req,res,next) => {
     try {
         const result = await adminService.findAllDudi()
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -230,7 +230,7 @@ const findDudiById = async (req,res,next) => {
         const id = parseInt(req.params.id)
         const result = await adminService.findDudiById(id)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -240,10 +240,10 @@ const findDudiById = async (req,res,next) => {
 }
 const findDudiFilter = async (req,res,next) => {
     try {
-        const query = req.body
+        const query = req.query
         const result = await adminService.findDudiFilter(query)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -257,7 +257,7 @@ const updateDudi = async (req,res,next) => {
         const data = req.body
         const result = await adminService.updateDudi(data,id)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -271,7 +271,7 @@ const updateAlamatDudi = async (req,res,next) => {
         const data = req.body
         const result = await adminService.updateAlamatDudi(data,id)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -284,7 +284,7 @@ const deleteDudi = async (req,res,next) => {
         const id = parseInt(req.params.id)
         const result = await adminService.updateDudi(data,id)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -302,7 +302,7 @@ const addPembimbingDudi = async (req,res,next) => {
 
         const result = await adminService.addPembimbingDudi(pembimbingDudi,alamat)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -314,7 +314,7 @@ const findAllPembimbingDudi = async (req,res,next) => {
     try {
         const result = await adminService.findAllPembimbingDudi()
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -328,7 +328,7 @@ const findPembimbingDudiById = async (req,res,next) => {
         
         const result = await adminService.findPembimbingDudiById(id)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -338,10 +338,10 @@ const findPembimbingDudiById = async (req,res,next) => {
 }
 const findPembimbingDudiFilter = async (req,res,next) => {
     try {
-        const query = req.body
+        const query = req.query
         const result = await adminService.findPembimbingDudifilter(query)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -355,7 +355,7 @@ const updatePembimbingDudi = async (req,res,next) => {
         const data = req.body
         const result = await adminService.updatePembimbingDudi(data,id)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -369,7 +369,7 @@ const updateAlamatPembimbingDudi = async (req,res,next) => {
         const data = req.body
         const result = await adminService.updateAlamatPembimbiDudi(data,id)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -383,7 +383,7 @@ const deletePembimbingDudi = async (req,res,next) => {
 
         const result = await adminService.deletePembimbingDudi(id)
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -399,7 +399,7 @@ const findAllPengajuanPkl = async (req,res,next) => {
         
         const result = await adminService.findAllPengajuanPkl()
 
-        res.status(201).json({
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -409,7 +409,7 @@ const findAllPengajuanPkl = async (req,res,next) => {
 }
 const findAllPengajuanPklFilter = async (req,res,next) => {
     try {
-        const status = req.body.status
+        const status = req.query.status
         const result = await adminService.findAllPengajuanPklFilter(status)
 
         res.status(200).json({
@@ -463,7 +463,7 @@ const findLaporanPklById = async (req,res,next) => {
 }
 const findLaporanPklFilter = async (req,res,next) => {
     try {
-        const query = req.body
+        const query = req.query
         const result = await adminService.findLaporanPklFilter(query)
     
         res.status(200).json({
@@ -505,7 +505,7 @@ const findLaporanPklSiswaById = async (req,res,next) => {
 }
 const findLaporanPklSiswaFilter = async (req,res,next) => {
     try {
-        const query = req.body
+        const query = req.query
         const result = await adminService.findLaporanPklSiswaFilter(query)
     
         res.status(200).json({
@@ -546,7 +546,7 @@ const findAbsenById = async (req,res,next) => {
 }
 const findAbsenFilter = async (req,res,next) => {
     try {
-        const query = req.body
+        const query = req.query
         const result = await adminService.findAbsenFilter(query)
     
         res.status(200).json({

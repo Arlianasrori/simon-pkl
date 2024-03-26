@@ -2,9 +2,10 @@ import siswaValidation from "../validation/siswaValidation.js";
 import { validate } from "../validation/validate.js";
 import { db } from "../config/prismaClient.js";
 import responseError from "../error/responseError.js";
+import adminValidation from "../validation/adminValidation.js";
 
 const getSiswaById = async (id) => {
-  id = await validate(siswaValidation.getSiswaValidation, id);
+  id = await validate(adminValidation.idValidation, id);
 
   const findSiswa = await db.siswa.findUnique({
     where: {
@@ -33,7 +34,7 @@ const getSiswaById = async (id) => {
 };
 
 const getSiswaByName = async (nama) => {
-  nama = await validate(siswaValidation.getSiswaByNameValidation, nama);
+  nama = await validate(siswaValidation.NameValidation, nama);
 
   const getSiswa = await db.siswa.findFirst({
     where: {
@@ -71,9 +72,23 @@ const getDudi = () => {
     },
   });
 };
+const getDudiById = async (id) => {
+  id = await validate(adminValidation.idValidation,id)
+
+  const findDudi = await db.dudi.findUnique({
+    where : {
+      id : id
+    }
+  })
+
+  if(!findDudi) {
+    throw new responseError(404,"data dudi tidak ditemukan")
+  }
+  return findDudi
+};
 
 const getDudiByName = async (nama) => {
-  nama = await validate(siswaValidation.getDudiByName, nama);
+  nama = await validate(siswaValidation.NameValidation, nama);
 
   const getDudi = await db.dudi.findFirst({
     where: {
@@ -157,4 +172,5 @@ export default {
   getDudi,
   getDudiByName,
   getDudiByAlamat,
+  getDudiById
 };
