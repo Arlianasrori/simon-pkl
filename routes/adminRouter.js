@@ -44,3 +44,22 @@ adminRouter.delete('/deletePembimbingDudi/:id',adminController.deletePembimbingD
 // pengajuan pkl
 adminRouter.get('/findAllPengajuanPkl',adminController.findAllPengajuanPkl)
 adminRouter.get('/findAllPengajuanPklFilter',adminController.findAllPengajuanPklFilter)
+adminRouter.get('/findAllPengajuanPkl/:id',adminController.findPengajuanPklById)
+
+
+// laporan Pkl
+adminRouter.get('/findAllLaporanPkl',adminController.findAllLaporanPkl)
+adminRouter.get('/findLaporanPkl/:id',adminController.findLaporanPklById)
+adminRouter.get('/findLaporanPklFilter',adminController.findLaporanPklFilter)
+
+
+// laporan Pkl
+adminRouter.get('/findAllLaporanPklSiswa',adminController.findAllLaporanPklSiswa)
+adminRouter.get('/findLaporanPklSiswa/:id',adminController.findLaporanPklSiswaById)
+adminRouter.get('/findLaporanPklSiswaFilter',adminController.findLaporanPklSiswaFilter)
+
+
+// absen
+adminRouter.get('/findAllAbsen',adminController.findAllAbsen)
+adminRouter.get('/findAbsenById',adminController.findAbsenById)
+adminRouter.get('/findAbsenFilter',adminController.findAbsenFilter)

@@ -412,7 +412,144 @@ const findAllPengajuanPklFilter = async (req,res,next) => {
         const status = req.body.status
         const result = await adminService.findAllPengajuanPklFilter(status)
 
-        res.status(201).json({
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const findPengajuanPklById = async (req,res,next) => {
+    try {
+        const id = parseInt(req.params.id)
+        const result = await adminService.findPengajuanPklById(id)
+
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+// laporan pkl
+const findAllLaporanPkl = async (req,res,next) => {
+    try {
+        const result = await adminService.findAllLaporanPkl()
+    
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const findLaporanPklById = async (req,res,next) => {
+    try {
+        const id = req.params.id
+        const result = await adminService.findLaporanPklById(id)
+    
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const findLaporanPklFilter = async (req,res,next) => {
+    try {
+        const query = req.body
+        const result = await adminService.findLaporanPklFilter(query)
+    
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+
+// laporan pkl siswa
+const findAllLaporanPklSiswa = async (req,res,next) => {
+    try {
+        const result = await adminService.findAllLaporanSiswaPkl()
+    
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const findLaporanPklSiswaById = async (req,res,next) => {
+    try {
+        const id = req.params.id
+        const result = await adminService.findLaporanPklSiswaById(id)
+    
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const findLaporanPklSiswaFilter = async (req,res,next) => {
+    try {
+        const query = req.body
+        const result = await adminService.findLaporanPklSiswaFilter(query)
+    
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+// absen
+const findAllAbsen = async (req,res,next) => {
+    try {
+        const result = await adminService.findAllAbsen()
+    
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const findAbsenById = async (req,res,next) => {
+    try {
+        const id = parseInt(req.params.id)
+        const result = await adminService.findAbsenById(id)
+    
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const findAbsenFilter = async (req,res,next) => {
+    try {
+        const query = req.body
+        const result = await adminService.findAbsenFilter(query)
+    
+        res.status(200).json({
             msg : "succes",
             data : result
         })
@@ -461,5 +598,24 @@ export default {
 
     // pengajuan pkl
     findAllPengajuanPkl,
-    findAllPengajuanPklFilter
+    findAllPengajuanPklFilter,
+    findPengajuanPklById,
+
+
+    // laporan pkl
+    findAllLaporanPkl,
+    findLaporanPklById,
+    findLaporanPklFilter,
+
+
+    // laporan pkl siswa
+    findAllLaporanPklSiswa,
+    findLaporanPklSiswaById,
+    findLaporanPklSiswaFilter,
+
+
+    // absen
+    findAllAbsen,
+    findAbsenById,
+    findAbsenFilter
 }
