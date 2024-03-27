@@ -12,17 +12,6 @@ const getSiswaById = async (req, res, next) => {
   }
 };
 
-const getSiswaByName = async (req, res, next) => {
-  try {
-    const result = await siswaService.getSiswaByName(req.body.nama);
-    res.status(200).json({
-      msg : "succes",
-      data : result
-  })
-  } catch (error) {
-    next(error);
-  }
-};
 
 const getDudi = async (req, res, next) => {
   try {
@@ -72,12 +61,37 @@ const getDudiById = async (req, res, next) => {
     next(error);
   }
 };
+const addPengajuanPkl = async (req, res, next) => {
+  try {
+    const body = req.body
+    const result = await siswaService.addPengajuanPkl(body);
+    res.status(200).json({
+      msg : "succes",
+      data : result
+  })
+  } catch (error) {
+    next(error);
+  }
+};
+const cancelPengajuanPkl = async (req, res, next) => {
+  try {
+    const body = req.body
+    const result = await siswaService.cancelPengajuanPkl(body);
+    res.status(200).json({
+      msg : "succes",
+      data : result
+  })
+  } catch (error) {
+    next(error);
+  }
+};
 
 export default {
   getSiswaById,
-  getSiswaByName,
   getDudi,
   getDudiByName,
   getDudiByAlamat,
-  getDudiById
+  getDudiById,
+  addPengajuanPkl,
+  cancelPengajuanPkl
 };

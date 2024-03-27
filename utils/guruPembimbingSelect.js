@@ -4,6 +4,7 @@ export const selectGuruPembimbingPbject =
         nama : true,
         nip : true,
         agama : true,
+        no_telepon : true,
         tanggal_lahir : true,
         tempat_lahir : true,
         jenis_kelamin : true,

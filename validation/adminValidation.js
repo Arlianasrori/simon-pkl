@@ -6,8 +6,8 @@ const addSiswaValidation = joi.object({
   id : joi.number().required(),
   nis : joi.number().required(),
   nama : joi.string().max(255).required(),
-  kelas : joi.string().max(255).required(),
-  jurusan : joi.string().max(255).required(),
+  id_kelas : joi.number().required(),
+  id_jurusan : joi.number().required(),
   jenis_kelamin : joi.valid("laki","perempuan").required(),
   no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).required(),
   id_guru_pembimbing : joi.number().required(),
@@ -26,8 +26,8 @@ const addAlamatSiswaValidation = joi.object({
 const updateSiswaValidation = joi.object({
   nis : joi.number().optional(),
   nama : joi.string().max(255).optional(),
-  kelas : joi.string().max(255).optional(),
-  jurusan : joi.string().max(255).optional(),
+  id_kelas : joi.number().optional(),
+  id_jurusan : joi.number().optional(),
   jenis_kelamin : joi.valid("laki","perempuan").optional(),
   no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).optional(),
   id_guru_pembimbing : joi.number().optional(),
@@ -36,8 +36,8 @@ const updateSiswaValidation = joi.object({
 const searchSiswaValidation = joi.object({
   nis : joi.number().optional(),
   nama : joi.string().max(255).optional(),
-  kelas : joi.string().max(255).optional(),
-  jurusan : joi.string().max(255).optional(),
+  id_kelas : joi.number().optional(),
+  id_jurusan : joi.number().optional(),
   jenis_kelamin : joi.valid("laki","perempuan").optional(),
   id_guru_pembimbing : joi.number().optional(),
   detail_tempat : joi.string().max(500).optional(),
@@ -48,6 +48,8 @@ const searchSiswaValidation = joi.object({
   negara : joi.string().max(255).optional(),
 }) 
 
+
+// public
 const updateAlamatValidation = joi.object({
   detail_tempat : joi.string().max(500).optional(),
   desa : joi.string().max(255).optional(),
@@ -58,6 +60,33 @@ const updateAlamatValidation = joi.object({
 })
 
 const idValidation = joi.number().required()
+const namaValidation = joi.string().max(255).required()
+
+
+// jurusan 
+const addJurusanValidation = joi.object({
+  id : joi.number().required(),
+  nama : joi.string().max(255).required()
+})
+
+
+// kelas
+const addKelasValidation = joi.object({
+  id : joi.number().required(),
+  nama : joi.string().max(255).required(),
+  tahun : joi.string().max(255).required(),
+  id_jurusan : joi.number().required()
+})
+const updateKelasValidation = joi.object({
+  nama : joi.string().max(255).optional(),
+  tahun : joi.string().max(255).optional(),
+  id_jurusan : joi.number().optional()
+})
+const searchKelasValidation = joi.object({
+  nama : joi.string().max(255).optional(),
+  tahun : joi.string().max(255).optional(),
+  id_jurusan : joi.number().optional()
+})
 
 
 // guruPembimbing validation
@@ -221,6 +250,16 @@ export default {
     addAlamatSiswaValidation,
     searchSiswaValidation,
 
+
+    // jurusan
+    addJurusanValidation,
+    namaValidation,
+
+
+    // kelas
+    addKelasValidation,
+    updateKelasValidation,
+    searchKelasValidation,
 
     // guru pembimbing
     addGuruPembimbingValidation,

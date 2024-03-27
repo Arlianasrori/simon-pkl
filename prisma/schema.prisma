@@ -30,8 +30,6 @@ model siswa {
   id Int @id
   nis Int @unique
   nama String @db.VarChar(255)
-  kelas String @db.VarChar(255)
-  jurusan String @db.VarChar(255)
   jenis_kelamin jenis_kelamin
   no_telepon String @db.VarChar(12) @unique
   id_guru_pembimbing Int
@@ -40,8 +38,12 @@ model siswa {
   tanggal_masuk DateTime?
   tanggal_keluar DateTime?
   password String @db.VarChar(255)
-  status status_pkl
+  status status_pkl @default(belum_pkl)
+  id_jurusan Int
+  id_kelas Int
 
+  jurusan jurusan @relation(fields: [id_jurusan],references: [id])
+  kelas kelas @relation(fields: [id_kelas],references: [id])
   alamat alamat_siswa?
   pengajuan_pkl pengajuan_pkl[]
   absen absen[]
@@ -50,6 +52,22 @@ model siswa {
   guru_pembimbing guru_pembimbing @relation(fields: [id_guru_pembimbing],references: [id])
   dudi dudi? @relation(fields: [id_dudi],references: [id])
   pembimbing_dudi Pembimbing_dudi? @relation(fields: [id_pembimbing_dudi],references: [id])
+}
+model jurusan {
+  id Int @id
+  nama String @db.VarChar(255)
+
+  kelas kelas[]
+  siswa siswa[]
+}
+model kelas {
+  id Int @id
+  nama String @db.VarChar(255)
+  tahun String
+  id_jurusan Int
+
+  siswa siswa[]
+  jurusan jurusan @relation(fields: [id_jurusan],references: [id])
 }
 model alamat_siswa {
   id_siswa Int @id
@@ -150,12 +168,13 @@ enum status_pengajuan {
   proses 
   diterima
   ditolak
+  dibatalkan
 }
 model pengajuan_pkl {
   id Int @id
   id_siswa Int
   id_dudi Int
-  status status_pengajuan 
+  status status_pengajuan @default(proses)
   waktu_pengajuan DateTime @default(now())
 
   siswa siswa @relation(fields: [id_siswa],references: [id])

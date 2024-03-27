@@ -11,6 +11,8 @@ import { selectPebimbingDudiObject } from "../utils/pembimbingDudiSelect.js"
 import { selectLaporanpklObject } from "../utils/laporanPklSelect.js"
 import { selectLaporanpklSiswaObject } from "../utils/laporanPklSiswaSelect.js"
 import { selectAbsenObject } from "../utils/absenSelect.js"
+import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js"
+import { selectKelasObject } from "../utils/kelasSelect.js"
 
 
 // siswa service
@@ -48,7 +50,27 @@ const addSiswa = async (siswa,alamat) => {
     if(!findGuruPembimbing) {
         throw new responseError(404,"guru pembimbing tidak ditemukan")
     }
-    siswa.status = "belum_pkl"
+
+    const findJurusan = await db.jurusan.findUnique({
+        where : {
+            id : siswa.id_jurusan
+        }
+    })
+
+    if(!findJurusan) {
+        throw new responseError(404,"data jurusan tidak ditemukan")
+    }
+
+    const findKelas = await db.kelas.findUnique({
+        where : {
+            id : siswa.id_kelas
+        }
+    })
+
+    if(!findKelas) {
+        throw new responseError(404,"data kelas tidak ditemukan")
+    }
+
     return db.$transaction(async (tx) => {
         const addSiswa = await tx.siswa.create({
             data : siswa,
@@ -89,16 +111,10 @@ const findSiswaFilter = async (query) => {
                     }
                 },
                 {
-                    kelas : {
-                        contains : query.kelas,
-                        mode : 'insensitive'
-                    }
+                    id_jurusan : query.id_jurusan
                 },
                 {
-                    jurusan : {
-                        contains : query.jurusan,
-                        mode : "insensitive"
-                    }
+                    id_kelas : query.id_kelas
                 },
                 {
                     jenis_kelamin : query.jenis_kelamin
@@ -229,6 +245,206 @@ const updateAlamatSiswa = async (data,id) => {
         data : data
     })
 }
+
+
+
+// jurusan
+const addJurusan = async (body) => {
+    body.id = generateId()
+    console.log(body);
+    body = await validate(adminValidation.addJurusanValidation,body)
+
+    return db.jurusan.create({
+        data : body
+    })
+}
+const deleteJurusan = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findJurusan = await db.jurusan.findUnique({
+        where : {
+            id : id
+        }
+    })
+
+    if(!findJurusan) {
+        throw new responseError(404,"data jurusan tidak ditemukan")
+    }
+
+    return db.jurusan.delete({
+        where : {
+            id : id
+        }
+    })
+}
+const findAllJurusan = async () => {
+    return db.jurusan.findMany()
+} 
+const findJurusanById = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findJurusan = await db.jurusan.findUnique({
+        where : {
+            id : id
+        }
+    })
+
+    if(!findJurusan) {
+        throw new responseError(404,"data jurusan tidak ditemukan")
+    }
+
+    return findJurusan
+} 
+const findJurusanByName = async (nama) => {
+    nama = await validate(adminValidation.namaValidation,nama)
+
+    const findJurusan = await db.jurusan.findFirst({
+        where : {
+            nama : {
+                contains : nama,
+                mode : "insensitive"
+            }
+        }
+    })
+
+    if(!findJurusan) {
+        throw new responseError(404,"data jurusan tidak ditemukan")
+    }
+
+    return findJurusan
+} 
+const updateJurusan = async (id,nama) => {
+    id = await validate(adminValidation.idValidation,id)
+    nama = await validate(adminValidation.namaValidation,nama)
+    const findJurusan = await db.jurusan.findUnique({
+        where : {
+            id : id
+        }
+    })
+
+    if(!findJurusan) {
+        throw new responseError(404,"data jurusan tidak ditemukan")
+    }
+
+    return db.jurusan.update({
+        where : {
+            id : id
+        },
+        data : {
+            nama : nama
+        }
+    })
+} 
+
+
+// kelas
+const addKelas = async (body) => {
+    body.id = generateId()
+    body = await validate(adminValidation.addKelasValidation,body)
+
+    const findJurusan = await db.jurusan.findUnique({
+        where : {
+            id : body.id_jurusan
+        }
+    })
+
+    if(!findJurusan) {
+        throw new responseError(404,"data jurusan tidak ditemukan")
+    }
+
+    return db.kelas.create({
+        data : body,
+        select : selectKelasObject
+    })
+}
+const deleteKelas = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findKelas = await db.kelas.findUnique({
+        where : {
+            id : id
+        }
+    })
+
+    if(!findKelas) {
+        throw new responseError(404,"data kelas tidak ditemukan")
+    }
+
+    return db.kelas.delete({
+        where : {
+            id : id
+        },
+        select : selectKelasObject
+    })
+}
+const findAllkelas = async () => {
+    return db.kelas.findMany({
+        select : selectKelasObject
+    })
+} 
+const findKelasById = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findkelas = await db.kelas.findUnique({
+        where : {
+            id : id
+        },
+        select : selectKelasObject
+    })
+
+    if(!findkelas) {
+        throw new responseError(404,"data kelas tidak ditemukan")
+    }
+
+    return findkelas
+} 
+const findKelasFilter = async (query) => {
+    query = await validate(adminValidation.searchKelasValidation,query)
+
+    const findKelas = await db.kelas.findMany({
+        where : {
+            AND : [
+                {
+                    nama : {
+                        contains : query.nama,
+                        mode : "insensitive"
+                    },
+                    tahun : {
+                        contains : query.tahun,
+                        mode : "insensitive"
+                    },
+                    id_jurusan : query.id_jurusan
+                }
+            ]
+        },
+        select : selectKelasObject
+    })
+
+    return findKelas
+} 
+const updateKelas = async (id,body) => {
+    id = await validate(adminValidation.idValidation,id)
+    body = await validate(adminValidation.updateKelasValidation,body)
+
+    const findkelas = await db.kelas.findUnique({
+        where : {
+            id : id
+        }
+    })
+
+    if(!findkelas) {
+        throw new responseError(404,"data kelas tidak ditemukan")
+    }
+
+    return db.kelas.update({
+        where : {
+            id : id
+        },
+        data : body,
+        select : selectKelasObject
+    })
+} 
+
 
 
 // guru pembimbing service
@@ -910,24 +1126,7 @@ const deletePembimbingDudi = async (id) => {
 
 const findAllPengajuanPkl = async () => {
     return db.pengajuan_pkl.findMany({
-        select : {
-            dudi : {
-                select : {
-                    nama_instansi_perusahaan : true,
-                    no_telepon : true,
-                    bidang : true,
-                    catatan : true
-                }
-            },
-            siswa : {
-                select : {
-                    nama : true,
-                    nis : true
-                }
-            },
-            status : true,
-            waktu_pengajuan : true
-        }
+        select : selectPengajuanPklObject
     })
 }
 const findAllPengajuanPklFilter = async (query) => {
@@ -936,24 +1135,7 @@ const findAllPengajuanPklFilter = async (query) => {
         where : {
             status : query
         },
-        select : {
-            dudi : {
-                select : {
-                    nama_instansi_perusahaan : true,
-                    no_telepon : true,
-                    bidang : true,
-                    catatan : true
-                }
-            },
-            siswa : {
-                select : {
-                    nama : true,
-                    nis : true
-                }
-            },
-            status : true,
-            waktu_pengajuan : true
-        }
+        select : selectPengajuanPklObject
     })
 }
 const findPengajuanPklById = async (id) => {
@@ -963,29 +1145,13 @@ const findPengajuanPklById = async (id) => {
         where : {
             id : id
         },
-        select : {
-            dudi : {
-            select : {
-                nama_instansi_perusahaan : true,
-                no_telepon : true,
-                bidang : true,
-                catatan : true
-            }
-        },
-        siswa : {
-            select : {
-                nama : true,
-                nis : true
-            }
-        },
-        status : true,
-        waktu_pengajuan : true
-        }
+        select : selectPengajuanPklObject
     })
 
     if(!findPengajuanPkl) {
         throw new responseError(404,"pengajuan pkl tidak ditemukan")
     }
+    return findPengajuanPkl
 }
 
 
@@ -1132,6 +1298,25 @@ export default {
     updateAlamatSiswa,
     findSiswaFilter,
     findSiswaHaventPkl,
+
+
+    // jurusan
+    addJurusan,
+    deleteJurusan,
+    findAllJurusan,
+    findJurusanById,
+    findJurusanByName,
+    updateJurusan,
+
+
+    // kelas
+    addKelas,
+    findAllkelas,
+    findKelasById,
+    findKelasFilter,
+    deleteKelas,
+    updateKelas,
+
 
     // guru pembimbing
     addGuruPembimbing,
