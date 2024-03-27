@@ -10,8 +10,7 @@ const getDudiByAlamat = joi.object({
 const addPengjuanPklValidation = joi.object({
   id  : joi.number().required(),
   id_siswa  : joi.number().required(),
-  id_dudi : joi.number().required(),
-  status : joi.valid("proses").required()
+  id_dudi : joi.number().required()
 });
 const cancelPengjuanPklValidation = joi.object({
   id  : joi.number().required(),

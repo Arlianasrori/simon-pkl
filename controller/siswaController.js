@@ -85,6 +85,31 @@ const cancelPengajuanPkl = async (req, res, next) => {
     next(error);
   }
 };
+const findAllPengajuanPkl = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id_siswa)
+    const result = await siswaService.findAllPengajuanPkl(id);
+    res.status(200).json({
+      msg : "succes",
+      data : result
+  })
+  } catch (error) {
+    next(error);
+  }
+};
+const findPengajuanPklbyId = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id)
+    console.log(id);
+    const result = await siswaService.findPengajuanPklById(id);
+    res.status(200).json({
+      msg : "succes",
+      data : result
+  })
+  } catch (error) {
+    next(error);
+  }
+};
 
 export default {
   getSiswaById,
@@ -93,5 +118,7 @@ export default {
   getDudiByAlamat,
   getDudiById,
   addPengajuanPkl,
-  cancelPengajuanPkl
+  cancelPengajuanPkl,
+  findAllPengajuanPkl,
+  findPengajuanPklbyId
 };

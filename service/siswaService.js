@@ -128,6 +128,8 @@ const getDudiByAlamat = async (alamat) => {
   return findDudi;
 };
 
+
+// pengajuan pkl
 const addPengajuanPkl = async (body) => {
   body.id = generateId()
   body = await validate(siswaValidation.addPengjuanPklValidation,body)
@@ -204,6 +206,30 @@ const cancelPengajuanPkl = async (body) => {
   })
 }
 
+const findAllPengajuanPkl = async (id) => {
+  id = await validate(adminValidation.idValidation,id)
+
+  return db.pengajuan_pkl.findMany({
+    where : {
+      id_siswa : id
+    }
+  })
+}
+const findPengajuanPklById = async (id) => {
+  id = await validate(adminValidation.idValidation,id)
+
+  const findPengajuan = await db.pengajuan_pkl.findUnique({
+    where : {
+      id : id
+    }
+  })
+
+  if(!findPengajuan) {
+    throw new responseError(404,"data pengajuan pkl tidak ditemukan")
+  }
+
+  return findPengajuan
+}
 export default {
   getSiswaById,
   getDudi,
@@ -211,5 +237,7 @@ export default {
   getDudiByAlamat,
   getDudiById,
   addPengajuanPkl,
-  cancelPengajuanPkl
+  cancelPengajuanPkl,
+  findAllPengajuanPkl,
+  findPengajuanPklById
 };
