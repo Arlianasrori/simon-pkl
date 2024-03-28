@@ -49,6 +49,7 @@ model siswa {
   absen absen[]
   laporan_pkl laporan_pkl[]
   laporans_siswa_pkl laporan_siswa_pkl[]
+  pengajuan_cancel_pkl cancel_pkl[]
   guru_pembimbing guru_pembimbing @relation(fields: [id_guru_pembimbing],references: [id])
   dudi dudi? @relation(fields: [id_dudi],references: [id])
   pembimbing_dudi Pembimbing_dudi? @relation(fields: [id_pembimbing_dudi],references: [id])
@@ -123,6 +124,7 @@ model Pembimbing_dudi {
   laporan_pkl laporan_pkl[]
   laporans_siswa_pkl laporan_siswa_pkl[]
   kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
+  pengajuan_cancel_pkl cancel_pkl[]
 
   dudi dudi @relation(fields: [id_dudi],references: [id])
 }
@@ -141,6 +143,7 @@ model dudi {
   laporans_siswa_pkl laporan_siswa_pkl[]
   kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
   pembimbing_dudi Pembimbing_dudi[]
+  pengajuan_cancel_pkl cancel_pkl[]
 }
 model alamat_pembimbing_dudi {
   id_pembimbing_dudi Int @id
@@ -179,6 +182,18 @@ model pengajuan_pkl {
 
   siswa siswa @relation(fields: [id_siswa],references: [id])
   dudi dudi @relation(fields: [id_dudi],references: [id])
+}
+
+model cancel_pkl {
+  id Int @id
+  id_siswa Int 
+  id_dudi Int 
+  id_pembimbing_dudi Int
+  status status_cancel_pkl
+
+  siswa siswa @relation(fields: [id_siswa],references: [id])
+  dudi dudi @relation(fields: [id_dudi],references: [id])
+  pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id])
 }
 model absen {
   id Int @id
@@ -238,4 +253,9 @@ model kunjungan_guru_pembimbing_pkl {
 enum status_absen {
   datang
   pulang
+}
+
+enum status_cancel_pkl {
+  setuju
+  tidak_setuju
 }

@@ -100,8 +100,20 @@ const findAllPengajuanPkl = async (req, res, next) => {
 const findPengajuanPklbyId = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id)
-    console.log(id);
     const result = await siswaService.findPengajuanPklById(id);
+    res.status(200).json({
+      msg : "succes",
+      data : result
+  })
+  } catch (error) {
+    next(error);
+  }
+};
+const findPengajuanPklByStatus = async (req, res, next) => {
+  try {
+    const body = req.body
+
+    const result = await siswaService.findPengajuanPklByStatus(id);
     res.status(200).json({
       msg : "succes",
       data : result
@@ -120,5 +132,6 @@ export default {
   addPengajuanPkl,
   cancelPengajuanPkl,
   findAllPengajuanPkl,
-  findPengajuanPklbyId
+  findPengajuanPklbyId,
+  findPengajuanPklByStatus
 };

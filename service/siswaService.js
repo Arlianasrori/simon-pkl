@@ -230,6 +230,26 @@ const findPengajuanPklById = async (id) => {
 
   return findPengajuan
 }
+
+const findPengajuanPklByStatus = async (body) => {
+  body = await validate(siswaValidation.findPengajuanByStatus,body)
+  return db.pengajuan_pkl.findMany({
+    where : {
+      AND : [
+        {
+          id_siswa : body.id_siswa
+        },
+        {
+          status : body.status
+        }
+      ]
+    }
+  })
+}
+
+const cancelPkl = async (body) => {
+  
+}
 export default {
   getSiswaById,
   getDudi,
@@ -239,5 +259,6 @@ export default {
   addPengajuanPkl,
   cancelPengajuanPkl,
   findAllPengajuanPkl,
-  findPengajuanPklById
+  findPengajuanPklById,
+  findPengajuanPklByStatus
 };

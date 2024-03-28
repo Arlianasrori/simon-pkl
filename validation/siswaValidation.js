@@ -16,9 +16,14 @@ const cancelPengjuanPklValidation = joi.object({
   id  : joi.number().required(),
   id_siswa  : joi.number().required()
 });
+const findPengajuanByStatus = joi.object({
+  id_siswa  : joi.number().required(),
+  status : joi.valid("proses","diterima","ditolak","dibatalkan").required()
+}) 
 
 export default {
   getDudiByAlamat,
   addPengjuanPklValidation,
-  cancelPengjuanPklValidation
+  cancelPengjuanPklValidation,
+  findPengajuanByStatus
 };
