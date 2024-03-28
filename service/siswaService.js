@@ -7,6 +7,7 @@ import generateId from "../utils/generateIdUtils.js";
 import { selectSiswaObject } from "../utils/siswaSelect.js";
 import { selectDudiObject } from "../utils/dudiSelect.js";
 import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js";
+import { checkPklSiswa } from "../utils/checkPklSiswa.js";
 
 const getSiswaById = async (id) => {
   id = await validate(adminValidation.idValidation, id);
@@ -247,9 +248,77 @@ const findPengajuanPklByStatus = async (body) => {
   })
 }
 
-const cancelPkl = async (body) => {
-  
+const addCancelPkl = async (body) => {
+  body.id = generateId()
+  body = await validate(siswaValidation.cancelPklValidation,body)
+
+  const findsiswa = await db.siswa.findFirst({
+    where : {
+     id : body.id_siswa
+    },
+    select : selectSiswaObject
+  })
+
+  if(!findsiswa) {
+    throw new responseError(404,"data siswa tidak ditemukan")
+  }
+
+  checkPklSiswa(findsiswa)
+
+  if(findsiswa.dudi.id != body.id_dudi) {
+    throw new responseError(400,"dudi tempat siswa pkl tidak ditemukan")
+  }
+
+  if(findsiswa.pembimbing_dudi.id != body.id_pembimbing_dudi) {
+    throw new responseError(400,"pembimbing dudi siswa pkl tidak ditemukan")
+  }
+
+  return db.pengajuan_cancel_pkl.create({
+    data : body,
+    select : {
+      id : true,
+      siswa : {
+        select : {
+          nama : true
+        }
+      },
+      dudi : {
+        select : {
+          nama_instansi_perusahaan : true
+        }
+      },
+      pembimbing_dudi : {
+        select : {
+          nama : true
+        }
+      }
+    }
+  })
 }
+
+const getCancelPklBySiswa = async (id_siswa) => {
+  id_siswa = await validate(adminValidation.idValidation,id_siswa)
+  return db.pengajuan_cancel_pkl.findMany({
+    where : {
+      id_siswa : id_siswa
+    }
+  })
+} 
+const getCancelPklById = async (id) => {
+  id = await validate(adminValidation.idValidation,id)
+  
+  const findCancelPkl = await db.pengajuan_cancel_pkl.findUnique({
+    where : {
+      id : id
+    }
+  })
+
+  if(!findCancelPkl) {
+    throw new responseError(404,"data pengjuan cancel pkl tidak ditemukan")
+  }
+
+  return findCancelPkl
+} 
 export default {
   getSiswaById,
   getDudi,
@@ -260,5 +329,8 @@ export default {
   cancelPengajuanPkl,
   findAllPengajuanPkl,
   findPengajuanPklById,
-  findPengajuanPklByStatus
+  findPengajuanPklByStatus,
+  addCancelPkl,
+  getCancelPklBySiswa,
+  getCancelPklById
 };

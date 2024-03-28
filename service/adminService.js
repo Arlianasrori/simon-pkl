@@ -712,7 +712,7 @@ const addDudi = async (dudi,alamat) => {
                 nama_instansi_perusahaan : true,
                 no_telepon : true,
                 bidang : true,
-                catatan : true
+                deksripsi : true
             }
         })
         const addAlamatDudi= await tx.alamat_dudi.create({
@@ -748,7 +748,7 @@ const findDudiById = async (id) => {
 const updateDudi = async (data,id) => {
     id = await validate(adminValidation.idValidation,id)
     data = await validate(adminValidation.updateDudiValidation,data)
-    console.log(data);
+
     const findDudi = await db.dudi.findUnique({
         where : {
             id : id

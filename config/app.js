@@ -3,6 +3,7 @@ import { adminRouter } from "../routes/adminRouter.js"
 import { pembimbingDudiRouter } from "../routes/pembimbingDudiRouter.js"
 import { siswaRouter } from "../routes/siswaRouter.js"
 import { guruPembimbingRouter } from "../routes/guruPembimbingRouter.js"
+import { notificationRouter } from "../routes/notificationRouter.js"
 import { errorMiddleware } from "../middleware/errorMiddleware.js"
 
 export const app = express()
@@ -19,5 +20,6 @@ app.use("/admin",adminRouter)
 app.use("/siswa",siswaRouter)
 app.use("/guruPembimbing",guruPembimbingRouter)
 app.use("/dudi",pembimbingDudiRouter)
+app.use("/notification",notificationRouter)
 
 app.use(errorMiddleware)

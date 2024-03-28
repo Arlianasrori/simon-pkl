@@ -1,4 +1,4 @@
-import dudiService from "../service/pembimbingDudiService.js"
+import pembimbingDudiService from "../service/pembimbingDudiService.js"
 
 export default {
     

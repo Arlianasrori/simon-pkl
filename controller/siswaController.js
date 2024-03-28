@@ -122,6 +122,45 @@ const findPengajuanPklByStatus = async (req, res, next) => {
     next(error);
   }
 };
+const addCancelPkl = async (req, res, next) => {
+  try {
+    const body = req.body
+
+    const result = await siswaService.addCancelPkl(body);
+    res.status(200).json({
+      msg : "succes",
+      data : result
+  })
+  } catch (error) {
+    next(error);
+  }
+};
+const getCancelPklBySiswa = async (req, res, next) => {
+  try {
+    const id_siswa = parseInt(req.params.id_siswa)
+
+    const result = await siswaService.getCancelPklBySiswa(id_siswa);
+    res.status(200).json({
+      msg : "succes",
+      data : result
+  })
+  } catch (error) {
+    next(error);
+  }
+};
+const getCancelPklById = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id)
+
+    const result = await siswaService.getCancelPklById(id);
+    res.status(200).json({
+      msg : "succes",
+      data : result
+  })
+  } catch (error) {
+    next(error);
+  }
+};
 
 export default {
   getSiswaById,
@@ -133,5 +172,8 @@ export default {
   cancelPengajuanPkl,
   findAllPengajuanPkl,
   findPengajuanPklbyId,
-  findPengajuanPklByStatus
+  findPengajuanPklByStatus,
+  addCancelPkl,
+  getCancelPklBySiswa,
+  getCancelPklById
 };
