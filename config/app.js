@@ -18,6 +18,6 @@ app.use((req, res, next) => {
 app.use("/admin",adminRouter)
 app.use("/siswa",siswaRouter)
 app.use("/guruPembimbing",guruPembimbingRouter)
-app.use("/dudi",pembimbingDudiRouter)
+app.use("/pembimbingDudi",pembimbingDudiRouter)
 
 app.use(errorMiddleware)
