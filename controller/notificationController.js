@@ -52,9 +52,8 @@ const readNotification = async (req,res,next) => {
 }
 const getCountNotificationNotRead = async (req,res,next) => {
     try {
-        const id = parseInt(req.params.id)
-        const id_siswa = req.body.id_siswa
-        const result = await notificationService.getCountNotificationNotRead(id,id_siswa)
+        const id_siswa = parseInt(req.params.id_siswa)
+        const result = await notificationService.getCountNotificationNotRead(id_siswa)
         res.status(201).json({
             msg : "succes",
             data : result
@@ -68,5 +67,6 @@ export default {
     add,
     getNotification,
     getNotificationbyId,
-    readNotification
+    readNotification,
+    getCountNotificationNotRead
 }
