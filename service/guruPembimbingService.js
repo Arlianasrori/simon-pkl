@@ -2,6 +2,7 @@ import guruPembimbingValidation from "../validation/guruPembimbingValidation.js"
 import { validate } from "../validation/validate.js";
 import { db } from "../config/prismaClient.js";
 import responseError from "../error/responseError.js";
+import { selectSiswaObject } from "../utils/siswaSelect.js";
 
 const getGuruPembimbing = async (id) => {
   id = await validate(guruPembimbingValidation.getGuruPembimbing, id);
@@ -32,21 +33,9 @@ const getSiswa = async (id) => {
 
   const findSiswa = await db.siswa.findFirst ({
     where: {
-      id_guru_pembimbing : parseInt(id)
+      id_guru_pembimbing : id
     },
-    select: {
-      nis : true,
-      nama : true,
-      kelas : true,
-      jurusan : true,
-      jenis_kelamin : true,
-      no_telepon : true,
-      id_guru_pembimbing : true,
-      id_dudi : true,
-      id_pembimbing_dudi : true,
-      tanggal_masuk : true,
-      tanggal_keluar : true
-    }
+    select: selectSiswaObject
   })
 
   if(!findSiswa) {

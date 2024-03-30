@@ -3,7 +3,7 @@ import pembimbingDudiService from "../service/pembimbingDudiService.js";
 const getPembimbingDudiById = async (req, res, next) => {
   try {
     const result = await pembimbingDudiService.getPembimbingDudiById(
-      parseInt(req.body.id)
+      parseInt(req.params.id)
     );
     res.status(200).json({
       msg: "succes",
@@ -16,7 +16,7 @@ const getPembimbingDudiById = async (req, res, next) => {
 
 const getSiswaPembimbingDudi = async (req, res, next) => {
   try {
-    const result = await pembimbingDudiService.getSiswaPembimbingDudi(parseInt(req.body.id_pembimbing_dudi)
+    const result = await pembimbingDudiService.getSiswaPembimbingDudi(parseInt(req.params.id_pembimbing_dudi)
     );
     res.status(200).json({
       msg: "succes",
@@ -26,6 +26,18 @@ const getSiswaPembimbingDudi = async (req, res, next) => {
     next(error);
   }
 };
+
+const getAllSiswaPembimbingDudi = async (req, res, next) => {
+  try {
+    const result = await pembimbingDudiService.getAllSiswaPembimbingDudi()
+    res.status(200).json({
+      msg : "succes",
+      data : result
+    })
+  } catch (error) {
+    next (error)
+  }
+}
 
 const getAllPengajuanPkl = async (req, res, next) => {
   try {
@@ -39,16 +51,22 @@ const getAllPengajuanPkl = async (req, res, next) => {
   }
 };
 
-// const getPengajuanPklById = async (req, res, next) => {
-//   try {
-//     const result = await pembim
-//   } catch (error) {
-//     next(error)
-//   }
-// }
+const getPengajuanPklById = async (req, res, next) => {
+  try {
+    const result = await pembimbingDudiService.getPengajuanPklById(parseInt(req.params.id))
+    res.status(200).json({
+      msg : "succes",
+      data : result
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 
 export default {
   getPembimbingDudiById,
   getSiswaPembimbingDudi,
-  getAllPengajuanPkl
+  getAllPengajuanPkl,
+  getPengajuanPklById,
+  getAllSiswaPembimbingDudi
 };

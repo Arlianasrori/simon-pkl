@@ -2,6 +2,7 @@ import { validate } from "../validation/validate.js";
 import pembimbingDudiValidation from "../validation/pembimbingDudiValidation.js";
 import { db } from "../config/prismaClient.js";
 import responseError from "../error/responseError.js";
+import { selectSiswaObject } from "../utils/siswaSelect.js";
 
 const getPembimbingDudiById = async (id) => {
   id = await validate(pembimbingDudiValidation.getIdValidation, id);
@@ -32,20 +33,7 @@ const getSiswaPembimbingDudi = async (id) => {
     where: {
       id_pembimbing_dudi: parseInt(id),
     },
-    select: {
-      id: true,
-      nis: true,
-      nama: true,
-      jenis_kelamin: true,
-      no_telepon: true,
-      id_guru_pembimbing: true,
-      id_dudi: true,
-      id_pembimbing_dudi: true,
-      tanggal_masuk: true,
-      tanggal_keluar: true,
-      id_jurusan: true,
-      id_kelas: true,
-    },
+    select: selectSiswaObject
   });
 
   if (!findSiswa) {
@@ -54,44 +42,51 @@ const getSiswaPembimbingDudi = async (id) => {
   return findSiswa;
 };
 
+const getAllSiswaPembimbingDudi = () => {
+  return db.siswa.findMany({
+    select: selectSiswaObject
+  });
+};
+
 const getAllPengajuanPkl = () => {
-  return db.pengajuan_pkl.findMany ({
+  return db.pengajuan_pkl.findMany({
     select: {
-      id_siswa : true,
-      id_dudi : true,
-      status : true,
-      waktu_pengajuan : true
-    }
-  })
-}
+      id_siswa: true,
+      id_dudi: true,
+      status: true,
+      waktu_pengajuan: true,
+    },
+  });
+};
 
 const getPengajuanPklById = async (id) => {
-  id = await validate(pembimbingDudiValidation.getIdValidation, id)
+  id = await validate(pembimbingDudiValidation.getIdValidation, id);
 
-  const findPengajuanPkl = await db.pengajuan_pkl.findUnique ({
-    where : {
-      id : id
+  const findPengajuanPkl = await db.pengajuan_pkl.findUnique({
+    where: {
+      id: id,
     },
-    select : {
-      id_siswa : true,
-      id_dudi : true,
-      status : true,
-      waktu_pengajuan : true
-    }
-  })
+    select: {
+      id_siswa: true,
+      id_dudi: true,
+      status: true,
+      waktu_pengajuan: true,
+    },
+  });
 
   if (!findPengajuanPkl) {
-    throw new responseError (404, "Pengajuan PKL tidak ditemukan")
+    throw new responseError(404, "Pengajuan PKL tidak ditemukan");
   }
 
-  return findPengajuanPkl
-}
+  return findPengajuanPkl;
+};
 
 export default {
   getPembimbingDudiById,
   getSiswaPembimbingDudi,
   getAllPengajuanPkl,
-  getPengajuanPklById
+  getPengajuanPklById,
+  getAllSiswaPembimbingDudi
 };
 
 // getpembimibng dudi by id,get siswa id_prmimb,get all pengajuan pkl,by id

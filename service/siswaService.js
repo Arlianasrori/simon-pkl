@@ -15,20 +15,7 @@ const getSiswaById = async (id) => {
     where: {
       id: id,
     },
-    select: {
-      nis: true,
-      nama: true,
-      kelas: true,
-      jurusan: true,
-      jenis_kelamin: true,
-      no_telepon: true,
-      tanggal_masuk: true,
-      tanggal_keluar: true,
-      alamat: true,
-      pengajuan_pkl: true,
-      guru_pembimbing: true,
-      pembimbing_dudi: true,
-    },
+    select: selectSiswaObject
   });
 
   if (!findSiswa) {

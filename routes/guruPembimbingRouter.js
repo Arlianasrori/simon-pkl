@@ -3,5 +3,5 @@ import guruPembimbingController from "../controller/guruPembimbingController.js"
 
 export const guruPembimbingRouter = express.Router()
 
-guruPembimbingRouter.get("/getGuruPembimbing", guruPembimbingController.getGuruPembimbing)
-guruPembimbingRouter.get("/getSiswa", guruPembimbingController.getSiswa)
+guruPembimbingRouter.get("/getGuruPembimbing/:id", guruPembimbingController.getGuruPembimbing)
+guruPembimbingRouter.get("/getSiswa/:id_guru_pembimbing", guruPembimbingController.getSiswa)

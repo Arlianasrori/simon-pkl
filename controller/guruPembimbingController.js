@@ -2,7 +2,7 @@ import guruPembimbingService from "../service/guruPembimbingService.js"
 
 const getGuruPembimbing = async (req, res, next) => {
     try {
-        const result = await guruPembimbingService.getGuruPembimbing(parseInt(req.body.id))
+        const result = await guruPembimbingService.getGuruPembimbing(parseInt(req.params.id))
         res.status(200).json({
             data: result
         })
@@ -13,7 +13,7 @@ const getGuruPembimbing = async (req, res, next) => {
 
 const getSiswa = async (req, res, next) => {
     try {
-        const result = await guruPembimbingService.getSiswa(parseInt(req.body.id_guru_pembimbing))
+        const result = await guruPembimbingService.getSiswa(parseInt(req.params.id_guru_pembimbing))
         res.status(200).json({
             data: result
         })
