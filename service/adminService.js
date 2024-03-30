@@ -1318,7 +1318,7 @@ export default {
 
 
     // guru pembimbing
-    addGuruPembimbing,
+    addGuruPembimbing, 
     findAllGuruPembimbing,
     updateGuruPembimbing,
     updateAlamatGuruPembimbing,

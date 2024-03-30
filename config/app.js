@@ -19,7 +19,11 @@ app.use((req, res, next) => {
 app.use("/admin",adminRouter)
 app.use("/siswa",siswaRouter)
 app.use("/guruPembimbing",guruPembimbingRouter)
+<<<<<<< HEAD
 app.use("/dudi",pembimbingDudiRouter)
 app.use("/notification",notificationRouter)
+=======
+app.use("/pembimbingDudi",pembimbingDudiRouter)
+>>>>>>> pembimbing_dudi_api
 
 app.use(errorMiddleware)

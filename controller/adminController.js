@@ -460,7 +460,7 @@ const deleteDudi = async (req,res,next) => {
 // pembimbing dudi controller
 const addPembimbingDudi = async (req,res,next) => {
     try {
-        const pembimbingDudi = req.body.pembimbingDudi
+        const pembimbingDudi = req.body.pembimbing_dudi
         const alamat = req.body.alamat
 
         const result = await adminService.addPembimbingDudi(pembimbingDudi,alamat)
