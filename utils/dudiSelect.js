@@ -4,5 +4,6 @@ export const selectDudiObject = {
     no_telepon : true,
     bidang : true,
     catatan : true,
-    alamat : true
+    alamat : true,
+    siswa : true
 }

@@ -444,7 +444,6 @@ const addDudi = async (dudi,alamat) => {
     if(findDudi) {
         throw new responseError(400,"data dudi telah ditambahkan")
     }
-    dudi.nama_instansi_perusahaan = dudi.nama_instansi_perusahaan.toLowerCase()
 
     return db.$transaction(async (tx) => {
         const addDudi = await tx.dudi.create({
