@@ -12,6 +12,22 @@ adminRouter.put('/updateSiswa/:identify',adminController.updateSiswa)
 adminRouter.delete('/deleteSiswa/:id',adminController.deleteSiswa)
 adminRouter.put('/updateSiswa/alamat/:id',adminController.updateAlamatSiswa)
 
+// jurusan
+adminRouter.post('/addJurusan',adminController.addJurusan)
+adminRouter.delete('/deleteJurusan/:id',adminController.deleteJurusan)
+adminRouter.put('/updateJurusan/:id',adminController.updateJurusan)
+adminRouter.get('/findAllJurusan',adminController.findAllJurusan)
+adminRouter.get('/findJurusan/:id',adminController.findJurusanById)
+adminRouter.get('/findJurusanFilter',adminController.findJurusanByNama)
+
+// kelas
+adminRouter.post('/addKelas',adminController.addKelas)
+adminRouter.get('/findAllKelas',adminController.findAllKelas)
+adminRouter.get('/findKelas/:id',adminController.findKelasById)
+adminRouter.get('/findKelasFilter',adminController.findKelasFilter)
+adminRouter.put('/updateKelas/:id',adminController.updateKelas)
+adminRouter.delete('/deleteKelas/:id',adminController.deleteKelas)
+
 // guru pembimbing router
 adminRouter.post('/addGuruPembimbing',adminController.addGuruPembimbing)
 adminRouter.get('/findAllGuruPembimbing',adminController.findAllGuruPembimbing)

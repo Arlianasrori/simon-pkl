@@ -30,8 +30,6 @@ model siswa {
   id Int @id
   nis Int @unique
   nama String @db.VarChar(255)
-  kelas String @db.VarChar(255)
-  jurusan String @db.VarChar(255)
   jenis_kelamin jenis_kelamin
   no_telepon String @db.VarChar(12) @unique
   id_guru_pembimbing Int
@@ -40,16 +38,40 @@ model siswa {
   tanggal_masuk DateTime?
   tanggal_keluar DateTime?
   password String @db.VarChar(255)
-  status status_pkl
+  status status_pkl @default(belum_pkl)
+  id_jurusan Int
+  id_kelas Int
 
+  jurusan jurusan @relation(fields: [id_jurusan],references: [id])
+  kelas kelas @relation(fields: [id_kelas],references: [id])
   alamat alamat_siswa?
   pengajuan_pkl pengajuan_pkl[]
   absen absen[]
   laporan_pkl laporan_pkl[]
   laporans_siswa_pkl laporan_siswa_pkl[]
+  pengajuan_cancel_pkl pengajuan_cancel_pkl[]
+  notification notification[]
+  notification_read notification_read[]
+
   guru_pembimbing guru_pembimbing @relation(fields: [id_guru_pembimbing],references: [id])
   dudi dudi? @relation(fields: [id_dudi],references: [id])
   pembimbing_dudi Pembimbing_dudi? @relation(fields: [id_pembimbing_dudi],references: [id])
+}
+model jurusan {
+  id Int @id
+  nama String @db.VarChar(255)
+
+  kelas kelas[]
+  siswa siswa[]
+}
+model kelas {
+  id Int @id
+  nama String @db.VarChar(255)
+  tahun String
+  id_jurusan Int
+
+  siswa siswa[]
+  jurusan jurusan @relation(fields: [id_jurusan],references: [id])
 }
 model alamat_siswa {
   id_siswa Int @id
@@ -74,6 +96,7 @@ model guru_pembimbing {
   password String @db.VarChar(255)
 
   siswa siswa[]
+  notification notification[]
   alamat alamat_guru_Pembimbing?
   kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
 
@@ -105,6 +128,8 @@ model Pembimbing_dudi {
   laporan_pkl laporan_pkl[]
   laporans_siswa_pkl laporan_siswa_pkl[]
   kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
+  pengajuan_cancel_pkl pengajuan_cancel_pkl[]
+  notification notification[]
 
   dudi dudi @relation(fields: [id_dudi],references: [id])
 }
@@ -113,7 +138,7 @@ model dudi {
   nama_instansi_perusahaan String @db.VarChar(255) @unique
   no_telepon String @db.VarChar(12) 
   bidang String @db.VarChar(255)
-  catatan String @db.VarChar(1500)
+  deksripsi String @db.VarChar(1500)
 
   alamat alamat_dudi?
   siswa siswa[]
@@ -123,6 +148,7 @@ model dudi {
   laporans_siswa_pkl laporan_siswa_pkl[]
   kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
   pembimbing_dudi Pembimbing_dudi[]
+  pengajuan_cancel_pkl pengajuan_cancel_pkl[]
 }
 model alamat_pembimbing_dudi {
   id_pembimbing_dudi Int @id
@@ -150,16 +176,29 @@ enum status_pengajuan {
   proses 
   diterima
   ditolak
+  dibatalkan
 }
 model pengajuan_pkl {
   id Int @id
   id_siswa Int
   id_dudi Int
-  status status_pengajuan 
+  status status_pengajuan @default(proses)
   waktu_pengajuan DateTime @default(now())
 
   siswa siswa @relation(fields: [id_siswa],references: [id])
   dudi dudi @relation(fields: [id_dudi],references: [id])
+}
+
+model pengajuan_cancel_pkl {
+  id Int @id
+  id_siswa Int 
+  id_dudi Int 
+  id_pembimbing_dudi Int
+  status status_cancel_pkl
+
+  siswa siswa @relation(fields: [id_siswa],references: [id])
+  dudi dudi @relation(fields: [id_dudi],references: [id])
+  pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id])
 }
 model absen {
   id Int @id
@@ -219,4 +258,34 @@ model kunjungan_guru_pembimbing_pkl {
 enum status_absen {
   datang
   pulang
+}
+
+enum status_cancel_pkl {
+  setuju
+  tidak_setuju
+}
+
+
+
+model notification {
+  id Int @id
+  id_siswa Int? 
+  id_pembimbing_dudi Int?
+  id_guru_pembimbing Int?
+  judul String @db.VarChar(600)
+  isi String @db.VarChar(2500)
+  
+  siswa siswa? @relation(fields: [id_siswa],references: [id])
+  pembimbing_dudi Pembimbing_dudi? @relation(fields: [id_pembimbing_dudi],references: [id])
+  guru_pembimbing guru_pembimbing? @relation(fields: [id_guru_pembimbing],references: [id])
+  read notification_read[]
+}
+
+model notification_read {
+  id Int @id
+  notification_id Int
+  id_siswa Int 
+  is_read Boolean @default(false)
+  notification notification @relation(fields: [notification_id],references: [id])
+  siswa siswa @relation(fields: [id_siswa],references: [id])
 }

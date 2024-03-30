@@ -6,8 +6,8 @@ const addSiswaValidation = joi.object({
   id : joi.number().required(),
   nis : joi.number().required(),
   nama : joi.string().max(255).required(),
-  kelas : joi.string().max(255).required(),
-  jurusan : joi.string().max(255).required(),
+  id_kelas : joi.number().required(),
+  id_jurusan : joi.number().required(),
   jenis_kelamin : joi.valid("laki","perempuan").required(),
   no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).required(),
   id_guru_pembimbing : joi.number().required(),
@@ -26,8 +26,8 @@ const addAlamatSiswaValidation = joi.object({
 const updateSiswaValidation = joi.object({
   nis : joi.number().optional(),
   nama : joi.string().max(255).optional(),
-  kelas : joi.string().max(255).optional(),
-  jurusan : joi.string().max(255).optional(),
+  id_kelas : joi.number().optional(),
+  id_jurusan : joi.number().optional(),
   jenis_kelamin : joi.valid("laki","perempuan").optional(),
   no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).optional(),
   id_guru_pembimbing : joi.number().optional(),
@@ -36,12 +36,20 @@ const updateSiswaValidation = joi.object({
 const searchSiswaValidation = joi.object({
   nis : joi.number().optional(),
   nama : joi.string().max(255).optional(),
-  kelas : joi.string().max(255).optional(),
-  jurusan : joi.string().max(255).optional(),
+  id_kelas : joi.number().optional(),
+  id_jurusan : joi.number().optional(),
   jenis_kelamin : joi.valid("laki","perempuan").optional(),
-  id_guur_pembimbing : joi.number().optional(),
+  id_guru_pembimbing : joi.number().optional(),
+  detail_tempat : joi.string().max(500).optional(),
+  desa : joi.string().max(255).optional(),
+  kecamatan : joi.string().max(255).optional(),
+  kabupaten : joi.string().max(255).optional(),
+  provinsi : joi.string().max(255).optional(),
+  negara : joi.string().max(255).optional(),
 }) 
 
+
+// public
 const updateAlamatValidation = joi.object({
   detail_tempat : joi.string().max(500).optional(),
   desa : joi.string().max(255).optional(),
@@ -52,6 +60,33 @@ const updateAlamatValidation = joi.object({
 })
 
 const idValidation = joi.number().required()
+const namaValidation = joi.string().max(255).required()
+
+
+// jurusan 
+const addJurusanValidation = joi.object({
+  id : joi.number().required(),
+  nama : joi.string().max(255).required()
+})
+
+
+// kelas
+const addKelasValidation = joi.object({
+  id : joi.number().required(),
+  nama : joi.string().max(255).required(),
+  tahun : joi.string().max(255).required(),
+  id_jurusan : joi.number().required()
+})
+const updateKelasValidation = joi.object({
+  nama : joi.string().max(255).optional(),
+  tahun : joi.string().max(255).optional(),
+  id_jurusan : joi.number().optional()
+})
+const searchKelasValidation = joi.object({
+  nama : joi.string().max(255).optional(),
+  tahun : joi.string().max(255).optional(),
+  id_jurusan : joi.number().optional()
+})
 
 
 // guruPembimbing validation
@@ -106,7 +141,7 @@ const addDudiValidation = joi.object({
   nama_instansi_perusahaan : joi.string().max(255).required(),
   no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).required(),
   bidang : joi.string().max(255).required(),
-  catatan : joi.string().max(1500).required(),
+  deksripsi : joi.string().max(1500).required(),
 })
 const addAlamatDudiValidation = joi.object({
   id_dudi : joi.number().required(),
@@ -121,13 +156,12 @@ const updateDudiValidation = joi.object({
   nama_instansi_perusahaan : joi.string().max(255).optional(),
   no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).optional(),
   bidang : joi.string().max(255).optional(),
-  catatan : joi.string().max(1500).optional(),
+  deksripsi : joi.string().max(1500).optional(),
 })
 const searchDudiValidation = joi.object({
   nama_instansi_perusahaan : joi.string().max(255).optional(),
   no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).optional(),
   bidang : joi.string().max(255).optional(),
-  catatan : joi.string().max(1500).optional(),
   detail_tempat : joi.string().max(500).optional(),
   desa : joi.string().max(255).optional(),
   kecamatan : joi.string().max(255).optional(),
@@ -215,6 +249,16 @@ export default {
     addAlamatSiswaValidation,
     searchSiswaValidation,
 
+
+    // jurusan
+    addJurusanValidation,
+    namaValidation,
+
+
+    // kelas
+    addKelasValidation,
+    updateKelasValidation,
+    searchKelasValidation,
 
     // guru pembimbing
     addGuruPembimbingValidation,
