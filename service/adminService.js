@@ -900,30 +900,26 @@ const findDudiFilter = async (query) => {
 
 // pembimbing dudi service
 const addPembimbingDudi = async (PembimbingDudi,alamat) => {
-    console.log(PembimbingDudi);
     PembimbingDudi.id = generateId()
     alamat.id_pembimbing_dudi = PembimbingDudi.id
 
     PembimbingDudi = await validate(adminValidation.addPembimbingDudiValidation,PembimbingDudi)
     alamat = await validate(adminValidation.addAlamatPembimbingDudiValidation,alamat)
-    console.log(PembimbingDudi);
+
     const findPembimbingDudi = await db.pembimbing_dudi.findFirst({
         where : {
-            OR : [
-                {
-                    id : PembimbingDudi.id
-                },
-                {
-                    username : PembimbingDudi.username
-                }
-            ]
+            id : PembimbingDudi.id
         }
     })
-
+    console.log(findPembimbingDudi);
     if(findPembimbingDudi) {
         throw new responseError(400,"data pembimbing dudi telah ditambahkan")
     }
-
+    const checkNoHp = await db.pembimbing_dudi.findFirst({
+        where : {
+            no_telepon : PembimbingDudi.no_telepon
+        }
+    })
     const findDudi = await db.dudi.findUnique({
         where : {
             id : PembimbingDudi.id_dudi

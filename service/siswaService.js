@@ -8,6 +8,7 @@ import { selectSiswaObject } from "../utils/siswaSelect.js";
 import { selectDudiObject } from "../utils/dudiSelect.js";
 import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js";
 import { checkPklSiswa } from "../utils/checkPklSiswa.js";
+import { selectCancelPkl } from "../utils/cancelPkl.js";
 
 const getSiswaById = async (id) => {
   id = await validate(adminValidation.idValidation, id);
@@ -135,10 +136,11 @@ const addPengajuanPkl = async (body) => {
     throw new responseError(404,"data siswa tidak ditemukan")
   }
   const statusPengajuan = ['dibatalkan','ditolak']
+  console.log(findSiswa);
 
   if(findSiswa.pengajuan_pkl.length >= 1) {
     if(!statusPengajuan.includes(findSiswa.pengajuan_pkl[0].status) ) {
-      throw new responseError(400,"siswa hanya dapat mengajukan satu pengjuan saja,jika ingin melanjutkan pengajuan silahkan cancel pengajuan sebelumnya")
+      throw new responseError(400,"siswa hanya dapat mengajukan satu pengajuan saja,jika ingin melanjutkan pengajuan silahkan cancel pengajuan sebelumnya")
     }
   }
 
@@ -235,13 +237,12 @@ const findPengajuanPklByStatus = async (body) => {
   })
 }
 
-const addCancelPkl = async (body) => {
-  body.id = generateId()
-  body = await validate(siswaValidation.cancelPklValidation,body)
+const addCancelPkl = async (id_siswa) => {
+  id_siswa = await validate(adminValidation.idValidation,id_siswa)
 
   const findsiswa = await db.siswa.findFirst({
     where : {
-     id : body.id_siswa
+     id : id_siswa
     },
     select : selectSiswaObject
   })
@@ -251,35 +252,15 @@ const addCancelPkl = async (body) => {
   }
 
   checkPklSiswa(findsiswa)
-
-  if(findsiswa.dudi.id != body.id_dudi) {
-    throw new responseError(400,"dudi tempat siswa pkl tidak ditemukan")
+  const body = {
+    id : generateId(),
+    id_siswa : findsiswa.id,
+    id_dudi : findsiswa.dudi.id,
+    id_pembimbing_dudi : findsiswa.pembimbing_dudi.id
   }
-
-  if(findsiswa.pembimbing_dudi.id != body.id_pembimbing_dudi) {
-    throw new responseError(400,"pembimbing dudi siswa pkl tidak ditemukan")
-  }
-
   return db.pengajuan_cancel_pkl.create({
     data : body,
-    select : {
-      id : true,
-      siswa : {
-        select : {
-          nama : true
-        }
-      },
-      dudi : {
-        select : {
-          nama_instansi_perusahaan : true
-        }
-      },
-      pembimbing_dudi : {
-        select : {
-          nama : true
-        }
-      }
-    }
+    select : selectCancelPkl
   })
 }
 
@@ -312,11 +293,15 @@ export default {
   getDudiByName,
   getDudiByAlamat,
   getDudiById,
+
+  // pengajuan pkl
   addPengajuanPkl,
   cancelPengajuanPkl,
   findAllPengajuanPkl,
   findPengajuanPklById,
   findPengajuanPklByStatus,
+
+  // cancel pkl
   addCancelPkl,
   getCancelPklBySiswa,
   getCancelPklById

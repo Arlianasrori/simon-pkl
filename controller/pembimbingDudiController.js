@@ -1,7 +1,5 @@
-<<<<<<< HEAD
 import pembimbingDudiService from "../service/pembimbingDudiService.js"
-=======
-import pembimbingDudiService from "../service/pembimbingDudiService.js";
+
 
 const getPembimbingDudiById = async (req, res, next) => {
   try {
@@ -32,7 +30,8 @@ const getSiswaPembimbingDudi = async (req, res, next) => {
 
 const getAllSiswaPembimbingDudi = async (req, res, next) => {
   try {
-    const result = await pembimbingDudiService.getAllSiswaPembimbingDudi()
+    const id_pembimbing_dudi = parseInt(req.params.id)
+    const result = await pembimbingDudiService.getAllSiswaPembimbingDudi(id_pembimbing_dudi)
     res.status(200).json({
       msg : "succes",
       data : result
@@ -42,9 +41,13 @@ const getAllSiswaPembimbingDudi = async (req, res, next) => {
   }
 }
 
+
+
+// pengajuan pkl
 const getAllPengajuanPkl = async (req, res, next) => {
   try {
-    const result = await pembimbingDudiService.getAllPengajuanPkl();
+    const id_pembimbing_dudi = parseInt(req.params.id)
+    const result = await pembimbingDudiService.getAllPengajuanPkl(id_pembimbing_dudi);
     res.status(200).json({
       msg : "succes",
       data : result
@@ -65,12 +68,81 @@ const getPengajuanPklById = async (req, res, next) => {
     next(error)
   }
 }
->>>>>>> pembimbing_dudi_api
 
+const updateStatusPengajuanPkl = async (req,res,next) => {
+  try {
+    const id = parseInt(req.params.id)
+    const status = req.body.status
+    const id_pembimbing_dudi = req.body.id_pembimbing_dudi
+
+    const result = await pembimbingDudiService.AccDcnPengajuanPkl(id,status,id_pembimbing_dudi)
+    res.status(200).json({
+      msg : "succes",
+      data : result
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+
+// cancel pkl
+const getAllCancelPkl = async (req,res,next) => {
+  try {
+    const id = parseInt(req.params.id_pembimbing_dudi)
+
+    const result = await pembimbingDudiService.getAllCancelPkl(id)
+    res.status(200).json({
+      msg : "succes",
+      data : result
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const getCancelPklById = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id)
+
+    const result = await pembimbingDudiService.getCancelPklById(id);
+    res.status(200).json({
+      msg : "succes",
+      data : result
+  })
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateStatusCancelPkl = async (req,res,next) => {
+  try {
+    const id = parseInt(req.params.id)
+    const status = req.body.status
+    const id_pembimbing_dudi = req.body.id_pembimbing_dudi
+
+    const result = await pembimbingDudiService.updateStatusCancelPkl(id,status,id_pembimbing_dudi)
+    res.status(200).json({
+      msg : "succes",
+      data : result
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 export default {
   getPembimbingDudiById,
   getSiswaPembimbingDudi,
+  getAllSiswaPembimbingDudi,
+
+  // pengajuan pkl
   getAllPengajuanPkl,
   getPengajuanPklById,
-  getAllSiswaPembimbingDudi
+  updateStatusPengajuanPkl,
+
+
+  // cancel pkl
+  getAllCancelPkl,
+  getCancelPklById,
+  updateStatusCancelPkl
 };

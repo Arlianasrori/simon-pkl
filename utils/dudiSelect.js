@@ -11,5 +11,11 @@ export const selectDudiObject = {
     alamat : true,
     siswa : {
         select : selectSiswaObject
+    },
+    pembimbing_dudi : {
+        select : {
+            id : true,
+            nama : true
+        }
     }
 }

@@ -124,9 +124,9 @@ const findPengajuanPklByStatus = async (req, res, next) => {
 };
 const addCancelPkl = async (req, res, next) => {
   try {
-    const body = req.body
+    const id = parseInt(req.params.id_siswa)
 
-    const result = await siswaService.addCancelPkl(body);
+    const result = await siswaService.addCancelPkl(id);
     res.status(200).json({
       msg : "succes",
       data : result
