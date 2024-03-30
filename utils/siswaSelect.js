@@ -6,6 +6,7 @@ export const selectSiswaObject = {
     jenis_kelamin : true,
     guru_pembimbing : {
         select : {
+            id : true,
             nama : true,
             nip : true,
             no_telepon : true,

@@ -4,34 +4,9 @@ import responseError from "../error/responseError.js"
 import generateId from "../utils/generateIdUtils.js"
 import notificationValidation from "../validation/notificationValidation.js"
 import { db } from "../config/prismaClient.js"
+import { cekNotif } from "../utils/ceknotif.js"
 
 
-const notificationSelected = {
-    OR : [
-        {
-            id_siswa : id_siswa
-        },
-        {
-            AND : [
-                {
-                    id_siswa : null
-                },
-                {
-                    id_guru_pembimbing : null
-                },
-                {
-                    id_pembimbing_dudi : null
-                },
-            ]
-        },
-        {
-            id_guru_pembimbing : findSiswa.guru_pembimbing.id
-        },
-        {
-            id_pembimbing_dudi : findSiswa.pembimbing_dudi.id
-        },
-    ]
-}
 const addNotification = async (body) => {
     body.id = generateId()
     body = await validate(notificationValidation.addNotificationValidation,body)
@@ -42,33 +17,10 @@ const addNotification = async (body) => {
 }
 
 const getNotification = async (id_siswa) => {
-    id_siswa = await validate(adminValidation.idValidation,id_siswa)
-
-    const findSiswa = await db.siswa.findUnique({
-        where : {
-            id : id_siswa
-        },
-        select : {
-            id : true,
-            guru_pembimbing : {
-                select : {
-                    id : true
-                }
-            },
-            pembimbing_dudi : {
-                select : {
-                    id : true
-                }
-            },
-        }
-    })
-
-    if(!findSiswa) {
-        throw new responseError(404,"siswa tidak ditemukan")
-    }
+    const selected = await cekNotif(id_siswa)
 
     return db.notification.findMany({
-        where : notificationSelected
+        where : selected
     })
 }
 
@@ -107,6 +59,23 @@ const readNotification = async (id,id_siswa) => {
         throw new responseError(400,"notif tidak ditemukan")
     }
 
+    const findIsRead = await db.notification_read.findFirst({
+        where : {
+            AND : [
+                {
+                    notification_id : id
+                },
+                {
+                    id_siswa : id_siswa
+                }
+            ]
+        }
+    })
+
+    if(findIsRead) {
+        throw new responseError(400,"notif sudah dibaca")
+    }
+
     const findSiswa = await db.siswa.findUnique({
         where : {
             id : id_siswa
@@ -126,14 +95,16 @@ const readNotification = async (id,id_siswa) => {
     })
 }
 const getCountNotificationNotRead = async (id_siswa) => {
+    const selected = await cekNotif(id_siswa)
+
     const countNotifNotRead = await db.notification.count({
         where : {  
             AND : [
-                notificationSelected,
+                selected,
                 {
                     read : {
                         none : {
-                            isread : true
+                            is_read : true
                         }
                     }
                 }
