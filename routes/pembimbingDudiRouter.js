@@ -8,7 +8,7 @@ pembimbingDudiRouter.get('/getSiswaPembimbingDudi/:id', pembimbingDudiController
 pembimbingDudiRouter.get('/getAllSiswaPembimbingDudi/:id', pembimbingDudiController.getAllSiswaPembimbingDudi)
 
 
-// pegajuan pkl
+// pengajuan pkl
 pembimbingDudiRouter.get('/getAllPengajuanPkl/:id', pembimbingDudiController.getAllPengajuanPkl)
 pembimbingDudiRouter.get('/getPengajuanPklById/:id', pembimbingDudiController.getPengajuanPklById)
 pembimbingDudiRouter.put('/updateStatusPengajuanpkl/:id', pembimbingDudiController.updateStatusPengajuanPkl)
@@ -18,3 +18,7 @@ pembimbingDudiRouter.put('/updateStatusPengajuanpkl/:id', pembimbingDudiControll
 pembimbingDudiRouter.get('/getAllCancelPkl/:id_pembimbing_dudi', pembimbingDudiController.getAllCancelPkl)
 pembimbingDudiRouter.get('/getCancelPklById/:id', pembimbingDudiController.getCancelPklById)
 pembimbingDudiRouter.put('/updateStatusCancelPkl/:id', pembimbingDudiController.updateStatusCancelPkl)
+
+
+// laporan pkl
+pembimbingDudiRouter.post('/addLaporanPkl', pembimbingDudiController.addLaporanPkl)

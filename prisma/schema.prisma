@@ -308,6 +308,7 @@ enum status_absen {
 
 enum status_cancel_pkl {
   proses
+  dibatalkan
   setuju
   tidak_setuju
 }

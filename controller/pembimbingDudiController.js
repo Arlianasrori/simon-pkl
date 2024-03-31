@@ -130,6 +130,23 @@ const updateStatusCancelPkl = async (req,res,next) => {
     next(error)
   }
 }
+
+// laporan pkl
+const addLaporanPkl = async (req,res,next) => {
+  try {
+    const body = req.body
+    const image = req.files.image
+    const url = `${req.host}/images`
+
+    const result = await pembimbingDudiService.addLaporanPkl(body,image,url)
+    res.status(200).json({
+      msg : "succes",
+      data : result
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 export default {
   getPembimbingDudiById,
   getSiswaPembimbingDudi,
@@ -144,5 +161,9 @@ export default {
   // cancel pkl
   getAllCancelPkl,
   getCancelPklById,
-  updateStatusCancelPkl
+  updateStatusCancelPkl,
+
+
+  // laporan pkl
+  addLaporanPkl
 };

@@ -61,6 +61,9 @@ const getDudiById = async (req, res, next) => {
     next(error);
   }
 };
+
+
+// pengajuan pkl
 const addPengajuanPkl = async (req, res, next) => {
   try {
     const body = req.body
@@ -122,6 +125,9 @@ const findPengajuanPklByStatus = async (req, res, next) => {
     next(error);
   }
 };
+
+
+// cancel pkl
 const addCancelPkl = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id_siswa)
@@ -161,6 +167,19 @@ const getCancelPklById = async (req, res, next) => {
     next(error);
   }
 };
+const cancelPengajuanCancelPkl = async (req, res, next) => {
+  try {
+    const body = req.body
+
+    const result = await siswaService.cancelPengajuanCancelPkl(body);
+    res.status(200).json({
+      msg : "succes",
+      data : result
+  })
+  } catch (error) {
+    next(error);
+  }
+};
 
 export default {
   getSiswaById,
@@ -168,12 +187,19 @@ export default {
   getDudiByName,
   getDudiByAlamat,
   getDudiById,
+
+
+  // pengajuan pkl
   addPengajuanPkl,
   cancelPengajuanPkl,
   findAllPengajuanPkl,
   findPengajuanPklbyId,
   findPengajuanPklByStatus,
+
+
+  // cancel pkl
   addCancelPkl,
   getCancelPklBySiswa,
-  getCancelPklById
+  getCancelPklById,
+  cancelPengajuanCancelPkl
 };

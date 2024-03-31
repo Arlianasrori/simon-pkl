@@ -21,5 +21,6 @@ siswaRouter.post('/cancelPengajuanPkl', siswaController.cancelPengajuanPkl)
 
 // cancel pkl siswa
 siswaRouter.post('/addCancelPkl/:id_siswa', siswaController.addCancelPkl)
+siswaRouter.put('/cancelPkl/cancel', siswaController.cancelPengajuanCancelPkl)
 siswaRouter.get('/getCancelPklBySiswa/:id_siswa', siswaController.getCancelPklBySiswa)
 siswaRouter.get('/getCancelPklById/:id', siswaController.getCancelPklById)

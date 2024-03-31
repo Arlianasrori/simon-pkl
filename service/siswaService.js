@@ -128,6 +128,8 @@ const addPengajuanPkl = async (body) => {
       id : body.id_siswa
     },
     select : {
+      status : true,
+      dudi : true,
       pengajuan_pkl : true
     }
   })
@@ -135,12 +137,16 @@ const addPengajuanPkl = async (body) => {
   if(!findSiswa) {
     throw new responseError(404,"data siswa tidak ditemukan")
   }
-  const statusPengajuan = ['dibatalkan','ditolak']
-  console.log(findSiswa);
+
+  if(findSiswa.dudi || findSiswa.status == "pkl") {
+    throw new responseError(400,"siswa sedang pkl,tidak dapat mengajukan permintaan pkl")
+  }
+  const statusPengajuan = ['dibatalkan','ditolak',"diterima"]
 
   if(findSiswa.pengajuan_pkl.length >= 1) {
-    if(!statusPengajuan.includes(findSiswa.pengajuan_pkl[0].status) ) {
-      throw new responseError(400,"siswa hanya dapat mengajukan satu pengajuan saja,jika ingin melanjutkan pengajuan silahkan cancel pengajuan sebelumnya")
+    const pengajuanPklLastIndex = findSiswa.pengajuan_pkl.length -1 
+    if(!statusPengajuan.includes(findSiswa.pengajuan_pkl[pengajuanPklLastIndex].status)) {
+      throw new responseError(400,"siswa hanya dapat mengajukan satu pengajuan,jika ingin mengajukan pengajuan harap membatalkan pengajuan sebelumnya")
     }
   }
 
@@ -287,6 +293,41 @@ const getCancelPklById = async (id) => {
 
   return findCancelPkl
 } 
+const cancelPengajuanCancelPkl = async (body) => {
+  body = await validate(siswaValidation.cancelPengjuanPklValidation,body)
+
+  const findPengajuanPkl = await db.pengajuan_cancel_pkl.findFirst({
+    where : {
+      AND : [
+        {
+          id : body.id
+        },
+        {
+          id_siswa : body.id_siswa
+        }
+      ]
+    },
+    select : selectCancelPkl
+  })
+
+  if(!findPengajuanPkl) {
+    throw new responseError(404,"data pengajuan pkl tidak ditemukan")
+  }
+  
+  if(findPengajuanPkl.status != "proses") {
+    throw new responseError(400,"pengajuan hanya bisa dibatalkan jika status pengajuan masih dalam proses")
+  }
+
+  return db.pengajuan_cancel_pkl.update({
+    where : {
+      id : body.id
+    },
+    data : {
+      status : "dibatalkan"
+    },
+    select : selectCancelPkl
+  })
+}
 export default {
   getSiswaById,
   getDudi,
@@ -304,5 +345,6 @@ export default {
   // cancel pkl
   addCancelPkl,
   getCancelPklBySiswa,
-  getCancelPklById
+  getCancelPklById,
+  cancelPengajuanCancelPkl
 };

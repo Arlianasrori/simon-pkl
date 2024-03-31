@@ -5,6 +5,8 @@ import responseError from "../error/responseError.js";
 import { selectSiswaObject } from "../utils/siswaSelect.js";
 import adminValidation from "../validation/adminValidation.js";
 import { selectCancelPkl } from "../utils/cancelPkl.js";
+import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js";
+import generateId from "../utils/generateIdUtils.js";
 
 const getPembimbingDudiById = async (id) => {
   id = await validate(pembimbingDudiValidation.getIdValidation, id);
@@ -78,26 +80,7 @@ const getAllPengajuanPkl = async (id_pembimbing_dudi) => {
     where : {
       id_dudi : findPembimbingDudi.dudi.id
     },
-    select: {
-      id : true,
-      siswa : {
-        select : {
-          id : true,
-          nama : true,
-          nis : true,
-          no_telepon : true
-        }
-      },
-      dudi : {
-        select : {
-          id : true,
-          nama_instansi_perusahaan : true,
-          bidang : true
-        }
-      },
-      status: true,
-      waktu_pengajuan: true,
-    },
+    select: selectPengajuanPklObject
   });
 };
 
@@ -108,13 +91,7 @@ const getPengajuanPklById = async (id) => {
     where: {
       id: id,
     },
-    select: {
-      id : true,
-      id_siswa: true,
-      id_dudi: true,
-      status: true,
-      waktu_pengajuan: true,
-    },
+    select: selectPengajuanPklObject
   });
 
   if (!findPengajuanPkl) {
@@ -124,13 +101,12 @@ const getPengajuanPklById = async (id) => {
   return findPengajuanPkl;
 };
 
-const AccDcnPengajuanPkl = async (id,status,id_pembimbing_dudi) => {
-  id = await validate(adminValidation.idValidation,id)
-  status = await validate(pembimbingDudiValidation.statusvalidation,status)
+const AccDcnPengajuanPkl = async (body,id_pembimbing_dudi) => {
+  body = await validate(pembimbingDudiValidation.statusvalidation,body)
 
   const findPengajuan = await db.pengajuan_pkl.findUnique({
     where : {
-      id : id
+      id : body.id
     },
     select : {
       id : true,
@@ -159,11 +135,12 @@ const AccDcnPengajuanPkl = async (id,status,id_pembimbing_dudi) => {
   return db.$transaction(async (tx) => {
    const updatePengajuan = await tx.pengajuan_pkl.update({
       where : {
-        id : id
+        id : body.id
       },
       data : {
-        status : status
-      }
+        status : body.status
+      },
+      select : selectPengajuanPklObject
     })
 
     if(updatePengajuan.status == "ditolak") {
@@ -177,11 +154,13 @@ const AccDcnPengajuanPkl = async (id,status,id_pembimbing_dudi) => {
       data : {
         id_dudi : findPengajuan.dudi.id,
         id_pembimbing_dudi : id_pembimbing_dudi,
-        status : "pkl"
+        status : "pkl",
+        tanggal_masuk : body.tanggal_masuk,
+        tanggal_keluar : body.tanggal_keluar
       }
     })
 
-    return {pengajuan : updatePengajuan,msg : `selamat anda diterimah oleh ${findPengajuan.dudi.nama_instansi_perusahaan}`}
+    return {pengajuan : updatePengajuan,msg : `selamat anda diterima oleh ${findPengajuan.dudi.nama_instansi_perusahaan}`}
   })
 }
 
@@ -203,7 +182,8 @@ const getCancelPklById = async (id) => {
   const findCancelPkl = await db.pengajuan_cancel_pkl.findUnique({
     where : {
       id : id
-    }
+    },
+    select : selectCancelPkl
   })
 
   if(!findCancelPkl) {
@@ -266,11 +246,44 @@ const updateStatusCancelPkl = async (id,status,id_pembimbing_dudi) => {
       data : {
         id_dudi : null,
         id_pembimbing_dudi : null,
-        status : "belum_pkl"
+        status : "belum_pkl",
+        tanggal_masuk : null,
+        tanggal_keluar : null
       }
     })
 
     return {pengajuan : updatePengajuan,msg : `selamat permintaan anda untuk mengundurkan diri di ${findCancelPengajuan.dudi.nama_instansi_perusahaan} diterimah,silahkan mencari tempat pkl baru`}
+  })
+}
+
+
+// laporan pkl
+const addLaporanPkl = async (body) => {
+  body.id = generateId()
+  body = await validate(pembimbingDudiValidation.addLaporanPkl,body)
+
+  const findSiswa = await db.siswa.findUnique({
+    where : {
+      id : body.id_siswa
+    }
+  })
+
+  if(!findSiswa) {
+    throw new responseError(404,"siswa tidak ditemukan")
+  }
+
+  const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
+    where : {
+      id : body.id_pembimbing_dudi
+    }
+  })
+
+  if(!findPembimbingDudi) {
+    throw new responseError(404,"pembimbing dudi tidak ditemukan")
+  }
+
+  return db.laporan_pkl.create({
+    data : body
   })
 }
 export default {
@@ -287,6 +300,10 @@ export default {
   // cancel pkl
   getAllCancelPkl,
   getCancelPklById,
-  updateStatusCancelPkl
+  updateStatusCancelPkl,
+
+
+  // laporan pkl
+  addLaporanPkl
 };
 
