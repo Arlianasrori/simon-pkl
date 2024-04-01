@@ -71,11 +71,10 @@ const getPengajuanPklById = async (req, res, next) => {
 
 const updateStatusPengajuanPkl = async (req,res,next) => {
   try {
-    const id = parseInt(req.params.id)
-    const status = req.body.status
-    const id_pembimbing_dudi = req.body.id_pembimbing_dudi
+    const id_pengajuan = parseInt(req.params.id_pengajuan)
+    const body = req.body
 
-    const result = await pembimbingDudiService.AccDcnPengajuanPkl(id,status,id_pembimbing_dudi)
+    const result = await pembimbingDudiService.AccDcnPengajuanPkl(body,id_pengajuan)
     res.status(200).json({
       msg : "succes",
       data : result

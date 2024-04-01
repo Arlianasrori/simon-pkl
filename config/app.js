@@ -5,6 +5,7 @@ import { siswaRouter } from "../routes/siswaRouter.js"
 import { guruPembimbingRouter } from "../routes/guruPembimbingRouter.js"
 import { notificationRouter } from "../routes/notificationRouter.js"
 import { errorMiddleware } from "../middleware/errorMiddleware.js"
+import { absenRouter } from "../routes/absenRouter.js"
 
 export const app = express()
 
@@ -22,5 +23,6 @@ app.use("/guruPembimbing",guruPembimbingRouter)
 app.use("/dudi",pembimbingDudiRouter)
 app.use("/notification",notificationRouter)
 app.use("/pembimbingDudi",pembimbingDudiRouter)
+app.use(absenRouter)
 
 app.use(errorMiddleware)

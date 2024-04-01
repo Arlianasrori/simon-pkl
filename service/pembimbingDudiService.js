@@ -101,12 +101,13 @@ const getPengajuanPklById = async (id) => {
   return findPengajuanPkl;
 };
 
-const AccDcnPengajuanPkl = async (body,id_pembimbing_dudi) => {
+const AccDcnPengajuanPkl = async (body,id_pengajuan) => {
   body = await validate(pembimbingDudiValidation.statusvalidation,body)
+  id_pengajuan = await validate(adminValidation.idValidation,id_pengajuan)
 
   const findPengajuan = await db.pengajuan_pkl.findUnique({
     where : {
-      id : body.id
+      id : id_pengajuan
     },
     select : {
       id : true,
@@ -128,14 +129,14 @@ const AccDcnPengajuanPkl = async (body,id_pembimbing_dudi) => {
   if(findPengajuan.status != "proses") {
     throw new responseError(400,"pengajuan ini telah diproses")
   }
-  if(findPengajuan.dudi.pembimbing_dudi[0].id != id_pembimbing_dudi) {
+  if(findPengajuan.dudi.pembimbing_dudi[0].id != body.id_pembimbing_dudi) {
     throw new responseError(401,"kesalahan hak akses")
   }
 
   return db.$transaction(async (tx) => {
    const updatePengajuan = await tx.pengajuan_pkl.update({
       where : {
-        id : body.id
+        id : id_pengajuan
       },
       data : {
         status : body.status
@@ -153,7 +154,7 @@ const AccDcnPengajuanPkl = async (body,id_pembimbing_dudi) => {
       },
       data : {
         id_dudi : findPengajuan.dudi.id,
-        id_pembimbing_dudi : id_pembimbing_dudi,
+        id_pembimbing_dudi : body.id_pembimbing_dudi,
         status : "pkl",
         tanggal_masuk : body.tanggal_masuk,
         tanggal_keluar : body.tanggal_keluar

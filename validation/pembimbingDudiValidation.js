@@ -3,7 +3,7 @@ import joi from "joi"
 const getIdValidation = joi.number().required()
 
 const statusvalidation = joi.object({
-    id : joi.number().required(),
+    id_pembimbing_dudi : joi.number().required(),
     status : joi.valid('diterima','ditolak'),
     tanggal_masuk : joi.date().required(),
     tanggal_keluar : joi.date().required()

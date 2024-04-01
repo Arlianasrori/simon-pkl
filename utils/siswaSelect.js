@@ -4,6 +4,8 @@ export const selectSiswaObject = {
     nis : true,
     status : true,
     jenis_kelamin : true,
+    tanggal_masuk : true,
+    tanggal_keluar : true,
     guru_pembimbing : {
         select : {
             id : true,

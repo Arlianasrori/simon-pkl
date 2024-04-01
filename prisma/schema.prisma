@@ -35,8 +35,8 @@ model siswa {
   id_guru_pembimbing Int
   id_dudi Int?
   id_pembimbing_dudi Int?
-  tanggal_masuk DateTime?
-  tanggal_keluar DateTime?
+  tanggal_masuk DateTime? @db.Timestamp()
+  tanggal_keluar DateTime? @db.Timestamp()
   password String @db.VarChar(255)
   status status_pkl @default(belum_pkl)
   id_jurusan Int
@@ -204,9 +204,10 @@ model absen_jadwal {
   id Int @id
   id_dudi Int
   id_pembimbing_dudi Int
-  tanggal DateTime
-  batas_absen_masuk DateTime
-  batas_absen_pulang DateTime
+  tanggal_mulai String
+  tanggal_berakhir String
+  batas_absen_masuk DateTime @db.Time() 
+  batas_absen_pulang DateTime @db.Time()
 
 
   absen absen[]
@@ -218,7 +219,7 @@ model absen {
   id Int @id
   id_absen_jadwal Int
   id_siswa Int
-  tanggal DateTime
+  tanggal String
   absen_masuk DateTime
   absen_keluar DateTime
   status_absen_masuk status_absen_masuk_keluar
@@ -242,7 +243,7 @@ model laporan_pkl {
   id_siswa Int
   id_dudi Int
   id_pembimbing_dudi Int
-  tanggal DateTime
+  tanggal String
   keterangan String @db.VarChar(1500)
   file_laporan String @db.VarChar(1500)
 
@@ -257,7 +258,7 @@ model laporan_siswa_pkl {
   id_pembimbing_dudi Int
   tanggal DateTime
   topik_pekerjaan String @db.VarChar(255)
-  rujukanko_mpetensi_dasar String @db.VarChar(255)
+  rujukan_kompetensi_dasar String @db.VarChar(255)
   dokumentasi String @db.VarChar(1500)
 
   siswa siswa @relation(fields: [id_siswa],references: [id])
