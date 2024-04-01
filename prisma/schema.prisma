@@ -206,8 +206,8 @@ model absen_jadwal {
   id_pembimbing_dudi Int
   tanggal_mulai String
   tanggal_berakhir String
-  batas_absen_masuk DateTime @db.Time() 
-  batas_absen_pulang DateTime @db.Time()
+  batas_absen_masuk Decimal
+  batas_absen_pulang Decimal
 
 
   absen absen[]

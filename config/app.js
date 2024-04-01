@@ -23,6 +23,6 @@ app.use("/guruPembimbing",guruPembimbingRouter)
 app.use("/dudi",pembimbingDudiRouter)
 app.use("/notification",notificationRouter)
 app.use("/pembimbingDudi",pembimbingDudiRouter)
-app.use(absenRouter)
+app.use("/absen",absenRouter)
 
 app.use(errorMiddleware)
