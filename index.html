@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input id="hay" type="time">
+
+    <script>
+        const id = document.getElementById("hay")
+
+        id.onchange = () => {
+            console.log(typeof(id.value))
+        }
+    </script>
+</body>
+</html>

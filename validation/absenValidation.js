@@ -1,15 +1,29 @@
 import joi from "joi"
 
+
+// jadwal absen
 const addJadwalAbsen = joi.object({
-    id : joi.number().required(),
     id_dudi : joi.number().required(),
     id_pembimbing_dudi : joi.number().required(),
     tanggal_mulai : joi.string().required(),
     tanggal_berakhir : joi.string().required(),
-    batas_absen_masuk : joi.number().optional(),
-    batas_absen_pulang : joi.number().optional(),
+    batas_absen_masuk : joi.string().required(),
+    batas_absen_pulang : joi.string().required(),
+    selisih_tanggal_day : joi.number().required(),
+    selisih_absen_hour : joi.number().required(),
 })
 
+
+// absen
+const addAbsenMasukValidation = joi.object({
+    id_absen_jadwal : joi.number().required(),
+    id_siswa : joi.number().required(),
+    tanggal : joi.string().required(),
+    absen_masuk : joi.string().required(),
+    status_absen_masuk : joi.valid("hadir","telat").optional(),
+    foto : joi.string().required()
+})
 export default {
-    addJadwalAbsen
+    addJadwalAbsen,
+    addAbsenMasukValidation
 }

@@ -201,13 +201,15 @@ model pengajuan_cancel_pkl {
   pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id])
 }
 model absen_jadwal {
-  id Int @id
+  id Int @id @default(autoincrement())
   id_dudi Int
   id_pembimbing_dudi Int
   tanggal_mulai String
   tanggal_berakhir String
-  batas_absen_masuk Decimal
-  batas_absen_pulang Decimal
+  batas_absen_masuk String
+  batas_absen_pulang String
+  selisih_tanggal_day Int
+  selisih_absen_hour Int
 
 
   absen absen[]
@@ -220,11 +222,11 @@ model absen {
   id_absen_jadwal Int
   id_siswa Int
   tanggal String
-  absen_masuk DateTime
-  absen_keluar DateTime
+  absen_masuk String
+  absen_keluar String?
   status_absen_masuk status_absen_masuk_keluar
-  status_absen_keluar status_absen_masuk_keluar
-  foto String @db.VarChar(1500)
+  status_absen_keluar status_absen_masuk_keluar?
+  foto String? @db.VarChar(1500)
   izin izin_absen[]
 
   jadwal_absen absen_jadwal @relation(fields: [id_absen_jadwal],references: [id])
