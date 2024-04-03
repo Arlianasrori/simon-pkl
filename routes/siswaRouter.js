@@ -24,3 +24,10 @@ siswaRouter.post('/addCancelPkl/:id_siswa', siswaController.addCancelPkl)
 siswaRouter.put('/cancelPkl/cancel', siswaController.cancelPengajuanCancelPkl)
 siswaRouter.get('/getCancelPklBySiswa/:id_siswa', siswaController.getCancelPklBySiswa)
 siswaRouter.get('/getCancelPklById/:id', siswaController.getCancelPklById)
+
+// Laporan Pkl Siswa 
+siswaRouter.post("/AddLaporanSiswaPkl",siswaController.AddLaporanSiswaPkl)
+siswaRouter.put("/updateLaporanSiswaPkl/:id",siswaController.updateLaporanSiswaPkl)
+siswaRouter.delete("/deleteLaporanSiswaPkl/:id",siswaController.deleteLaporanSiswaPkl)
+siswaRouter.get("/findAllLaporanSiswaPkl/:id_siswa",siswaController.findAllLaporanSiswaPkl)
+siswaRouter.get("/findLaporanSiswaPklById/:id",siswaController.findLaporanSiswaPklById)

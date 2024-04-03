@@ -9,7 +9,7 @@ pembimbingDudiRouter.get('/getAllSiswaPembimbingDudi/:id', pembimbingDudiControl
 
 
 // pengajuan pkl
-pembimbingDudiRouter.get('/getAllPengajuanPkl/:id', pembimbingDudiController.getAllPengajuanPkl)
+pembimbingDudiRouter.get('/getAllPengajuanPkl/id', pembimbingDudiController.getAllPengajuanPkl)
 pembimbingDudiRouter.get('/getPengajuanPklById/:id', pembimbingDudiController.getPengajuanPklById)
 pembimbingDudiRouter.put('/updateStatusPengajuanpkl/:id_pengajuan', pembimbingDudiController.updateStatusPengajuanPkl)
 
