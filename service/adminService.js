@@ -702,7 +702,6 @@ const addDudi = async (dudi,alamat) => {
     if(findDudi) {
         throw new responseError(400,"data dudi telah ditambahkan")
     }
-    dudi.nama_instansi_perusahaan = dudi.nama_instansi_perusahaan.toLowerCase()
 
     return db.$transaction(async (tx) => {
         const addDudi = await tx.dudi.create({
@@ -712,7 +711,7 @@ const addDudi = async (dudi,alamat) => {
                 nama_instansi_perusahaan : true,
                 no_telepon : true,
                 bidang : true,
-                catatan : true
+                deksripsi : true
             }
         })
         const addAlamatDudi= await tx.alamat_dudi.create({
@@ -748,7 +747,7 @@ const findDudiById = async (id) => {
 const updateDudi = async (data,id) => {
     id = await validate(adminValidation.idValidation,id)
     data = await validate(adminValidation.updateDudiValidation,data)
-    console.log(data);
+
     const findDudi = await db.dudi.findUnique({
         where : {
             id : id
@@ -901,30 +900,26 @@ const findDudiFilter = async (query) => {
 
 // pembimbing dudi service
 const addPembimbingDudi = async (PembimbingDudi,alamat) => {
-    console.log(PembimbingDudi);
     PembimbingDudi.id = generateId()
     alamat.id_pembimbing_dudi = PembimbingDudi.id
 
     PembimbingDudi = await validate(adminValidation.addPembimbingDudiValidation,PembimbingDudi)
     alamat = await validate(adminValidation.addAlamatPembimbingDudiValidation,alamat)
-    console.log(PembimbingDudi);
+
     const findPembimbingDudi = await db.pembimbing_dudi.findFirst({
         where : {
-            OR : [
-                {
-                    id : PembimbingDudi.id
-                },
-                {
-                    username : PembimbingDudi.username
-                }
-            ]
+            id : PembimbingDudi.id
         }
     })
-
+    console.log(findPembimbingDudi);
     if(findPembimbingDudi) {
         throw new responseError(400,"data pembimbing dudi telah ditambahkan")
     }
-
+    const checkNoHp = await db.pembimbing_dudi.findFirst({
+        where : {
+            no_telepon : PembimbingDudi.no_telepon
+        }
+    })
     const findDudi = await db.dudi.findUnique({
         where : {
             id : PembimbingDudi.id_dudi

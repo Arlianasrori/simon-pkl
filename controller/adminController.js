@@ -258,8 +258,6 @@ const deleteKelas = async (req,res,next) => {
     }
 }
 
-
-
 // guru pembimbing controller
 const addGuruPembimbing = async (req,res,next) => {
     try {

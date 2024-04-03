@@ -4,8 +4,11 @@ export const selectSiswaObject = {
     nis : true,
     status : true,
     jenis_kelamin : true,
+    tanggal_masuk : true,
+    tanggal_keluar : true,
     guru_pembimbing : {
         select : {
+            id : true,
             nama : true,
             nip : true,
             no_telepon : true,
@@ -18,9 +21,15 @@ export const selectSiswaObject = {
     jurusan : true,
     kelas : true,
     alamat : true,
-    dudi : true,
+    dudi : {
+        select : {
+            id : true,
+            nama_instansi_perusahaan : true
+        }
+    },
     pembimbing_dudi : {
         select : {
+            id : true,
             nama : true,
             username : true,
             agama : true,

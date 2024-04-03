@@ -5,9 +5,17 @@ export const selectDudiObject = {
     nama_instansi_perusahaan : true,
     no_telepon : true,
     bidang : true,
-    catatan : true,
+    alamat : true,
+    siswa : true,
+    deksripsi : true,
     alamat : true,
     siswa : {
         select : selectSiswaObject
+    },
+    pembimbing_dudi : {
+        select : {
+            id : true,
+            nama : true
+        }
     }
 }

@@ -20,10 +20,27 @@ const findPengajuanByStatus = joi.object({
   id_siswa  : joi.number().required(),
   status : joi.valid("proses","diterima","ditolak","dibatalkan").required()
 }) 
+const addLaporanSiswaPkl = joi.object ({
+  id : joi.number().required(),
+  id_siswa : joi.number().required(),
+  id_dudi : joi.number().required(),
+  id_pembimbing_dudi : joi.number().required(),
+  tanggal : joi.string().required(),
+  topik_pekerjaan : joi.string().max(255).required(),
+  rujukan_kompetensi_dasar : joi.string().max(255).required(),
+  dokumentasi : joi.string().max(1500).required()
+})
+const UpdateLaporanSiswaPkl = joi.object ({
+  topik_pekerjaan : joi.string().max(255).optional(),
+  rujukan_kompetensi_dasar : joi.string().max(255).optional(),
+  dokumentasi : joi.string().max(1500).optional()
+})
 
 export default {
   getDudiByAlamat,
   addPengjuanPklValidation,
   cancelPengjuanPklValidation,
-  findPengajuanByStatus
+  findPengajuanByStatus,
+  addLaporanSiswaPkl,
+  UpdateLaporanSiswaPkl
 };

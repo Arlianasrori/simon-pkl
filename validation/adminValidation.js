@@ -141,7 +141,7 @@ const addDudiValidation = joi.object({
   nama_instansi_perusahaan : joi.string().max(255).required(),
   no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).required(),
   bidang : joi.string().max(255).required(),
-  catatan : joi.string().max(1500).required(),
+  deksripsi : joi.string().max(1500).required(),
 })
 const addAlamatDudiValidation = joi.object({
   id_dudi : joi.number().required(),
@@ -156,13 +156,12 @@ const updateDudiValidation = joi.object({
   nama_instansi_perusahaan : joi.string().max(255).optional(),
   no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).optional(),
   bidang : joi.string().max(255).optional(),
-  catatan : joi.string().max(1500).optional(),
+  deksripsi : joi.string().max(1500).optional(),
 })
 const searchDudiValidation = joi.object({
   nama_instansi_perusahaan : joi.string().max(255).optional(),
   no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).optional(),
   bidang : joi.string().max(255).optional(),
-  catatan : joi.string().max(1500).optional(),
   detail_tempat : joi.string().max(500).optional(),
   desa : joi.string().max(255).optional(),
   kecamatan : joi.string().max(255).optional(),
