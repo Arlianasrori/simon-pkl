@@ -208,9 +208,7 @@ model absen_jadwal {
   tanggal_berakhir String
   batas_absen_masuk String
   batas_absen_pulang String
-  selisih_tanggal_day Int
-  selisih_absen_hour Int
-
+  selisih_tanggal_day String
 
   absen absen[]
   dudi dudi @relation(fields: [id_dudi],references: [id])
@@ -226,6 +224,7 @@ model absen {
   absen_keluar String?
   status_absen_masuk status_absen_masuk_keluar
   status_absen_keluar status_absen_masuk_keluar?
+  status status_absen?
   foto String? @db.VarChar(1500)
   izin izin_absen[]
 
@@ -319,6 +318,7 @@ enum status_cancel_pkl {
 enum status_absen_masuk_keluar {
   hadir
   telat
+  tidak_hadir
 }
 
 enum status_izin {
