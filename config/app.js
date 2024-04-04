@@ -6,6 +6,7 @@ import { guruPembimbingRouter } from "../routes/guruPembimbingRouter.js"
 import { notificationRouter } from "../routes/notificationRouter.js"
 import { errorMiddleware } from "../middleware/errorMiddleware.js"
 import { absenRouter } from "../routes/absenRouter.js"
+import fileUpload from "express-fileupload"
 
 export const app = express()
 
@@ -17,6 +18,8 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Headers", "Content-Type,ngrok-skip-browser-warning");
     next();
 })
+app.use(express.static('public'))
+app.use(fileUpload())
 app.use("/admin",adminRouter)
 app.use("/siswa",siswaRouter)
 app.use("/guruPembimbing",guruPembimbingRouter)

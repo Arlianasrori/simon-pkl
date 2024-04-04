@@ -222,7 +222,7 @@ model absen {
   tanggal String
   absen_masuk String
   absen_keluar String?
-  status_absen_masuk status_absen_masuk_keluar
+  status_absen_masuk status_absen_masuk_keluar 
   status_absen_keluar status_absen_masuk_keluar?
   status status_absen?
   foto String? @db.VarChar(1500)
@@ -234,7 +234,7 @@ model absen {
 model izin_absen {
   id Int @id
   id_absen Int
-  note String @db.VarChar(3000000)
+  note String @db.VarChar(30000)
   status_izin status_izin
 
   absen absen @relation(fields: [id_absen],references: [id])
@@ -319,10 +319,10 @@ enum status_absen_masuk_keluar {
   hadir
   telat
   tidak_hadir
+  izin
 }
 
 enum status_izin {
-  izin 
   sakit
-  lupa
+  acara
 }
