@@ -182,7 +182,7 @@ const AddLaporanSiswaPkl = async (req, res, next) => {
   try {
     const body = req.body;
     const image = req.files.dokumentasi;
-    const url = `http://${req.hostname}:2008/public/images`;
+    const url = `http://${req.hostname}:2008/laporan_siswa_pkl`;
 
     const result = await siswaService.AddLaporanSiswaPkl(body, image, url);
     res.status(200).json({

@@ -18,6 +18,7 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Headers", "Content-Type,ngrok-skip-browser-warning");
     next();
 })
+app.use(express.static('public'))
 app.use(fileUpload())
 // req.files.p.mv
 app.use("/admin",adminRouter)

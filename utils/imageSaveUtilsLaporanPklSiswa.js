@@ -11,7 +11,7 @@ export const file = async (image, url) => {
   }
   const fullName = `${new Date().getTime()}-${fileName}`;
   const fullPath = `${url}/${fullName}`;
-  const pathSaveFile = `./public/images/${fullName}`;
+  const pathSaveFile = `./public/laporan_pkl/${fullName}`;
 
   return { fullPath, pathSaveFile };
 };

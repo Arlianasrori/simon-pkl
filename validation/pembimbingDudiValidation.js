@@ -17,7 +17,8 @@ const addLaporanPkl = joi.object({
     id_dudi : joi.number().required(),
     id_pembimbing_dudi : joi.number().required(),
     tanggal : joi.date().required(),
-    keterangan : joi.string().max(1500)
+    keterangan : joi.string().max(1500).required(),
+    file_laporan : joi.string().max(1500).optional()
 })
 export default {
     statusvalidation,

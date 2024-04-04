@@ -21,4 +21,8 @@ pembimbingDudiRouter.put('/updateStatusCancelPkl/:id', pembimbingDudiController.
 
 
 // laporan pkl
-pembimbingDudiRouter.post('/addLaporanPkl', pembimbingDudiController.addLaporanPkl)
+pembimbingDudiRouter.post("/AddLaporanPkl",pembimbingDudiController.AddLaporanPkl)
+// pembimbingDudiRouter.put("/updateLaporanSiswaPkl/:id",siswaController.updateLaporanSiswaPkl)
+// pembimbingDudiRouter.delete("/deleteLaporanSiswaPkl/:id",siswaController.deleteLaporanSiswaPkl)
+// pembimbingDudiRouter.get("/findAllLaporanSiswaPkl/:id_siswa",siswaController.findAllLaporanSiswaPkl)
+// pembimbingDudiRouter.get("/findLaporanSiswaPklById/:id",siswaController.findLaporanSiswaPklById)

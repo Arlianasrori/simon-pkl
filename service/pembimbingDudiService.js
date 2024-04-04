@@ -7,6 +7,8 @@ import adminValidation from "../validation/adminValidation.js";
 import { selectCancelPkl } from "../utils/cancelPkl.js";
 import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js";
 import generateId from "../utils/generateIdUtils.js";
+import { fileLaporaPkl } from "../utils/imageSaveUtilsLaporanPkl.js";
+import { selectLaporanSiswaPkl } from "../utils/LaporanSiswaPklUtil.js";
 
 const getPembimbingDudiById = async (id) => {
   id = await validate(pembimbingDudiValidation.getIdValidation, id);
@@ -258,35 +260,48 @@ const updateStatusCancelPkl = async (id,status,id_pembimbing_dudi) => {
 }
 
 
-// laporan pkl
-const addLaporanPkl = async (body) => {
-  body.id = generateId()
-  body = await validate(pembimbingDudiValidation.addLaporanPkl,body)
+// // laporan pkl
+const AddLaporanPkl = async (body, image, url) => {
+  body.id = generateId();
+  const date = new Date();
+  const options = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
 
-  const findSiswa = await db.siswa.findUnique({
-    where : {
-      id : body.id_siswa
+  const { pathSaveFile, fullPath } = await fileLaporaPkl(image, url);
+  body.file_laporan = fullPath;
+
+  const tanggal = date.toLocaleDateString("id", options);
+  body.tanggal = tanggal;
+  body = await validate(pembimbingDudiValidation.addLaporanPkl, body);
+
+  await image.mv(pathSaveFile, async (err) => {
+    if (err) {
+      console.log(err);
+      throw new responseError(500, err.message);
     }
-  })
+  });
 
-  if(!findSiswa) {
-    throw new responseError(404,"siswa tidak ditemukan")
+  const FindLaporanPkl = await db.laporan_pkl.findUnique({
+    where: {
+      id: body.id,
+    },
+  });
+
+  if (FindLaporanPkl) {
+    throw new responseError(404, "Laporan Pkl Sudah Di Tambahkan");
   }
 
-  const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
-    where : {
-      id : body.id_pembimbing_dudi
-    }
-  })
+  const addLaporan = await db.laporan_pkl.create({
+    data: body,
+    select: laporan_pkl,
+  });
+  return addLaporan;
+};
 
-  if(!findPembimbingDudi) {
-    throw new responseError(404,"pembimbing dudi tidak ditemukan")
-  }
-
-  return db.laporan_pkl.create({
-    data : body
-  })
-}
 export default {
   getPembimbingDudiById,
   getSiswaPembimbingDudi,
@@ -305,6 +320,7 @@ export default {
 
 
   // laporan pkl
-  addLaporanPkl
+  // addLaporanPkl,
+  AddLaporanPkl
 };
 

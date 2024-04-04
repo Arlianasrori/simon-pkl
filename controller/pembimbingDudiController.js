@@ -131,21 +131,24 @@ const updateStatusCancelPkl = async (req,res,next) => {
 }
 
 // laporan pkl
-const addLaporanPkl = async (req,res,next) => {
-  try {
-    const body = req.body
-    const image = req.files.image
-    const url = `${req.host}/images`
 
-    const result = await pembimbingDudiService.addLaporanPkl(body,image,url)
+const AddLaporanPkl = async (req, res, next) => {
+  try {
+    const body = req.body;
+    const image = req.files.file_laporan;
+    console.log(image);
+    const url = `http://${req.hostname}:2008/laporan_pkl`;
+
+    const result = await pembimbingDudiService.AddLaporanPkl(body, image, url);
     res.status(200).json({
-      msg : "succes",
-      data : result
-    })
+      msg: "Success",
+      data: result,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
+
 export default {
   getPembimbingDudiById,
   getSiswaPembimbingDudi,
@@ -164,5 +167,5 @@ export default {
 
 
   // laporan pkl
-  addLaporanPkl
+  AddLaporanPkl
 };

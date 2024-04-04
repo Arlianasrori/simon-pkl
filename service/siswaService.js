@@ -9,7 +9,7 @@ import { selectDudiObject } from "../utils/dudiSelect.js";
 import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js";
 import { checkPklSiswa } from "../utils/checkPklSiswa.js";
 import { selectCancelPkl } from "../utils/cancelPkl.js";
-import { file } from "../utils/imageSaveUtils.js";
+import { file } from "../utils/imageSaveUtilsLaporanPklSiswa.js";
 import { selectLaporanSiswaPkl } from "../utils/LaporanSiswaPklUtil.js";
 
 const getSiswaById = async (id) => {
