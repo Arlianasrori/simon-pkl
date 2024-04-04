@@ -406,7 +406,8 @@ const updateLaporanSiswaPkl = async (id, body) => {
     where: {
       id: id,
     },
-    data: selectLaporanSiswaPkl,
+    data: body,
+    select : selectLaporanSiswaPkl
   });
 };
 
