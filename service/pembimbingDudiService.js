@@ -8,7 +8,7 @@ import { selectCancelPkl } from "../utils/cancelPkl.js";
 import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js";
 import generateId from "../utils/generateIdUtils.js";
 import { fileLaporaPkl } from "../utils/imageSaveUtilsLaporanPkl.js";
-import { selectLaporanSiswaPkl } from "../utils/LaporanSiswaPklUtil.js";
+import { selectLaporanPkl } from "../utils/LaporanSiswaPklUtil.js";
 
 const getPembimbingDudiById = async (id) => {
   id = await validate(pembimbingDudiValidation.getIdValidation, id);
@@ -297,9 +297,80 @@ const AddLaporanPkl = async (body, image, url) => {
 
   const addLaporan = await db.laporan_pkl.create({
     data: body,
-    select: laporan_pkl,
+    select: selectLaporanPkl,
   });
   return addLaporan;
+};
+
+const updateLaporanPkl = async (id, body) => {
+  id = await validate(adminValidation.idValidation, id);
+  body = await validate(pembimbingDudiValidation.updateLaporanPkl, body);
+
+  const findLaporan = await db.laporan_pkl.findUnique({
+    where: {
+      id: id,
+    },
+  });
+
+  if (!findLaporan) {
+    throw new responseError(404, "Laporan tidak ditemukan");
+  }
+
+  return db.laporan_pkl.update({
+    where: {
+      id: id,
+    },
+    data: body,
+    select: selectLaporanPkl
+  });
+};
+
+const deleteLaporanPkl = async (id) => {
+  id = await validate(adminValidation.idValidation, id);
+
+  const findLaporan = await db.laporan_pkl.findFirst({
+    where: {
+      id: id,
+    },
+  });
+
+  if (!findLaporan) {
+    throw new responseError(404, "Laporan PKL tidak ditemukan");
+  }
+
+  return db.laporan_pkl.delete({
+    where: {
+      id: id,
+    },
+  });
+};
+
+const findAllLaporanPkl = async (id_pembimbing_dudi) => {
+  id_pembimbing_dudi = await validate(adminValidation.idValidation, id_pembimbing_dudi);
+
+  return db.laporan_pkl.findMany({
+    where: {
+      id_pembimbing_dudi: id_pembimbing_dudi,
+    },
+    select: selectLaporanPkl,
+  });
+};
+
+const findLaporanPklById = async (id) => {
+  id = await validate(adminValidation.idValidation, id);
+
+  const findLaporan = await db.laporan_pkl.findUnique({
+    where: {
+      id: id,
+    },
+    select: selectLaporanPkl,
+  });
+
+  if (!findLaporan) {
+    throw new responseError(404, "Laporan tidak ditemukan");
+  }
+
+  return findLaporan;
 };
 
 export default {
@@ -320,7 +391,10 @@ export default {
 
 
   // laporan pkl
-  // addLaporanPkl,
-  AddLaporanPkl
+  AddLaporanPkl,
+  updateLaporanPkl,
+  deleteLaporanPkl,
+  findAllLaporanPkl,
+  findLaporanPklById
 };
 

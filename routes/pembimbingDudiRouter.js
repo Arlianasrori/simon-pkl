@@ -22,7 +22,7 @@ pembimbingDudiRouter.put('/updateStatusCancelPkl/:id', pembimbingDudiController.
 
 // laporan pkl
 pembimbingDudiRouter.post("/AddLaporanPkl",pembimbingDudiController.AddLaporanPkl)
-// pembimbingDudiRouter.put("/updateLaporanSiswaPkl/:id",siswaController.updateLaporanSiswaPkl)
-// pembimbingDudiRouter.delete("/deleteLaporanSiswaPkl/:id",siswaController.deleteLaporanSiswaPkl)
-// pembimbingDudiRouter.get("/findAllLaporanSiswaPkl/:id_siswa",siswaController.findAllLaporanSiswaPkl)
-// pembimbingDudiRouter.get("/findLaporanSiswaPklById/:id",siswaController.findLaporanSiswaPklById)
+pembimbingDudiRouter.put("/updateLaporanPkl/:id",pembimbingDudiController.updateLaporanPkl)
+pembimbingDudiRouter.delete("/deleteLaporanPkl/:id",pembimbingDudiController.deleteLaporanPkl)
+pembimbingDudiRouter.get("/findAllLaporanPkl/:id_pembimbing_dudi",pembimbingDudiController.findAllLaporanPkl)
+pembimbingDudiRouter.get("/findLaporanPklById/:id",pembimbingDudiController.findLaporanPklById)

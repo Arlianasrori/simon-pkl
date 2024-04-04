@@ -10,8 +10,9 @@ export const file = async (image, url) => {
     throw new responseError(400, `extensi file ${extFile} tidak didukung`);
   }
   const fullName = `${new Date().getTime()}-${fileName}`;
+  console.log(fullName);
   const fullPath = `${url}/${fullName}`;
-  const pathSaveFile = `./public/laporan_pkl/${fullName}`;
+  const pathSaveFile = `./public/laporan_siswa_pkl/${fullName}`;
 
   return { fullPath, pathSaveFile };
 };

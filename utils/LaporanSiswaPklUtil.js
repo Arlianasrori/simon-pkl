@@ -8,6 +8,7 @@ export const selectLaporanSiswaPkl = {
         rujukan_kompetensi_dasar: true,
         dokumentasi : true,
       }
+      
 export const selectLaporanPkl = {
         id: true,
         id_siswa: true,

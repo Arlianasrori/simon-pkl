@@ -149,6 +149,55 @@ const AddLaporanPkl = async (req, res, next) => {
   }
 };
 
+const updateLaporanPkl = async (req, res, next) => {
+  try {
+    const result = await pembimbingDudiService.updateLaporanPkl(parseInt(req.params.id),req.body)
+    res.status(200).json({
+      msg: "Success",
+      data: result,
+    })
+      
+  } catch (error) {
+    next(error)
+  }
+}
+
+const deleteLaporanPkl = async (req, res, next) => {
+  try {
+    const result = await pembimbingDudiService.deleteLaporanPkl(parseInt(req.params.id))
+    res.status(200).json({
+      msg: "Laporan Anda Telah Dihapus",
+      data: result,
+    })
+  } catch (error) { 
+   next(error) 
+  }
+}
+
+const findAllLaporanPkl = async (req, res, next) => {
+  try {
+    const result = await pembimbingDudiService.findAllLaporanPkl(parseInt(req.params.id_pembimbing_dudi))
+    res.status(200).json({
+      msg: "Success",
+      data: result,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const findLaporanPklById = async (req, res, next) => {
+  try {
+    const result = await pembimbingDudiService.findLaporanPklById(parseInt(req.params.id))
+    res.status(200).json({
+      msg: "Success",
+      data: result,
+    })
+  } catch (error) {
+    next(error)
+  }
+  }
+
 export default {
   getPembimbingDudiById,
   getSiswaPembimbingDudi,
@@ -167,5 +216,9 @@ export default {
 
 
   // laporan pkl
-  AddLaporanPkl
+  AddLaporanPkl,
+  updateLaporanPkl,
+  deleteLaporanPkl,
+  findAllLaporanPkl,
+  findLaporanPklById
 };
