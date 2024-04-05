@@ -12,6 +12,13 @@ absenRouter.get("/findJadwalById/:id_jadwal",absenController.findJadwalAbsenById
 
 // absen
 absenRouter.post("/absenMasuk",absenController.addAbsenMasuk)
-absenRouter.post("/absenKeluar",absenController.addAbsenKeluar)
+absenRouter.post("/absenKeluar",absenController.addAbsenPulang)
 absenRouter.post("/absenIzin",absenController.absenTidakMemenuhiJam)
 absenRouter.get("/findAbsen/:id_siswa",absenController.findAbsen)
+
+
+// kordinat absen
+absenRouter.post("/addKordinatAbsen",absenController.addKordinatAbsen)
+absenRouter.get("/findAllKordinatAbsen/:id_pembimbing_dudi",absenController.findAllKordinatAbsen)
+absenRouter.post("/cekKordinat",absenController.cekRadiusKordinatAbsen)
+absenRouter.delete("/deleteKordinat/:id_koordinat",absenController.deleteKoordinat)

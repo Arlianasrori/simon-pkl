@@ -26,20 +26,45 @@ const addAbsenMasukValidation = joi.object({
 const addAbsenKeluarValidation = joi.object({
     id : joi.number().required(),
     id_siswa : joi.number().required(),
-    absen_keluar : joi.string().required(),
-    status_absen_keluar : joi.valid("hadir","telat","tidak_hadir").required()
+    absen_pulang : joi.string().required(),
+    status_absen_pulang : joi.valid("hadir","telat","tidak_hadir").required()
 })
 const absenTidakMemenuhiJamValidation = joi.object({
     id : joi.number().required(),
     id_siswa : joi.number().required(),
-    absen_keluar : joi.string().required(),
+    absen_pulang : joi.string().required(),
     note : joi.string().max(30000).required(),
     status_izin : joi.valid("sakit","acara"),
     status : joi.string().required()
 })
+
+
+// kordinat absen
+const addKordinatAbsenValidation = joi.object({
+    id : joi.number().required(),
+    id_dudi : joi.number().required(),
+    id_pembimbing_dudi : joi.number().required(),
+    nama : joi.string().max(255).required(),
+    latitude : joi.number().required(),
+    longtitude : joi.number().required(),
+    radius_absen_meter : joi.number().required(),
+})
+const cekRadiusKordinatAbsenValidation = joi.object({
+    latitude : joi.number().required(),
+    longtitude : joi.number().required(),
+})
 export default {
+    // jadwal absen
     addJadwalAbsen,
+
+
+    // absen
     addAbsenMasukValidation,
     addAbsenKeluarValidation,
-    absenTidakMemenuhiJamValidation
+    absenTidakMemenuhiJamValidation,
+
+
+    // kordinat absen
+    addKordinatAbsenValidation,
+    cekRadiusKordinatAbsenValidation
 }

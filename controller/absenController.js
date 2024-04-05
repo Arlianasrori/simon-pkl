@@ -44,7 +44,6 @@ const addAbsenMasuk = async (req,res,next) => {
         const body = req.body
         const files = req.files.foto
         const url = `http://${req.hostname}:2008/images`
-        console.log(files);
 
         const result = await absenService.addAbsenMasuk(body,files,url)
         res.status(201).json({
@@ -55,11 +54,11 @@ const addAbsenMasuk = async (req,res,next) => {
         next(error)
     }
 }
-const addAbsenKeluar = async (req,res,next) => {
+const addAbsenPulang = async (req,res,next) => {
     try {
         const body = req.body
 
-        const result = await absenService.addAbsenKeluar(body)
+        const result = await absenService.addAbsenPulang(body)
         res.status(201).json({
             msg : "succes",
             data : result
@@ -94,6 +93,63 @@ const findAbsen = async (req,res,next) => {
         next(error)
     }
 }
+
+
+// kordinat absen
+const addKordinatAbsen = async (req,res,next) => {
+    try {
+        const body = req.body
+        const result = await absenService.addKordinatAbsen(body)
+
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const deleteKoordinat = async (req,res,next) => {
+    try {
+        const id_koordinat = parseInt(req.params.id_koordinat)
+        const result = await absenService.deleteKoordinatAbsen(id_koordinat)
+
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const findAllKordinatAbsen = async (req,res,next) => {
+    try {
+        const id_pembimbing_dudi = parseInt(req.params.id_pembimbing_dudi)
+        const result = await absenService.findAllKordinatAbsen(id_pembimbing_dudi)
+
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const cekRadiusKordinatAbsen = async (req,res,next) => {
+    try {
+        const body = req.body.body
+        const siswa = req.body.siswa
+        const result = await absenService.cekRadiusKoordinat(body,siswa)
+
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 export default {
     // absen jadawl
     addJadwalAbsen,
@@ -102,7 +158,13 @@ export default {
 
     // absen
     addAbsenMasuk,
-    addAbsenKeluar,
+    addAbsenPulang,
     absenTidakMemenuhiJam,
     findAbsen,
+
+    // kordinat absen
+    addKordinatAbsen,
+    findAllKordinatAbsen,
+    cekRadiusKordinatAbsen,
+    deleteKoordinat
 }

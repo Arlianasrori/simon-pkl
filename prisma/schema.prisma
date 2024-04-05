@@ -130,6 +130,7 @@ model Pembimbing_dudi {
   kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
   pengajuan_cancel_pkl pengajuan_cancel_pkl[]
   notification notification[]
+  kordinat kordinat_absen[]
 
   dudi dudi @relation(fields: [id_dudi],references: [id])
 }
@@ -149,6 +150,7 @@ model dudi {
   kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
   pembimbing_dudi Pembimbing_dudi[]
   pengajuan_cancel_pkl pengajuan_cancel_pkl[]
+  kordinat_absen kordinat_absen[]
 }
 model alamat_pembimbing_dudi {
   id_pembimbing_dudi Int @id
@@ -221,10 +223,9 @@ model absen {
   id_siswa Int
   tanggal String
   absen_masuk String
-  absen_keluar String?
+  absen_pulang String?
   status_absen_masuk status_absen_masuk_keluar 
   status_absen_keluar status_absen_masuk_keluar?
-  status status_absen?
   foto String? @db.VarChar(1500)
   izin izin_absen[]
 
@@ -238,6 +239,18 @@ model izin_absen {
   status_izin status_izin
 
   absen absen @relation(fields: [id_absen],references: [id])
+}
+model kordinat_absen {
+  id Int @id
+  id_dudi Int
+  id_pembimbing_dudi Int
+  nama String @db.VarChar(255)
+  latitude Float
+  longtitude Float
+  radius_absen_meter Float
+
+  dudi dudi @relation(fields: [id_dudi],references: [id])
+  pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id])
 }
 model laporan_pkl {
   id Int @id
