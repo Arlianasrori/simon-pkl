@@ -1,5 +1,9 @@
 import joi from "joi"
 
+const adminLogin = joi.object ({
+  username : joi.string().max(255).required(),
+  password : joi.string().max(255).required()
+})
 
 // siswa Validation 
 const addSiswaValidation = joi.object({
@@ -237,6 +241,10 @@ const searchAbsen = joi.object({
 
 
 export default {
+
+  // admin login 
+  adminLogin,
+
   // public
     idValidation,
     updateAlamatValidation,

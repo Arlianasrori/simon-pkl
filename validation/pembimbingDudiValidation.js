@@ -1,5 +1,10 @@
 import joi from "joi"
 
+const pembimbingDudiLogin = joi.object ({
+    username : joi.string().max(255).required(),
+    password : joi.string().max(255).required()
+})
+
 const getIdValidation = joi.number().required()
 
 const statusvalidation = joi.object({
@@ -27,6 +32,7 @@ const updateLaporanPkl = joi.object ({
   })
 
 export default {
+    pembimbingDudiLogin,
     statusvalidation,
     getIdValidation,
     statusCancelValidation,

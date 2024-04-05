@@ -3,6 +3,9 @@ import pembimbingDudiController from "../controller/pembimbingDudiController.js"
 
 export const pembimbingDudiRouter = express.Router()
 
+// pembimbing dudi login 
+pembimbingDudiRouter.post("/pembimbingDudiLogin",pembimbingDudiController.pembimbingDudiLogin)
+
 pembimbingDudiRouter.get('/getPembimbingDudiById/:id', pembimbingDudiController.getPembimbingDudiById)
 pembimbingDudiRouter.get('/getSiswaPembimbingDudi/:id', pembimbingDudiController.getSiswaPembimbingDudi)
 pembimbingDudiRouter.get('/getAllSiswaPembimbingDudi/:id', pembimbingDudiController.getAllSiswaPembimbingDudi)

@@ -7,9 +7,11 @@ import { notificationRouter } from "../routes/notificationRouter.js"
 import { errorMiddleware } from "../middleware/errorMiddleware.js"
 import { absenRouter } from "../routes/absenRouter.js"
 import fileUpload from "express-fileupload"
+import env from "dotenv"
 
 export const app = express()
 
+env.config()
 app.use(express.json())
 app.use(express.urlencoded({extended : true}))
 app.use((req, res, next) => {

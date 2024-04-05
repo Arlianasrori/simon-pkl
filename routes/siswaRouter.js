@@ -3,6 +3,9 @@ import siswaController from "../controller/siswaController.js"
 
 export const siswaRouter = express.Router()
 
+// siswa login 
+siswaRouter.post("/siswaLogin",siswaController.siswaLogin)
+
 siswaRouter.get('/getSiswaById/:id', siswaController.getSiswaById)
 
 // dudi

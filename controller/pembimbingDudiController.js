@@ -1,5 +1,23 @@
 import pembimbingDudiService from "../service/pembimbingDudiService.js"
 
+const pembimbingDudiLogin = async (req,res,next) => {
+  try {
+      const body = req.body
+      const result = await pembimbingDudiService.pembimbingDudiLogin(body)
+      res.status(201).cookie("acces_token",result.acces_token_pembimbing_dudi,{
+          maxAge : 24 * 60 * 60 * 60,
+          httpOnly: true,
+      }).cookie("refresh_token",result.refresh_token_pembimbing_dudi,{
+          maxAge : 24 * 60 * 60 * 60,
+          httpOnly: true,
+      }).json({
+          msg : "succes",
+          data : result
+      })
+  } catch (error) {
+      next(error)
+  }
+}
 
 const getPembimbingDudiById = async (req, res, next) => {
   try {
@@ -199,6 +217,10 @@ const findLaporanPklById = async (req, res, next) => {
   }
 
 export default {
+
+  // pembimbing dudi login 
+  pembimbingDudiLogin,
+
   getPembimbingDudiById,
   getSiswaPembimbingDudi,
   getAllSiswaPembimbingDudi,

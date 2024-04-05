@@ -13,7 +13,36 @@ import { selectLaporanpklSiswaObject } from "../utils/laporanPklSiswaSelect.js"
 import { selectAbsenObject } from "../utils/absenSelect.js"
 import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js"
 import { selectKelasObject } from "../utils/kelasSelect.js"
+import jwt from "jsonwebtoken"
 
+const adminLogin = async (body) => {
+    body = await validate(adminValidation.adminLogin, body)
+  
+    const findAdmin = await db.admin.findFirst({
+      where: {
+        username : body.username
+      }
+    })
+    
+    if (!findAdmin) {
+      throw new responseError (400, "username atau password salah")
+    }
+  
+    const isPassowrd = bcrypt.compare(body.password, findAdmin.password)
+    if(!isPassowrd) {
+        throw new responseError(400,"username atau password salah")
+    }
+  
+    const payload = {
+        username : body.username,
+        password : body.password,
+    }
+     
+    const acces_token_admin = jwt.sign(payload,process.env.TOKEN_SECRET_ADMIN,{expiresIn : "2d"})
+    const refresh_token_admin = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_ADMIN,{expiresIn : "60d"})
+  
+    return {acces_token_admin,refresh_token_admin}
+  }
 
 // siswa service
 const addSiswa = async (siswa,alamat) => {
@@ -1285,6 +1314,10 @@ const findAbsenFilter = async (query) => {
     return {count : findAbsen.length,data : findAbsen}
 }
 export default {
+
+    // admin login 
+    adminLogin,
+
     // siswa
     addSiswa,
     findAllSiswa,
