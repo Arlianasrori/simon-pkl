@@ -14,6 +14,23 @@ import { selectAbsenObject } from "../utils/absenSelect.js"
 import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js"
 import { selectKelasObject } from "../utils/kelasSelect.js"
 
+// admin service 
+const addAdmin = async (body) => {
+    body = await validate (adminValidation.addAdminValidation, body)
+    body.id = generateId()
+
+    const findAdmin = await db.admin.findUnique ({
+        where: {
+            id: body.id
+        }
+    })
+
+    if (findAdmin) {
+        throw new responseError (400, "Admin telah dibuat")
+    }
+
+
+}
 
 // siswa service
 const addSiswa = async (siswa,alamat) => {
@@ -1285,6 +1302,15 @@ const findAbsenFilter = async (query) => {
     return {count : findAbsen.length,data : findAbsen}
 }
 export default {
+
+    // admin 
+    addAdmin,
+    UpdateAdmin,
+    deleteAdmin,
+    getAdminById,
+    getAllAdmin,
+
+
     // siswa
     addSiswa,
     findAllSiswa,
