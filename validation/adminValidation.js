@@ -8,8 +8,8 @@ const addAdminValidation = joi.object ({
 })
 
 const updateAdminValidation = joi.object ({
-  username: joi.string().max(255).required(),
-  password: joi.string().max(255).required()
+  username: joi.string().max(255).optional(),
+  password: joi.string().max(255).optional()
 })
 
 // siswa Validation 

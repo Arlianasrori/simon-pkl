@@ -31,9 +31,6 @@ const addAdmin = async (body) => {
         throw new responseError (400, "Admin telah dibuat")
     }
     return db.admin.create ({
-            where: {
-                id: id
-            },
             data: body,
             select: {
                 id: true,
@@ -42,8 +39,9 @@ const addAdmin = async (body) => {
         })
 }
 
-const updateAdmin = async (id) => {
+const updateAdmin = async (id, body) => {
     id = await validate(adminValidation.idValidation, id)
+    body = await validate(adminValidation.updateAdminValidation, body)
 
     const findAdmin = await db.admin.findUnique({
         where: {
@@ -58,13 +56,59 @@ const updateAdmin = async (id) => {
       where: {
         id: id
       },
-    data: id,
+    data: body,
       select: {
         username: true,
         password: true
       }
     })
     
+}
+
+const deleteAdmin = async (id) => {
+    id = await validate(adminValidation.idValidation, id)
+
+    const findAdmin = await db.admin.findUnique ({
+        where: {
+            id: id
+        }
+    })
+
+    if (!findAdmin) {
+        throw new responseError(404, "Admin tidak ditemukan")
+    }
+
+    return db.admin.delete({
+        where: {
+            id: id
+        },
+    })
+}
+
+const getAdminById = async (id) => {
+    id = await validate(adminValidation.idValidation, id)
+
+    const findAdmin = await db.admin.findUnique ({
+        where: {
+            id: id
+        },
+        select: {
+            username: true,
+        }
+    })
+
+    if (!findAdmin) {
+        throw new responseError(404, "Admin tidak ditemukan")
+    }
+    return findAdmin
+}
+
+const getAllAdmin = async () => {
+    return db.admin.findMany ({
+        select: {
+            username: true
+        }
+    })
 }
 
 // siswa service
@@ -1341,9 +1385,9 @@ export default {
     // admin 
     addAdmin,
     updateAdmin,
-    // deleteAdmin,
-    // getAdminById,
-    // getAllAdmin,
+    deleteAdmin,
+    getAdminById,
+    getAllAdmin,
 
 
     // siswa
