@@ -5,10 +5,10 @@ export const adminRouter = express.Router()
 
 // admin router 
 adminRouter.post('/addAdmin', adminController.addAdmin)
-adminRouter.put('/UpdateAdmin', adminController.updateAdmin)
-adminRouter.delete('/deleteAdmin', adminController.deleteAdmin)
-adminRouter.get('/getAdminById', adminController.getAdminById)
-adminRouter.get('/getAllAdmin', adminController.getAllAdmin)
+adminRouter.put('/updateAdmin/:id', adminController.updateAdmin)
+// adminRouter.delete('/deleteAdmin', adminController.deleteAdmin)
+// adminRouter.get('/getAdminById', adminController.getAdminById)
+// adminRouter.get('/getAllAdmin', adminController.getAllAdmin)
 
 // siswa router
 adminRouter.post('/addSiswa',adminController.addSiswa)

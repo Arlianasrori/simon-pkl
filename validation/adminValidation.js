@@ -7,6 +7,11 @@ const addAdminValidation = joi.object ({
   password: joi.string().max(255).required()
 })
 
+const updateAdminValidation = joi.object ({
+  username: joi.string().max(255).required(),
+  password: joi.string().max(255).required()
+})
+
 // siswa Validation 
 const addSiswaValidation = joi.object({
   id : joi.number().required(),
@@ -249,6 +254,7 @@ export default {
 
   // admin 
   addAdminValidation,
+  updateAdminValidation,
     
   // siswa
     addSiswaValidation ,

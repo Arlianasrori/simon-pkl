@@ -16,8 +16,10 @@ import { selectKelasObject } from "../utils/kelasSelect.js"
 
 // admin service 
 const addAdmin = async (body) => {
-    body = await validate (adminValidation.addAdminValidation, body)
     body.id = generateId()
+    body = await validate (adminValidation.addAdminValidation, body)
+    
+    body.password = await bcrypt.hash(body.password,10)
 
     const findAdmin = await db.admin.findUnique ({
         where: {
@@ -28,8 +30,41 @@ const addAdmin = async (body) => {
     if (findAdmin) {
         throw new responseError (400, "Admin telah dibuat")
     }
+    return db.admin.create ({
+            where: {
+                id: id
+            },
+            data: body,
+            select: {
+                id: true,
+                username: true
+            }
+        })
+}
 
+const updateAdmin = async (id) => {
+    id = await validate(adminValidation.idValidation, id)
 
+    const findAdmin = await db.admin.findUnique({
+        where: {
+            id: id
+        }
+    })
+
+    if (!findAdmin) {
+        throw new responseError (404, "Admin tidak ditemukan")
+    }
+    return db.admin.update({
+      where: {
+        id: id
+      },
+    data: id,
+      select: {
+        username: true,
+        password: true
+      }
+    })
+    
 }
 
 // siswa service
@@ -1305,10 +1340,10 @@ export default {
 
     // admin 
     addAdmin,
-    UpdateAdmin,
-    deleteAdmin,
-    getAdminById,
-    getAllAdmin,
+    updateAdmin,
+    // deleteAdmin,
+    // getAdminById,
+    // getAllAdmin,
 
 
     // siswa
