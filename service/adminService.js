@@ -209,6 +209,20 @@ const addSiswa = async (siswa,alamat) => {
     })
 }
 
+const findSiswaById = async (id) => {
+    id = await validate(adminValidation.idValidation, id)
+
+    const findSiswa = await db.siswa.findUnique ({
+        where: {
+            id: id
+        }
+    })
+    if (!findSiswa) {
+        throw new responseError (404, "Siswa tidak ditemukan")
+    }
+    return findSiswa
+}
+
 const findAllSiswa = async () => {
     return db.siswa.findMany({
         select : selectSiswaObject
@@ -1425,6 +1439,7 @@ export default {
 
     // siswa
     addSiswa,
+    findSiswaById,
     findAllSiswa,
     updateSiswa,
     deleteSiswa,
