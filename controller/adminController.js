@@ -78,6 +78,18 @@ const addSiswa = async (req,res,next) => {
         next(error)
     }
 }
+const findSiswaById = async (req, res, next) => {
+    try {
+        const id = req.params.id
+        const result = await adminService.findSiswaById(id)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 const findAllSiswa = async (req,res,next) => {
     try {
         const result = await adminService.findAllSiswa()
@@ -792,6 +804,7 @@ export default {
     
     // siswa
     addSiswa,
+    findSiswaById,
     findAllSiswa,
     updateSiswa,
     deleteSiswa,
