@@ -15,6 +15,7 @@ import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js"
 import { selectKelasObject } from "../utils/kelasSelect.js"
 import jwt from "jsonwebtoken"
 
+<<<<<<< HEAD
 const adminLogin = async (body) => {
     body = await validate(adminValidation.adminLogin, body)
   
@@ -43,6 +44,103 @@ const adminLogin = async (body) => {
   
     return {acces_token_admin,refresh_token_admin}
   }
+=======
+// admin service 
+const addAdmin = async (body) => {
+    body.id = generateId()
+    body = await validate (adminValidation.addAdminValidation, body)
+    
+    body.password = await bcrypt.hash(body.password,10)
+
+    const findAdmin = await db.admin.findUnique ({
+        where: {
+            id: body.id
+        }
+    })
+
+    if (findAdmin) {
+        throw new responseError (400, "Admin telah dibuat")
+    }
+    return db.admin.create ({
+            data: body,
+            select: {
+                id: true,
+                username: true
+            }
+        })
+}
+
+const updateAdmin = async (id, body) => {
+    id = await validate(adminValidation.idValidation, id)
+    body = await validate(adminValidation.updateAdminValidation, body)
+
+    const findAdmin = await db.admin.findUnique({
+        where: {
+            id: id
+        }
+    })
+
+    if (!findAdmin) {
+        throw new responseError (404, "Admin tidak ditemukan")
+    }
+    return db.admin.update({
+      where: {
+        id: id
+      },
+    data: body,
+      select: {
+        username: true,
+        password: true
+      }
+    })
+    
+}
+
+const deleteAdmin = async (id) => {
+    id = await validate(adminValidation.idValidation, id)
+
+    const findAdmin = await db.admin.findUnique ({
+        where: {
+            id: id
+        }
+    })
+
+    if (!findAdmin) {
+        throw new responseError(404, "Admin tidak ditemukan")
+    }
+
+    return db.admin.delete({
+        where: {
+            id: id
+        },
+    })
+}
+
+const getAdminById = async (id) => {
+    id = await validate(adminValidation.idValidation, id)
+
+    const findAdmin = await db.admin.findUnique ({
+        where: {
+            id: id
+        },
+        select: {
+            username: true,
+        }
+    })
+
+    if (!findAdmin) {
+        throw new responseError(404, "Admin tidak ditemukan")
+    }
+    return findAdmin
+}
+
+const getAllAdmin = async () => {
+    return db.admin.findMany ({
+        select: {
+            username: true
+        }
+    })
+}
 
 // siswa service
 const addSiswa = async (siswa,alamat) => {
@@ -1315,8 +1413,18 @@ const findAbsenFilter = async (query) => {
 }
 export default {
 
+<<<<<<< HEAD
     // admin login 
     adminLogin,
+=======
+    // admin 
+    addAdmin,
+    updateAdmin,
+    deleteAdmin,
+    getAdminById,
+    getAllAdmin,
+
+>>>>>>> admin-api
 
     // siswa
     addSiswa,

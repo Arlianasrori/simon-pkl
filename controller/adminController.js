@@ -1,23 +1,5 @@
 import adminService from "../service/adminService.js"
 
-const adminLogin = async (req,res,next) => {
-    try {
-        const body = req.body
-        const result = await adminService.adminLogin(body)
-        res.status(201).cookie("acces_token",result.acces_token_admin,{
-            maxAge : 24 * 60 * 60 * 60,
-            httpOnly: true,
-        }).cookie("refresh_token",result.refresh_token_admin,{
-            maxAge : 24 * 60 * 60 * 60,
-            httpOnly: true,
-        }).json({
-            msg : "succes",
-            data : result
-        })
-    } catch (error) {
-        next(error)
-    }
-  }
 
 // siswa controller
 const addSiswa = async (req,res,next) => {
@@ -737,10 +719,6 @@ const findAbsenFilter = async (req,res,next) => {
     }
 }
 export default {
-
-    // admin login 
-    adminLogin,
-
     // siswa
     addSiswa,
     findAllSiswa,
