@@ -15,7 +15,6 @@ import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js"
 import { selectKelasObject } from "../utils/kelasSelect.js"
 import jwt from "jsonwebtoken"
 
-<<<<<<< HEAD
 const adminLogin = async (body) => {
     body = await validate(adminValidation.adminLogin, body)
   
@@ -44,7 +43,6 @@ const adminLogin = async (body) => {
   
     return {acces_token_admin,refresh_token_admin}
   }
-=======
 // admin service 
 const addAdmin = async (body) => {
     body.id = generateId()
@@ -1413,10 +1411,10 @@ const findAbsenFilter = async (query) => {
 }
 export default {
 
-<<<<<<< HEAD
     // admin login 
     adminLogin,
-=======
+
+    
     // admin 
     addAdmin,
     updateAdmin,
@@ -1424,7 +1422,6 @@ export default {
     getAdminById,
     getAllAdmin,
 
->>>>>>> admin-api
 
     // siswa
     addSiswa,

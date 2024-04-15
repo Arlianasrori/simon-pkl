@@ -1,10 +1,10 @@
 import joi from "joi"
 
-<<<<<<< HEAD
 const adminLogin = joi.object ({
   username : joi.string().max(255).required(),
   password : joi.string().max(255).required()
-=======
+})
+  
 // admin validation 
 const addAdminValidation = joi.object ({
   id : joi.number().required(),
@@ -15,7 +15,6 @@ const addAdminValidation = joi.object ({
 const updateAdminValidation = joi.object ({
   username: joi.string().max(255).optional(),
   password: joi.string().max(255).optional()
->>>>>>> admin-api
 })
 
 // siswa Validation 
