@@ -12,7 +12,7 @@ adminRouter.get('/getAllAdmin', adminController.getAllAdmin)
 
 // siswa router
 adminRouter.post('/addSiswa',adminController.addSiswa)
-adminRouter.get('/findSiswaById/:id',adminController.findSiswaById)
+adminRouter.get('/findSiswa/:id',adminController.findSiswaById)
 adminRouter.get('/findAllSiswa',adminController.findAllSiswa)
 adminRouter.get('/findSiswaFilter',adminController.findsiswafilter)
 adminRouter.get('/findSiswaHaventPkl',adminController.findSiswaHaventPkl)
