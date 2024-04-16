@@ -1,7 +1,11 @@
 import express from "express"
 import adminController from "../controller/adminController.js"
+import { adminMiddleware } from "../middleware/adminMiddleware.js"
 
 export const adminRouter = express.Router()
+
+// middleware
+adminRouter.use(adminMiddleware)
 
 // siswa router
 adminRouter.post('/addSiswa',adminController.addSiswa)

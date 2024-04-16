@@ -1,7 +1,11 @@
 import express from "express"
 import siswaController from "../controller/siswaController.js"
+import { siswaMiddleware } from "../middleware/siswaMiddleware.js"
 
 export const siswaRouter = express.Router()
+
+// middlewarew
+siswaRouter.use(siswaMiddleware)
 
 // siswa login 
 siswaRouter.post("/siswaLogin",siswaController.siswaLogin)

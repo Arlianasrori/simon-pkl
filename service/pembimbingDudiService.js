@@ -338,6 +338,7 @@ const updateLaporanPkl = async (id, body) => {
   id = await validate(adminValidation.idValidation, id);
   body = await validate(pembimbingDudiValidation.updateLaporanPkl, body);
 
+
   const findLaporan = await db.laporan_pkl.findUnique({
     where: {
       id: id,

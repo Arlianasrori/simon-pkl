@@ -1,7 +1,11 @@
 import express from "express"
 import pembimbingDudiController from "../controller/pembimbingDudiController.js"
+import { pembimbingDudiMiddleware } from "../middleware/pembimbingDudiMiddleware.js"
 
 export const pembimbingDudiRouter = express.Router()
+
+// middleware
+pembimbingDudiRouter.use(pembimbingDudiMiddleware)
 
 // pembimbing dudi login 
 pembimbingDudiRouter.post("/pembimbingDudiLogin",pembimbingDudiController.pembimbingDudiLogin)

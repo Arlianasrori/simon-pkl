@@ -3,6 +3,9 @@ import guruPembimbingController from "../controller/guruPembimbingController.js"
 
 export const guruPembimbingRouter = express.Router()
 
+// middleware
+guruPembimbingRouter.use(guruPembimbingRouter)
+
 // guru pembimbing login 
 guruPembimbingRouter.post("/guruPembimbingLogin",guruPembimbingController.guruPembimbingLogin)
 
