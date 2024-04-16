@@ -1,6 +1,67 @@
 import adminService from "../service/adminService.js"
 
+// admin controller 
+const addAdmin = async (req, res, next) => {
+    try {
+        const result = await adminService.addAdmin(req.body)
+        res.status(200).json({
+        msg : "succes",
+        data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 
+const updateAdmin = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id)
+        const body = req.body
+        const result = await adminService.updateAdmin(id, body)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+            })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const deleteAdmin = async (req, res, next) => {
+    try {
+        const result = await adminService.deleteAdmin(req.params.id)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const getAdminById = async (req, res, next) => {
+    try {
+        const result = await adminService.getAdminById(req.params.id)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const getAllAdmin = async (req,res,next) => {
+    try {
+        const result = await adminService.getAllAdmin()
+
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 // siswa controller
 const addSiswa = async (req,res,next) => {
     try {
@@ -9,6 +70,18 @@ const addSiswa = async (req,res,next) => {
 
         const result = await adminService.addSiswa(siswa,alamat)
 
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const findSiswaById = async (req, res, next) => {
+    try {
+        const id = req.params.id
+        const result = await adminService.findSiswaById(id)
         res.status(200).json({
             msg : "succes",
             data : result
@@ -721,8 +794,17 @@ const findAbsenFilter = async (req,res,next) => {
     }
 }
 export default {
+
+     // admin 
+    addAdmin,
+    updateAdmin,
+    deleteAdmin,
+    getAdminById,
+    getAllAdmin,
+    
     // siswa
     addSiswa,
+    findSiswaById,
     findAllSiswa,
     updateSiswa,
     deleteSiswa,

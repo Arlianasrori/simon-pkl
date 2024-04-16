@@ -3,8 +3,16 @@ import adminController from "../controller/adminController.js"
 
 export const adminRouter = express.Router()
 
+// admin router 
+adminRouter.post('/addAdmin', adminController.addAdmin)
+adminRouter.put('/updateAdmin/:id', adminController.updateAdmin)
+adminRouter.delete('/deleteAdmin/:id', adminController.deleteAdmin)
+adminRouter.get('/getAdminById/:id', adminController.getAdminById)
+adminRouter.get('/getAllAdmin', adminController.getAllAdmin)
+
 // siswa router
 adminRouter.post('/addSiswa',adminController.addSiswa)
+adminRouter.get('/findSiswa/:id',adminController.findSiswaById)
 adminRouter.get('/findAllSiswa',adminController.findAllSiswa)
 adminRouter.get('/findSiswaFilter',adminController.findsiswafilter)
 adminRouter.get('/findSiswaHaventPkl',adminController.findSiswaHaventPkl)
