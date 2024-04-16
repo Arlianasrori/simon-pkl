@@ -3,6 +3,9 @@ import adminController from "../controller/adminController.js"
 
 export const adminRouter = express.Router()
 
+// admin login 
+adminRouter.post('/adminLogin',adminController.adminLogin)
+
 // admin router 
 adminRouter.post('/addAdmin', adminController.addAdmin)
 adminRouter.put('/updateAdmin/:id', adminController.updateAdmin)

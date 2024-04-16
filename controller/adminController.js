@@ -1,5 +1,24 @@
 import adminService from "../service/adminService.js"
 
+const adminLogin = async (req,res,next) => {
+    try {
+        const body = req.body
+        const result = await adminService.adminLogin(body)
+        res.status(201).cookie("acces_token",result.acces_token_admin,{
+            maxAge : 24 * 60 * 60 * 60,
+            httpOnly: true,
+        }).cookie("refresh_token",result.refresh_token_admin,{
+            maxAge : 24 * 60 * 60 * 60,
+            httpOnly: true,
+        }).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+  }
+
 // admin controller 
 const addAdmin = async (req, res, next) => {
     try {
@@ -794,12 +813,17 @@ const findAbsenFilter = async (req,res,next) => {
 }
 export default {
 
+    // adminLogin
+    adminLogin,
+
+    
     // admin 
     addAdmin,
     updateAdmin,
     deleteAdmin,
     getAdminById,
     getAllAdmin,
+
 
     // siswa
     addSiswa,
