@@ -251,7 +251,6 @@ const searchAbsen = joi.object({
   id_pembimbing_dudi: joi.number().optional()
 })
 
-
 export default {
 
   // admin login 
