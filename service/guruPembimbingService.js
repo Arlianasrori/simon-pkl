@@ -26,6 +26,7 @@ const guruPembimbingLogin = async (body) => {
   }
 
   const payload = {
+      id : findGuruPembimbing.id,
       nip : body.nip,
       password : body.password,
   }

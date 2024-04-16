@@ -33,6 +33,7 @@ const siswaLogin = async (body) => {
   }
 
   const payload = {
+      id : findSiswa.id,
       nis : body.nis,
       password : body.password,
   }
