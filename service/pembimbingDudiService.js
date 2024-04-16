@@ -11,6 +11,7 @@ import { fileLaporaPkl } from "../utils/imageSaveUtilsLaporanPkl.js";
 import { selectLaporanPkl } from "../utils/LaporanSiswaPklUtil.js";
 import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs"
+import fs from "fs"
 
 const pembimbingDudiLogin = async (body) => {
   body = await validate(pembimbingDudiValidation.pembimbingDudiLogin, body)
@@ -334,7 +335,7 @@ const AddLaporanPkl = async (body, image, url) => {
   return addLaporan;
 };
 
-const updateLaporanPkl = async (id, body) => {
+const updateLaporanPkl = async (id, body, image, url) => {
   id = await validate(adminValidation.idValidation, id);
   body = await validate(pembimbingDudiValidation.updateLaporanPkl, body);
 
@@ -347,6 +348,17 @@ const updateLaporanPkl = async (id, body) => {
 
   if (!findLaporan) {
     throw new responseError(404, "Laporan tidak ditemukan");
+  }
+
+  if(image) {
+    const { pathSaveFile, fullPath } = await fileLaporaPkl(image, url);
+    body.file_laporan = fullPath;
+    await image.mv(pathSaveFile, async (err) => {
+      if (err) {
+        console.log(err);
+        throw new responseError(500, err.message);
+      }
+    });
   }
 
   return db.laporan_pkl.update({
@@ -370,7 +382,13 @@ const deleteLaporanPkl = async (id) => {
   if (!findLaporan) {
     throw new responseError(404, "Laporan PKL tidak ditemukan");
   }
-
+  const filename = findLaporan.file_laporan.split("/")[4]
+  const p = `./public/laporan_pkl/${filename}`
+  fs.unlinkSync(p,(err) => {
+    if(err) {
+      throw new responseError(500,err.message)
+    }
+  })
   return db.laporan_pkl.delete({
     where: {
       id: id,

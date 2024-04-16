@@ -1,5 +1,86 @@
 import adminService from "../service/adminService.js"
 
+const adminLogin = async (req,res,next) => {
+    try {
+        const body = req.body
+        const result = await adminService.adminLogin(body)
+        res.status(201).cookie("acces_token",result.acces_token_admin,{
+            maxAge : 24 * 60 * 60 * 60,
+            httpOnly: true,
+        }).cookie("refresh_token",result.refresh_token_admin,{
+            maxAge : 24 * 60 * 60 * 60,
+            httpOnly: true,
+        }).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+  }
+
+// admin controller 
+const addAdmin = async (req, res, next) => {
+    try {
+        const result = await adminService.addAdmin(req.body)
+        res.status(200).json({
+        msg : "succes",
+        data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const updateAdmin = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id)
+        const body = req.body
+        const result = await adminService.updateAdmin(id, body)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+            })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const deleteAdmin = async (req, res, next) => {
+    try {
+        const result = await adminService.deleteAdmin(req.params.id)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const getAdminById = async (req, res, next) => {
+    try {
+        const result = await adminService.getAdminById(req.params.id)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const getAllAdmin = async (req,res,next) => {
+    try {
+        const result = await adminService.getAllAdmin()
+
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 
 // siswa controller
 const addSiswa = async (req,res,next) => {
@@ -731,6 +812,19 @@ const findAbsenFilter = async (req,res,next) => {
     }
 }
 export default {
+
+    // adminLogin
+    adminLogin,
+
+    
+    // admin 
+    addAdmin,
+    updateAdmin,
+    deleteAdmin,
+    getAdminById,
+    getAllAdmin,
+
+
     // siswa
     addSiswa,
     findSiswaById,
