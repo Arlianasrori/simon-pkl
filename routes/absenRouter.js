@@ -1,26 +1,24 @@
 import express from "express"
+import absenController from "../controller/absenController.js"
 
 export const absenRouter = express.Router()
 
 
-// absenRouter.get("/absen",(req,res) => {
-//     const j = 14.24
-//     const p = 14.25
+// jadwal absen
+absenRouter.post("/addJadwalAbsen",absenController.addJadwalAbsen)
+absenRouter.get("/findAllJadwalAbsen/:id_pembimbing_dudi",absenController.findAllJadwalAbsen)
+absenRouter.get("/findJadwalById/:id_jadwal",absenController.findJadwalAbsenById)
 
-//     if(j < p) {
-//         console.log("terlalu cepat");
-//     }
-//     const date = new Date()
-//     const options = {
-//         weekday: "long",
-//         year: "numeric",
-//         month: "long",
-//         day: "numeric",
-//         hour : "numeric",
-//         minute : "numeric",
-//         second : "numeric"
-//     };
-//     const tanggal = date.toLocaleDateString("id",options)
-//     console.log(tanggal);
-//     res.send("hay")
-// })
+
+// absen
+absenRouter.post("/absenMasuk",absenController.addAbsenMasuk)
+absenRouter.post("/absenKeluar",absenController.addAbsenPulang)
+absenRouter.post("/absenIzin",absenController.absenTidakMemenuhiJam)
+absenRouter.get("/findAbsen/:id_siswa",absenController.findAbsen)
+
+
+// kordinat absen
+absenRouter.post("/addKordinatAbsen",absenController.addKordinatAbsen)
+absenRouter.get("/findAllKordinatAbsen/:id_pembimbing_dudi",absenController.findAllKordinatAbsen)
+absenRouter.post("/cekKordinat",absenController.cekRadiusKordinatAbsen)
+absenRouter.delete("/deleteKordinat/:id_koordinat",absenController.deleteKoordinat)

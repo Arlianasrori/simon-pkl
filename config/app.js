@@ -7,7 +7,6 @@ import { notificationRouter } from "../routes/notificationRouter.js"
 import { errorMiddleware } from "../middleware/errorMiddleware.js"
 import { absenRouter } from "../routes/absenRouter.js"
 import fileUpload from "express-fileupload"
-import env from "dotenv"
 
 export const app = express()
 
@@ -22,13 +21,12 @@ app.use((req, res, next) => {
 })
 app.use(express.static('public'))
 app.use(fileUpload())
-// req.files.p.mv
 app.use("/admin",adminRouter)
 app.use("/siswa",siswaRouter)
 app.use("/guruPembimbing",guruPembimbingRouter)
 app.use("/dudi",pembimbingDudiRouter)
 app.use("/notification",notificationRouter)
 app.use("/pembimbingDudi",pembimbingDudiRouter)
-app.use(absenRouter)
+app.use("/absen",absenRouter)
 
 app.use(errorMiddleware)
