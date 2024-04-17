@@ -22,7 +22,7 @@ const siswaLogin = async (req,res,next) => {
 
 const getSiswaById = async (req, res, next) => {
   try {
-    const result = await siswaService.getSiswaById(parseInt(req.params.id));
+    const result = await siswaService.getSiswaById(req.siswa.id);
     res.status(200).json({
       msg: "succes",
       data: result,
@@ -108,7 +108,7 @@ const cancelPengajuanPkl = async (req, res, next) => {
 };
 const findAllPengajuanPkl = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id_siswa);
+    const id = req.siswa.id
     const result = await siswaService.findAllPengajuanPkl(id);
     res.status(200).json({
       msg: "succes",
@@ -160,7 +160,7 @@ const addCancelPkl = async (req, res, next) => {
 };
 const getCancelPklBySiswa = async (req, res, next) => {
   try {
-    const id_siswa = parseInt(req.params.id_siswa);
+    const id_siswa = req.siswa.id
 
     const result = await siswaService.getCancelPklBySiswa(id_siswa);
     res.status(200).json({
@@ -240,7 +240,7 @@ const deleteLaporanSiswaPkl = async (req, res, next) => {
 
 const findAllLaporanSiswaPkl = async (req, res, next) => {
   try {
-    const result = await siswaService.findAllLaporanSiswaPkl(parseInt(req.params.id_siswa))
+    const result = await siswaService.findAllLaporanSiswaPkl(req.siswa.id)
     res.status(200).json({
       msg: "Success",
       data: result,
@@ -264,7 +264,7 @@ try {
 const findLaporanSiswaPklFilter = async (req, res, next) => {
 try {
   const query = req.query
-  query.id_siswa = parseInt(req.params.id)
+  query.id_siswa = req.siswa.id
   const result = await adminService.findLaporanPklSiswaFilter(query)
   res.status(200).json({
     msg: "Success",
