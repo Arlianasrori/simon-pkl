@@ -393,11 +393,9 @@ const AddLaporanSiswaPkl = async (body, image, url) => {
   const tanggal = date.toLocaleDateString("id", options);
   body.tanggal = tanggal;
   body = await validate(siswaValidation.addLaporanSiswaPkl, body);
-  console.log(body);
 
   await image.mv(pathSaveFile, async (err) => {
     if (err) {
-      console.log(err);
       throw new responseError(500, err.message);
     }
   });
@@ -412,11 +410,7 @@ const AddLaporanSiswaPkl = async (body, image, url) => {
     throw new responseError(404, "Laporan Pkl Sudah Di Tambahkan");
   }
 
-  const addLaporan = await db.laporan_siswa_pkl.create({
-    data: body,
-    select: selectLaporanSiswaPkl,
-  });
-  return addLaporan;
+  return db.laporan_siswa_pkl.create
 };
 
 const updateLaporanSiswaPkl = async (id, body, image, url) => {
@@ -466,8 +460,8 @@ const deleteLaporanSiswaPkl = async (id) => {
     throw new responseError(404, "Laporan PKL tidak ditemukan");
   }
   const filename = findLaporan.file_laporan.split("/")[4]
-  const p = `./public/laporan_siswa_pkl/${filename}`
-  fs.unlinkSync(p,(err) => {
+  const pathDelete = `./public/laporan_siswa_pkl/${filename}`
+  fs.unlinkSync(pathDelete,(err) => {
     if(err) {
       throw new responseError(500,err.message)
     }
