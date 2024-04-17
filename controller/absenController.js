@@ -93,6 +93,19 @@ const findAbsen = async (req,res,next) => {
         next(error)
     }
 }
+const findAbsenFilter = async (req,res,next) => {
+    try {
+        const query = req.query
+
+        const result = await absenService.findAbsenFilter(query)
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 
 
 // kordinat absen
@@ -161,6 +174,7 @@ export default {
     addAbsenPulang,
     absenTidakMemenuhiJam,
     findAbsen,
+    findAbsenFilter,
 
     // kordinat absen
     addKordinatAbsen,

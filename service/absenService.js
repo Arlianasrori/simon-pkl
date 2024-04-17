@@ -276,6 +276,83 @@ const findAbsen = async (id_siswa) => {
     })
 }
 
+const findAbsenFilter = async (query) => {
+    console.log(query);
+    query = await validate(absenValidation.findAbsenFilterValidation,query)
+
+    if(query.month_ago) {
+        query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago)
+    }
+
+    return db.absen.findMany({
+        where : {
+            AND : [
+                {
+                    id_siswa : query.id_siswa
+                },
+                {
+                    siswa : {
+                        id_pembimbing_dudi : query.id_pembimbing_dudi
+                    }
+                },
+                {
+                    siswa : {
+                        id_guru_pembimbing : query.id_guru_pembimbing
+                    }
+                },
+                {
+                    siswa : {
+                        id_dudi : query.id_dudi
+                    }
+                },
+                {
+                    OR : [
+                        {
+                            tanggal : query.tanggal
+                        },
+                        {
+                            AND : [
+                                {
+                                    tanggal : {
+                                        gte : query.tanggal_start
+                                    }
+                                },
+                                {
+                                    tanggal : {
+                                        lte : query.tanggal_end
+                                    }
+                                },
+                            ]
+                        }
+                    ]
+                },
+                {
+                    tanggal : query.month_ago
+                }
+            ]
+        },
+        orderBy : {
+            tanggal : "desc"
+        },
+        select : {
+            id : true,
+            tanggal : true,
+            absen_masuk : true,
+            absen_pulang : true,
+            status_absen_masuk : true,
+            status_absen_keluar : true,
+            foto : true,
+            jadwal_absen : true,
+            siswa : {
+                select : {
+                    id : true,
+                    nama : true,
+                    nis : true
+                }
+            }
+        }
+    })
+}
 
 
 // kordinat absen
@@ -428,6 +505,7 @@ export default {
     addAbsenPulang,
     findAbsen,
     absenTidakMemenuhiJam,
+    findAbsenFilter,
 
 
     // kordinat absen
