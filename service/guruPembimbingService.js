@@ -66,7 +66,7 @@ const getSiswa = async (id) => {
 
   const findSiswa = await db.siswa.findFirst({
     where: {
-      id_guru_pembimbing: id,
+      id: id,
     },
     select: selectSiswaObject,
   });

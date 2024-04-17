@@ -1411,6 +1411,11 @@ const findLaporanPklSiswaFilter = async (query) => {
                 {
                     id_pembimbing_dudi : query.id_pembimbing_dudi
                 },
+                   {
+                    siswa : {
+                        id_guru_pembimbing : query.id_guru_Pembimbing
+                    }
+                },
                 {
                     AND : [
                       {
