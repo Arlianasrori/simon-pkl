@@ -483,6 +483,57 @@ const findAllLaporanSiswaPkl = async (id_siswa) => {
     select: selectLaporanSiswaPkl,
   });
 };
+const findAllLaporanSiswaPklFilter = async (id_siswa,query) => {
+  id_siswa = await validate(adminValidation.idValidation, id_siswa);
+  query = await validate(siswaValidation.findLaporanPklFIlter,query)
+
+  if(query.month_ago) {
+    query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago + 1)
+  }
+
+  return db.laporan_siswa_pkl.findMany({
+    where : {
+      AND : [
+          {
+              id_siswa : id_siswa
+          },
+          {
+            rujukan_kompetensi_dasar : query.rujukan_kompetensi_dasar
+          },
+          {
+            topik_pekerjaan : query.topik_pekerjaan
+          },
+          {
+              OR : [
+                  {
+                      tanggal : query.tanggal
+                  },
+                  {
+                      AND : [
+                          {
+                              tanggal : {
+                                  gte : query.tanggal_start
+                              }
+                          },
+                          {
+                              tanggal : {
+                                  lte : query.tanggal_end
+                              }
+                          },
+                      ]
+                  }
+              ]
+          },
+          {
+              tanggal : query.month_ago
+          }
+      ]
+  },
+  orderBy : {
+      tanggal : "desc"
+  },
+  });
+};
 
 const findLaporanSiswaPklById = async (id) => {
   id = await validate(adminValidation.idValidation, id);
@@ -532,4 +583,5 @@ export default {
   deleteLaporanSiswaPkl,
   findAllLaporanSiswaPkl,
   findLaporanSiswaPklById,
+  findAllLaporanSiswaPklFilter
 };

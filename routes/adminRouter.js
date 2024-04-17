@@ -5,7 +5,7 @@ import { adminMiddleware } from "../middleware/adminMiddleware.js"
 export const adminRouter = express.Router()
 
 // middleware
-adminRouter.use(adminMiddleware)
+// adminRouter.use(adminMiddleware)
 
 // admin login 
 adminRouter.post('/adminLogin',adminController.adminLogin)

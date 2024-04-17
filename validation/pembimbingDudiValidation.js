@@ -30,6 +30,13 @@ const updateLaporanPkl = joi.object ({
     keterangan : joi.string().max(1500).optional(),
     file_laporan : joi.string().max(1500).optional()
   })
+  const findLaporanPklFIlter = joi.object ({
+    keterangan : joi.string().optional(),
+    tanggal : joi.string().optional(),
+    tanggal_start : joi.string().required(),
+    tanggal_end : joi.string().optional(),
+    month_ago : joi.number().optional()
+  })
 
 export default {
     pembimbingDudiLogin,
@@ -38,4 +45,5 @@ export default {
     statusCancelValidation,
     addLaporanPkl,
     updateLaporanPkl,
+    findLaporanPklFIlter,
 }

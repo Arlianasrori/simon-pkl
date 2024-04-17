@@ -260,6 +260,17 @@ try {
   next(error)
 }
 }
+const findLaporanSiswaPklFilter = async (req, res, next) => {
+try {
+  const result = await siswaService.findAllLaporanSiswaPklFilter(parseInt(req.params.id),req.query)
+  res.status(200).json({
+    msg: "Success",
+    data: result,
+  })
+} catch (error) {
+  next(error)
+}
+}
 
 export default {
 
@@ -291,5 +302,6 @@ export default {
   updateLaporanSiswaPkl,
   deleteLaporanSiswaPkl,
   findAllLaporanSiswaPkl,
-  findLaporanSiswaPklById
+  findLaporanSiswaPklById,
+  findLaporanSiswaPklFilter
 };

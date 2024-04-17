@@ -244,6 +244,7 @@ const searchLaporanPkl = joi.object({
 })
 
 
+
 // laporan absen
 const searchAbsen = joi.object({
   id_dudi : joi.number().optional(),

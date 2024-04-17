@@ -4,11 +4,12 @@ import { siswaMiddleware } from "../middleware/siswaMiddleware.js"
 
 export const siswaRouter = express.Router()
 
+// siswa login 
+siswaRouter.post("/Login",siswaController.siswaLogin)
+
 // middlewarew
 siswaRouter.use(siswaMiddleware)
 
-// siswa login 
-siswaRouter.post("/siswaLogin",siswaController.siswaLogin)
 
 siswaRouter.get('/getSiswaById/:id', siswaController.getSiswaById)
 
@@ -38,3 +39,4 @@ siswaRouter.put("/updateLaporanSiswaPkl/:id",siswaController.updateLaporanSiswaP
 siswaRouter.delete("/deleteLaporanSiswaPkl/:id",siswaController.deleteLaporanSiswaPkl)
 siswaRouter.get("/findAllLaporanSiswaPkl/:id_siswa",siswaController.findAllLaporanSiswaPkl)
 siswaRouter.get("/findLaporanSiswaPklById/:id",siswaController.findLaporanSiswaPklById)
+siswaRouter.get("/findLaporanSiswaPklFilter/:id",siswaController.findLaporanSiswaPklFilter)

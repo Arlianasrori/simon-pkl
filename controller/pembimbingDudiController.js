@@ -215,6 +215,17 @@ const findLaporanPklById = async (req, res, next) => {
     next(error)
   }
   }
+const findLaporanPklFilter= async (req, res, next) => {
+  try {
+    const result = await pembimbingDudiService.findLaporanPklFilter(parseInt(req.params.id_dudi),req.query)
+    res.status(200).json({
+      msg: "Success",
+      data: result,
+    })
+  } catch (error) {
+    next(error)
+  }
+  }
 
 export default {
 
@@ -242,5 +253,6 @@ export default {
   updateLaporanPkl,
   deleteLaporanPkl,
   findAllLaporanPkl,
-  findLaporanPklById
+  findLaporanPklById,
+  findLaporanPklFilter
 };

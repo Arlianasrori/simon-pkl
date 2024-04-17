@@ -33,3 +33,4 @@ pembimbingDudiRouter.put("/updateLaporanPkl/:id",pembimbingDudiController.update
 pembimbingDudiRouter.delete("/deleteLaporanPkl/:id",pembimbingDudiController.deleteLaporanPkl)
 pembimbingDudiRouter.get("/findAllLaporanPkl/:id_pembimbing_dudi",pembimbingDudiController.findAllLaporanPkl)
 pembimbingDudiRouter.get("/findLaporanPklById/:id",pembimbingDudiController.findLaporanPklById)
+pembimbingDudiRouter.get("/findLaporanPklFilter/:id_dudi",pembimbingDudiController.findLaporanPklById)

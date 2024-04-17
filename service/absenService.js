@@ -277,11 +277,10 @@ const findAbsen = async (id_siswa) => {
 }
 
 const findAbsenFilter = async (query) => {
-    console.log(query);
     query = await validate(absenValidation.findAbsenFilterValidation,query)
 
     if(query.month_ago) {
-        query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago)
+        query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago + 1)
     }
 
     return db.absen.findMany({
