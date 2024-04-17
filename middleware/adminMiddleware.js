@@ -19,7 +19,7 @@ export const adminMiddleware = async (req,res,next) => {
         return admin
     })
 
-    const findAdmin = await db.admin.findUnique({
+    const findAdmin = await db.admin.findFirst({
         where : {
             username : admin.username
         }

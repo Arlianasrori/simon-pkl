@@ -1324,9 +1324,48 @@ const findLaporanPklFilter = async (query) => {
                     id_siswa :  query.id_siswa
                 },
                 {
+                    siswa : {
+                        id_guru_pembimbing : query.id_guru_Pembimbing
+                    }
+                },
+                {
                     id_pembimbing_dudi : query.id_pembimbing_dudi
+                },
+                {
+                    AND : [
+                    {
+                      keterangan : query.keterangan
+                    },
+                    {
+                        OR : [
+                            {
+                                tanggal : query.tanggal
+                            },
+                            {
+                                AND : [
+                                    {
+                                        tanggal : {
+                                            gte : query.tanggal_start
+                                        }
+                                    },
+                                    {
+                                        tanggal : {
+                                            lte : query.tanggal_end
+                                        }
+                                    },
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        tanggal : query.month_ago
+                    }
+                ]
                 }
             ]
+        },
+        orderBy : {
+            tanggal : "desc"
         },
         select : selectLaporanpklObject
     })
@@ -1357,7 +1396,8 @@ const findLaporanPklSiswaById = async (id) => {
     return findLaporan
 }
 const findLaporanPklSiswaFilter = async (query) => {
-    query = await validate(adminValidation.searchLaporanPkl,query)
+    console.log(query);
+    query = await validate(adminValidation.searchLaporanPklSiswa,query)
 
     const findLaporan = await db.laporan_siswa_pkl.findMany({
         where : {
@@ -1370,7 +1410,41 @@ const findLaporanPklSiswaFilter = async (query) => {
                 },
                 {
                     id_pembimbing_dudi : query.id_pembimbing_dudi
-                }
+                },
+                {
+                    AND : [
+                      {
+                        rujukan_kompetensi_dasar : query.rujukan_kompetensi_dasar
+                      },
+                      {
+                        topik_pekerjaan : query.topik_pekerjaan
+                      },
+                      {
+                          OR : [
+                              {
+                                  tanggal : query.tanggal
+                              },
+                              {
+                                  AND : [
+                                      {
+                                          tanggal : {
+                                              gte : query.tanggal_start
+                                          }
+                                      },
+                                      {
+                                          tanggal : {
+                                              lte : query.tanggal_end
+                                          }
+                                      },
+                                  ]
+                              }
+                          ]
+                      },
+                      {
+                          tanggal : query.month_ago
+                      }
+                    ]
+                  }
             ]
         },
         select : selectLaporanpklSiswaObject

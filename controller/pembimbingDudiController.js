@@ -1,3 +1,4 @@
+import adminService from "../service/adminService.js"
 import pembimbingDudiService from "../service/pembimbingDudiService.js"
 
 const pembimbingDudiLogin = async (req,res,next) => {
@@ -21,9 +22,7 @@ const pembimbingDudiLogin = async (req,res,next) => {
 
 const getPembimbingDudiById = async (req, res, next) => {
   try {
-    const result = await pembimbingDudiService.getPembimbingDudiById(
-      parseInt(req.params.id)
-    );
+    const result = await pembimbingDudiService.getPembimbingDudiById(req.pembimbingDudi.id);
     res.status(200).json({
       msg: "succes",
       data: result,
@@ -35,8 +34,7 @@ const getPembimbingDudiById = async (req, res, next) => {
 
 const getSiswaPembimbingDudi = async (req, res, next) => {
   try {
-    const result = await pembimbingDudiService.getSiswaPembimbingDudi(parseInt(req.params.id_pembimbing_dudi)
-    );
+    const result = await pembimbingDudiService.getSiswaPembimbingDudi(parseInt(req.params.id));
     res.status(200).json({
       msg: "succes",
       data: result,
@@ -48,7 +46,7 @@ const getSiswaPembimbingDudi = async (req, res, next) => {
 
 const getAllSiswaPembimbingDudi = async (req, res, next) => {
   try {
-    const id_pembimbing_dudi = parseInt(req.params.id)
+    const id_pembimbing_dudi = req.pembimbingDudi.id
     const result = await pembimbingDudiService.getAllSiswaPembimbingDudi(id_pembimbing_dudi)
     res.status(200).json({
       msg : "succes",
@@ -64,7 +62,7 @@ const getAllSiswaPembimbingDudi = async (req, res, next) => {
 // pengajuan pkl
 const getAllPengajuanPkl = async (req, res, next) => {
   try {
-    const id_pembimbing_dudi = parseInt(req.params.id)
+    const id_pembimbing_dudi = req.pembimbingDudi.id
     const result = await pembimbingDudiService.getAllPengajuanPkl(id_pembimbing_dudi);
     res.status(200).json({
       msg : "succes",
@@ -106,7 +104,7 @@ const updateStatusPengajuanPkl = async (req,res,next) => {
 // cancel pkl
 const getAllCancelPkl = async (req,res,next) => {
   try {
-    const id = parseInt(req.params.id_pembimbing_dudi)
+    const id = req.pembimbingDudi.id
 
     const result = await pembimbingDudiService.getAllCancelPkl(id)
     res.status(200).json({
@@ -194,7 +192,7 @@ const deleteLaporanPkl = async (req, res, next) => {
 
 const findAllLaporanPkl = async (req, res, next) => {
   try {
-    const result = await pembimbingDudiService.findAllLaporanPkl(parseInt(req.params.id_pembimbing_dudi))
+    const result = await pembimbingDudiService.findAllLaporanPkl(req.pembimbingDudi.id)
     res.status(200).json({
       msg: "Success",
       data: result,
@@ -217,7 +215,9 @@ const findLaporanPklById = async (req, res, next) => {
   }
 const findLaporanPklFilter= async (req, res, next) => {
   try {
-    const result = await pembimbingDudiService.findLaporanPklFilter(parseInt(req.params.id_dudi),req.query)
+    const query = req.query
+    query.id_pembimbing_dudi = req.pembimbingDudi.id
+    const result = await adminService.findLaporanPklFilter(query)
     res.status(200).json({
       msg: "Success",
       data: result,

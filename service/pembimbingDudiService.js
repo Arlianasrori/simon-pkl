@@ -70,7 +70,7 @@ const getSiswaPembimbingDudi = async (id) => {
   id = await validate(pembimbingDudiValidation.getIdValidation, id);
   const findSiswa = await db.siswa.findFirst({
     where: {
-      id_pembimbing_dudi: parseInt(id),
+      id: parseInt(id),
     },
     select: selectSiswaObject
   });
@@ -409,58 +409,6 @@ const findAllLaporanPkl = async (id_pembimbing_dudi) => {
     select: selectLaporanPkl,
   });
 };
-const findLaporanPklFilter = async (id_pembimbing_dudi,query) => {
-  id_pembimbing_dudi = await validate(adminValidation.idValidation, id_pembimbing_dudi);
-  query = await validate(pembimbingDudiValidation.findLaporanPklFIlter,query)
-
-  if(query.month_ago) {
-    query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago + 1)
-  }
-
-  return db.laporan_pkl.findMany({
-    where : {
-      AND : [
-        {
-          id_pembimbing_dudi : id_pembimbing_dudi
-        },
-        {
-            AND : [
-            {
-              keterangan : query.keterangan
-            },
-            {
-                OR : [
-                    {
-                        tanggal : query.tanggal
-                    },
-                    {
-                        AND : [
-                            {
-                                tanggal : {
-                                    gte : query.tanggal_start
-                                }
-                            },
-                            {
-                                tanggal : {
-                                    lte : query.tanggal_end
-                                }
-                            },
-                        ]
-                    }
-                ]
-            },
-            {
-                tanggal : query.month_ago
-            }
-        ]
-        }
-      ]    
-  },
-  orderBy : {
-      tanggal : "desc"
-  },
-  });
-};
 
 const findLaporanPklById = async (id) => {
   id = await validate(adminValidation.idValidation, id);
@@ -506,6 +454,5 @@ export default {
   deleteLaporanPkl,
   findAllLaporanPkl,
   findLaporanPklById,
-  findLaporanPklFilter
 };
 

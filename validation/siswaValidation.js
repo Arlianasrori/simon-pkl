@@ -40,14 +40,6 @@ const UpdateLaporanSiswaPkl = joi.object ({
   rujukan_kompetensi_dasar : joi.string().max(255).optional(),
   dokumentasi : joi.string().max(1500).optional()
 })
-const findLaporanPklFIlter = joi.object ({
-  topik_pekerjaan : joi.string().optional(),
-  rujukan_kompetensi_dasar : joi.string().optional(),
-  tanggal : joi.string().optional(),
-  tanggal_start : joi.string().required(),
-  tanggal_end : joi.string().optional(),
-  month_ago : joi.number().optional()
-})
 
 export default {
   siswaLogin,
@@ -57,5 +49,4 @@ export default {
   findPengajuanByStatus,
   addLaporanSiswaPkl,
   UpdateLaporanSiswaPkl,
-  findLaporanPklFIlter
 };

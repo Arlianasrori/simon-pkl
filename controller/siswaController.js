@@ -1,3 +1,4 @@
+import adminService from "../service/adminService.js";
 import siswaService from "../service/siswaService.js";
 
 const siswaLogin = async (req,res,next) => {
@@ -262,7 +263,9 @@ try {
 }
 const findLaporanSiswaPklFilter = async (req, res, next) => {
 try {
-  const result = await siswaService.findAllLaporanSiswaPklFilter(parseInt(req.params.id),req.query)
+  const query = req.query
+  query.id_siswa = parseInt(req.params.id)
+  const result = await adminService.findLaporanPklSiswaFilter(query)
   res.status(200).json({
     msg: "Success",
     data: result,
