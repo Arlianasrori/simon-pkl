@@ -254,7 +254,7 @@ const absenTidakMemenuhiJam = async (body) => {
 const findAbsen = async (id_siswa) => {
     id_siswa = await validate(adminValidation.idValidation,id_siswa)
 
-    return db.absen.findFirst({
+    return db.absen.findMany({
         where : {
             id_siswa : id_siswa
         },
@@ -264,7 +264,7 @@ const findAbsen = async (id_siswa) => {
             absen_pulang : true,
             jadwal_absen : true,
             status_absen_masuk : true,
-            status_absen_pulang : true,
+            status_absen_keluar : true,
             foto : true,
             izin : {
                 select : {
@@ -351,6 +351,90 @@ const findAbsenFilter = async (query) => {
             }
         }
     })
+}
+const analisisAbsen = async (query) => {
+    query = await validate(absenValidation.findAbsenFilterValidation,query)
+
+    if(query.month_ago) {
+        query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago + 1)
+    }
+    console.log(query);
+
+    return db.$queryRaw`SELECT COUNT(status_absen_masuk) filter (where status_absen_masuk = 'hadir') as absen_masuk_hadir,COUNT(status_absen_masuk) filter (where absen_masuk = 'tidak_hadir') as absen_masuk_tidak_hadir,COUNT(absen_masuk) filter (where status_absen_masuk = 'telat') as absen_masuk_telat,COUNT(status_absen_masuk) filter (where status_absen_masuk = 'izin') as absen_masuk_izin,
+    COUNT(status_absen_keluar) filter (where status_absen_keluar = 'hadir') as absen_keluar_hadir,COUNT(status_absen_keluar) filter (where status_absen_keluar = 'tidak_hadir') as absen_keluar_tidak_hadir,COUNT(status_absen_keluar) filter (where status_absen_keluar = 'telat') as absen_keluar_telat,COUNT(status_absen_keluar) filter (where status_absen_keluar = 'izin') as absen_keluar_izin,
+    id_siswa,siswa.nama
+    FROM absen
+    INNER JOIN siswa ON absen.id_siswa = siswa.id
+    WHERE absen.id_siswa = ${query.id_siswa} AND siswa.id_pembimbing_dudi = ${query.id_pembimbing_dudi} AND siswa.id_guru_pembimbing = ${query.id_guru_pembimbing} AND siswa.id_dudi = ${query.id_dudi} AND (absen.tanggal = ${query.tanggal} OR (absen.tanggal >= ${query.tanggal_start} AND absen.tanggal <= ${query.tanggal_end})) AND absen.tanggal = ${query.month_ago}
+    GROUP BY id_siswa,nama`
+    // return db.absen.findMany({
+    //     where : {
+    //         AND : [
+    //             {
+    //                 id_siswa : query.id_siswa
+    //             },
+    //             {
+    //                 siswa : {
+    //                     id_pembimbing_dudi : query.id_pembimbing_dudi
+    //                 }
+    //             },
+    //             {
+    //                 siswa : {
+    //                     id_guru_pembimbing : query.id_guru_pembimbing
+    //                 }
+    //             },
+    //             {
+    //                 siswa : {
+    //                     id_dudi : query.id_dudi
+    //                 }
+    //             },
+    //             {
+    //                 OR : [
+    //                     {
+    //                         tanggal : query.tanggal
+    //                     },
+    //                     {
+    //                         AND : [
+    //                             {
+    //                                 tanggal : {
+    //                                     gte : query.tanggal_start
+    //                                 }
+    //                             },
+    //                             {
+    //                                 tanggal : {
+    //                                     lte : query.tanggal_end
+    //                                 }
+    //                             },
+    //                         ]
+    //                     }
+    //                 ]
+    //             },
+    //             {
+    //                 tanggal : query.month_ago
+    //             }
+    //         ]
+    //     },
+    //     orderBy : {
+    //         tanggal : "desc"
+    //     },
+    //     select : {
+    //         id : true,
+    //         tanggal : true,
+    //         absen_masuk : true,
+    //         absen_pulang : true,
+    //         status_absen_masuk : true,
+    //         status_absen_keluar : true,
+    //         foto : true,
+    //         jadwal_absen : true,
+    //         siswa : {
+    //             select : {
+    //                 id : true,
+    //                 nama : true,
+    //                 nis : true
+    //             }
+    //         }
+    //     }
+    // })
 }
 
 
@@ -505,6 +589,7 @@ export default {
     findAbsen,
     absenTidakMemenuhiJam,
     findAbsenFilter,
+    analisisAbsen,
 
 
     // kordinat absen
