@@ -35,3 +35,7 @@ pembimbingDudiRouter.delete("/deleteLaporanPkl/:id",pembimbingDudiController.del
 pembimbingDudiRouter.get("/findAllLaporanPkl",pembimbingDudiController.findAllLaporanPkl)
 pembimbingDudiRouter.get("/findLaporanPklById/:id",pembimbingDudiController.findLaporanPklById)
 pembimbingDudiRouter.get("/findLaporanPklFilter",pembimbingDudiController.findLaporanPklFilter)
+
+
+// absen
+pembimbingDudiRouter.get("/cetakAbsen",pembimbingDudiController.cetakAbsen)

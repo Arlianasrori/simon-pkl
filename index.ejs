@@ -63,65 +63,34 @@
                   <td style="font-weight: bold;width: 50px;">jam</td>
                   <td style="font-weight: bold;width: 60px;">status</td>
                 </tr>
-                <tr>
-                  <td>1</td>
-                  <td>habil arlian asrori</td>
-                  <td>Pt telkom indonesia</td>
-                  <td>Rekayasa perangkat lunak</td>
-                  <td>senin, 7 januari 2008</td>
-                  <td>08.00</td>
-                  <td>hadir</td>
-                  <td>12.00</td>
-                  <td>tidak hadir</td>
-                </tr>
-                <tr>
-                  <td>2</td>
-                  <td>aditya putra budiman</td>
-                  <td>Pt telkom indonesia</td>
-                  <td>Rekayasa perangkat lunak</td>
-                  <td>senin, 7 januari 2008</td>
-                  <td>08.00</td>
-                  <td>hadir</td>
-                  <td>12.00</td>
-                  <td>tidak hadir</td>
-                </tr>
-                <tr>
-                  <td>3</td>
-                  <td>Anak agung gede alit smara atmaja</td>
-                  <td>Pt telkom indonesia</td>
-                  <td>Rekayasa perangkat lunak</td>
-                  <td>senin, 7 januari 2008</td>
-                  <td>08.00</td>
-                  <td>hadir</td>
-                  <td>12.00</td>
-                  <td>tidak hadir</td>
-                </tr>
-                <!-- <tr>
-                  <td>4</td>
-                  <td>100891232</td>
-                  <td>Anak agung gede alit smara atmaja</td>
-                  <td>Pt telkom indonesia</td>
-                  <td>Rekayasa perangkat lunak</td>
-                  <td>x rpl 1</td>
-                  <td>senin, 7 januari 2008</td>
-                  <td>08.00</td>
-                  <td>hadir</td>
-                  <td>12.00</td>
-                  <td>tidak hadir</td>
-                </tr>
-                <tr>
-                  <td>5</td>
-                  <td>100891232</td>
-                  <td>Anak agung gede alit smara atmaja</td>
-                  <td>Pt telkom indonesia</td>
-                  <td>Rekayasa perangkat lunak</td>
-                  <td>x rpl 1</td>
-                  <td>senin, 7 januari 2008</td>
-                  <td>08.00</td>
-                  <td>hadir</td>
-                  <td>12.00</td>
-                  <td>tidak hadir</td>
-                </tr> -->
+                <% data.forEach(function(data,index){ %>
+                  <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= data.siswa.nama %></td>
+                    <td><%= data.siswa.dudi.nama_instansi_perusahaan %></td>
+                    <td><%= data.siswa.jurusan.nama %></td>
+                    <td><%= data.tanggal%></td>
+                    <!-- <td><%= data.absen_masuk%></td> -->
+                    <td><% if (data.absen_masuk == null) { %>
+                      belum absen
+                    <% } else { %>
+                      <%= data.absen_masuk%>
+                    <%} %></td>
+
+                    <td><%= data.status_absen_masuk%></td>
+                    <td><% if (data.absen_keluar == null) { %>
+                      belum absen
+                      <%} else { %>
+                        <%= data.absen_keluar%>
+                      <% } %></td>
+
+                    <td><% if (data.status_absen_keluar == null) { %>
+                      silahkan absen pulang
+                    <% } else { %>
+                      <%= data.status_absen_keluar%>
+                    <%} %></td>
+                  </tr>
+                <% }); %>       
               </table>
         </div>
     </div>
