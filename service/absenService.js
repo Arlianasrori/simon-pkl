@@ -331,7 +331,7 @@ const findAbsenFilter = async (query) => {
             ]
         },
         orderBy : {
-            tanggal : "desc"
+            tanggal : "desc",
         },
         select : {
             id : true,
