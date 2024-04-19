@@ -5,7 +5,7 @@ import { siswaMiddleware } from "../middleware/siswaMiddleware.js"
 export const siswaRouter = express.Router()
 
 // siswa login 
-siswaRouter.post("/Login",siswaController.siswaLogin)
+siswaRouter.post("/login",siswaController.siswaLogin)
 
 // middlewarew
 siswaRouter.use(siswaMiddleware)

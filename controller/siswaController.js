@@ -216,7 +216,9 @@ const AddLaporanSiswaPkl = async (req, res, next) => {
 
 const updateLaporanSiswaPkl = async (req, res, next) => {
   try {
-    const result = await siswaService.updateLaporanSiswaPkl(parseInt(req.params.id),req.body)
+    const image = req.files.file_laporan;
+    const url = `http://${req.hostname}:2008/laporan_siswa_pkl`;
+    const result = await siswaService.updateLaporanSiswaPkl(parseInt(req.params.id),req.body, image, url)
     res.status(200).json({
       msg: "Success",
       data: result,

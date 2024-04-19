@@ -167,7 +167,9 @@ const AddLaporanPkl = async (req, res, next) => {
 
 const updateLaporanPkl = async (req, res, next) => {
   try {
-    const result = await pembimbingDudiService.updateLaporanPkl(parseInt(req.params.id),req.body)
+    const image = req.files.file_laporan;
+    const url = `http://${req.hostname}:2008/laporan_pkl`;
+    const result = await pembimbingDudiService.updateLaporanPkl(parseInt(req.params.id),req.body,image,url)
     res.status(200).json({
       msg: "Success",
       data: result,
@@ -182,7 +184,7 @@ const deleteLaporanPkl = async (req, res, next) => {
   try {
     const result = await pembimbingDudiService.deleteLaporanPkl(parseInt(req.params.id))
     res.status(200).json({
-      msg: "Laporan Anda Telah Dihapus",
+      msg: "Laporan Anda Berhasil Dihapus",
       data: result,
     })
   } catch (error) { 

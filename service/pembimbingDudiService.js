@@ -339,7 +339,6 @@ const updateLaporanPkl = async (id, body, image, url) => {
   id = await validate(adminValidation.idValidation, id);
   body = await validate(pembimbingDudiValidation.updateLaporanPkl, body);
 
-
   const findLaporan = await db.laporan_pkl.findUnique({
     where: {
       id: id,
@@ -351,6 +350,7 @@ const updateLaporanPkl = async (id, body, image, url) => {
   }
 
   if(image) {
+    console.log("hay");
     const { pathSaveFile, fullPath } = await fileLaporaPkl(image, url);
     body.file_laporan = fullPath;
     await image.mv(pathSaveFile, async (err) => {
@@ -431,10 +431,12 @@ export default {
 
   // pembimbing dudi login 
   pembimbingDudiLogin,
+   
 
   getPembimbingDudiById,
   getSiswaPembimbingDudi,
   getAllSiswaPembimbingDudi,
+ 
 
   // pengajuan pkl
   getAllPengajuanPkl,

@@ -6,7 +6,7 @@ export const pembimbingDudiRouter = express.Router()
 
 
 // pembimbing dudi login 
-pembimbingDudiRouter.post("/Login",pembimbingDudiController.pembimbingDudiLogin)
+pembimbingDudiRouter.post("/login",pembimbingDudiController.pembimbingDudiLogin)
 
 // middleware
 pembimbingDudiRouter.use(pembimbingDudiMiddleware)
