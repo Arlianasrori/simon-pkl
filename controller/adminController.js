@@ -786,8 +786,7 @@ const findAllAbsen = async (req,res,next) => {
     }
 }
 const findAbsenById = async (req,res,next) => {
-    try {
-        const id = parseInt(req.params.id)
+    try {        const id = parseInt(req.params.id)
         const result = await adminService.findAbsenById(id)
     
         res.status(200).json({

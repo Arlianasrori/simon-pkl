@@ -117,21 +117,18 @@ const addAbsenMasuk = async (body,image,url) => {
 
     if(hourNow > findJadwalAbsen.batas_absen_pulang) {
             body.status_absen_masuk = "tidak_hadir"
+            body.status = "tidak_hadir"
             body = await validate(absenValidation.addAbsenMasukValidation,body)
             await db.absen.create({
                 data : body
             })
             throw new responseError(400,"anda dinyatakn tidak hadir karena telah melewati batas absen")
         }else if (hourNow > findJadwalAbsen.batas_absen_masuk) {
-            body.status_absen_masuk = "telat"
-            body = await validate(absenValidation.addAbsenMasukValidation,body)
-            const adddAbsen = await db.absen.create({
-                data : body
-            })
-            return {data : adddAbsen,msg : "anda telat dalam absen masuk,penuhi batas jam kerja anda sebelum absen pulang"}
+            return {succes_absen : false,msg : "anda telat untuk absen masuk,silahkan isi keterangan anda untuk absen"}
         }
 
     body.status_absen_masuk = "hadir"
+    body.status = "hadir"
     body = await validate(absenValidation.addAbsenMasukValidation,body)
     return db.absen.create({
     data : body
@@ -174,7 +171,7 @@ const addAbsenPulang = async (body) => {
         throw new responseError(400,"anda telah melakukan absen pulang")
     }
 
-    const validasi = await validasiAbsen(findAbsen.jadwal_absen.tanggal_mulai,findAbsen.jadwal_absen.selisih_tanggal_day,findAbsen.absen_masuk,findAbsen.jadwal_absen.batas_absen_pulang,findAbsen.jadwal_absen.batas_absen_masuk)
+    const validasi = await validasiAbsen(findAbsen.jadwal_absen.tanggal_mulai,findAbsen.jadwal_absen.selisih_tanggal_day,findAbsen.absen_masuk,findAbsen.jadwal_absen.batas_absen_pulang,findAbsen.jadwal_absen.batas_absen_masuk,body)
 
     body.absen_pulang = validasi
     body.status_absen_pulang = "hadir"

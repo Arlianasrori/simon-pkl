@@ -227,7 +227,8 @@ model absen {
   status_absen_masuk status_absen_masuk_keluar 
   status_absen_keluar status_absen_masuk_keluar?
   foto String? @db.VarChar(1500)
-  izin izin_absen[]
+  status status_absen
+  keterangan_absen izin_absen[]
 
   jadwal_absen absen_jadwal @relation(fields: [id_absen_jadwal],references: [id])
   siswa siswa @relation(fields: [id_siswa],references: [id])
@@ -236,7 +237,7 @@ model izin_absen {
   id Int @id
   id_absen Int
   note String @db.VarChar(30000)
-  status_izin status_izin
+  status_izin status_other_absen
 
   absen absen @relation(fields: [id_absen],references: [id])
 }
@@ -317,9 +318,8 @@ model notification_read {
 }
 
 enum status_absen {
-  datang
-  pulang
-  izin
+  hadir
+  tidak_hadir
 }
 
 enum status_cancel_pkl {
@@ -336,7 +336,7 @@ enum status_absen_masuk_keluar {
   izin
 }
 
-enum status_izin {
-  sakit
-  acara
+enum status_other_absen {
+  izin
+  telat
 }
