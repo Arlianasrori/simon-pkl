@@ -811,11 +811,23 @@ const findAbsenFilter = async (req,res,next) => {
         next(error)
     }
 }
+const adminLogout = async (req, res, next) => {
+    try {
+      res.clearCookie("acces_token", "refresh_token")
+      .status(200).json({
+        msg : "succes"
+    })
+    } catch (error) {
+      next(error)
+    }
+  }
 export default {
 
     // adminLogin
     adminLogin,
-
+    
+    // adminLogout 
+    adminLogout,
     
     // admin 
     addAdmin,
@@ -904,4 +916,5 @@ export default {
     findAllAbsen,
     findAbsenById,
     findAbsenFilter
+
 }

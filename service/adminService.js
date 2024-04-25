@@ -1068,7 +1068,6 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
     if(!findDudi) {
         throw new responseError(404,"data dudi tidak ditemukan")
     }
-
     return db.$transaction(async (tx) => {
         const addPembimbingDudi = await tx.pembimbing_dudi.create({
             data : PembimbingDudi,

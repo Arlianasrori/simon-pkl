@@ -4,11 +4,14 @@ import { adminMiddleware } from "../middleware/adminMiddleware.js"
 
 export const adminRouter = express.Router()
 
-// middleware
-// adminRouter.use(adminMiddleware)
-
 // admin login 
 adminRouter.post('/adminLogin',adminController.adminLogin)
+
+// middleware
+adminRouter.use(adminMiddleware)
+
+// admin logout 
+adminRouter.delete('/adminLogout',adminController.adminLogout)
 
 // admin router 
 adminRouter.post('/addAdmin', adminController.addAdmin)

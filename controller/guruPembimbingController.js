@@ -111,7 +111,6 @@ const findLaporanPklById = async (req, res, next) => {
 }
 const getLaporanPklSiswa = async (req, res, next) => {
     try {
-        console.log("p");
         const id = parseInt(req.params.id_guru_pembimbing)
         const result = await guruPembimbingService.getLaporanPklSiswa(id)
         res.status(200).json({
@@ -120,6 +119,18 @@ const getLaporanPklSiswa = async (req, res, next) => {
         })
     } catch (error) {
         next(error)
+    }
+}
+const getAllLaporanPklSiswa = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id_guru_pembimbing)
+        const result = await guruPembimbingService.getAllLaporanPklSiswa(id)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next (error)
     }
 }
 export default {
@@ -132,5 +143,6 @@ export default {
     findLaporanPklFilter,
     findLaporanPklById,
 
-    getLaporanPklSiswa
+    getLaporanPklSiswa,
+    getAllLaporanPklSiswa
 }

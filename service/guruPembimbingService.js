@@ -99,7 +99,6 @@ const getAllSiswaGuruPembimbing = async (id_guru_pembimbing) => {
 };
 
 const getLaporanPklSiswa = async (id_guru_pembimbing) => {
-  console.log("hy");
   id_guru_pembimbing = await validate( adminValidation.idValidation,id_guru_pembimbing);
 
   const findGuruPembimbing = await db.guru_pembimbing.findUnique({
@@ -111,11 +110,35 @@ const getLaporanPklSiswa = async (id_guru_pembimbing) => {
   if (!findGuruPembimbing) {
     throw new responseError(404, "Guru pembimbing tidak ditemukan");
   }else {
-    return db.laporan_siswa_pkl.findUnique({
+    return db.laporan_siswa_pkl.findFirst({
       where: {
-        laporan_siswa_pkl : id_guru_pembimbing
+        siswa : {
+          id_guru_pembimbing : id_guru_pembimbing
+        }
       }
     })
+  }
+}
+
+const getAllLaporanPklSiswa = async (id_guru_pembimbing) => {
+  id_guru_pembimbing = await validate( adminValidation.idValidation,id_guru_pembimbing);
+
+  const findGuruPembimbing = await db.guru_pembimbing.findUnique({
+    where: {
+      id: id_guru_pembimbing,
+    },
+  });
+
+  if (!findGuruPembimbing) {
+    throw new responseError(404, "Guru pembimbing tidak ditemukan");
+  } else {
+    return db.laporan_siswa_pkl.findMany({
+      where: {
+        siswa : {
+          id_guru_pembimbing : id_guru_pembimbing
+        }
+      },
+    });
   }
 }
 
@@ -129,5 +152,6 @@ export default {
   getAllSiswaGuruPembimbing,
 
   // laporan pkl 
-  getLaporanPklSiswa
+  getLaporanPklSiswa,
+  getAllLaporanPklSiswa
 };

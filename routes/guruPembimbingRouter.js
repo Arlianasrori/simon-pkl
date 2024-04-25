@@ -1,5 +1,6 @@
 import express from "express"
 import guruPembimbingController from "../controller/guruPembimbingController.js"
+import { guruPembimbingMiddleware } from "../middleware/guruPembimbingMiddleware.js"
 
 export const guruPembimbingRouter = express.Router()
 
@@ -7,7 +8,7 @@ export const guruPembimbingRouter = express.Router()
 guruPembimbingRouter.post("/login",guruPembimbingController.guruPembimbingLogin)
 
 // middleware
-guruPembimbingRouter.use(guruPembimbingRouter)
+guruPembimbingRouter.use(guruPembimbingMiddleware)
 
 guruPembimbingRouter.get("/getGuruPembimbing", guruPembimbingController.getGuruPembimbing)
 guruPembimbingRouter.get("/getSiswa/:id_siswa", guruPembimbingController.getSiswa)
@@ -22,4 +23,6 @@ guruPembimbingRouter.get("/findLaporanPklSiswa/:id", guruPembimbingController.fi
 guruPembimbingRouter.get("/findLaporanPklFilter", guruPembimbingController.findLaporanPklFilter)
 guruPembimbingRouter.get("/findLaporanPkl/:id", guruPembimbingController.findLaporanPklById)
 
+// get laporan pkl siswa
 guruPembimbingRouter.get("/getLaporanPklSiswa/:id_guru_pembimbing", guruPembimbingController.getLaporanPklSiswa)
+guruPembimbingRouter.get("/getAllLaporanPklSiswa/:id_guru_pembimbing", guruPembimbingController.getAllLaporanPklSiswa)

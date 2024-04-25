@@ -308,5 +308,5 @@ export default {
   deleteLaporanSiswaPkl,
   findAllLaporanSiswaPkl,
   findLaporanSiswaPklById,
-  findLaporanSiswaPklFilter
+  findLaporanSiswaPklFilter,
 };
