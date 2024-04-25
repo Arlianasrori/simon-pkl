@@ -227,8 +227,22 @@ const findLaporanPklFilter= async (req, res, next) => {
   } catch (error) {
     next(error)
   }
-  }
+}
 
+  // absen
+  const cetakAbsen= async (req, res, next) => {
+    try {
+      const query = req.query
+      query.id_pembimbing_dudi = req.pembimbingDudi.id
+      const result = await pembimbingDudiService.cetakAbsen(query)
+      res.status(200).json({
+        msg: "Success",
+        data: result,
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
 export default {
 
   // pembimbing dudi login 
@@ -256,5 +270,9 @@ export default {
   deleteLaporanPkl,
   findAllLaporanPkl,
   findLaporanPklById,
-  findLaporanPklFilter
+  findLaporanPklFilter,
+
+
+  // absen
+  cetakAbsen
 };

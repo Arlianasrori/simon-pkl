@@ -2,8 +2,9 @@ import absenService from "../service/absenService.js";
 // jadwal absen 
 const addJadwalAbsen = async (req,res,next) => {
     try {
-        const body = req.body
-        const result = await absenService.addJadwalAbsen(body)
+        const body = req.body.jadwal
+        const day = req.body.day
+        const result = await absenService.addJadwalAbsen(body,day)
         res.status(201).json({
             msg : "succes",
             data : result
@@ -106,6 +107,19 @@ const findAbsenFilter = async (req,res,next) => {
         next(error)
     }
 }
+const analisisAbsen = async (req,res,next) => {
+    try {
+        const query = req.query
+
+        const result = await absenService.analisisAbsen(query)
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 
 
 // kordinat absen
@@ -175,6 +189,7 @@ export default {
     absenTidakMemenuhiJam,
     findAbsen,
     findAbsenFilter,
+    analisisAbsen,
 
     // kordinat absen
     addKordinatAbsen,

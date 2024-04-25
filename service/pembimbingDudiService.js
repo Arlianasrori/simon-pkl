@@ -12,6 +12,9 @@ import { selectLaporanPkl } from "../utils/LaporanSiswaPklUtil.js";
 import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs"
 import fs from "fs"
+import absenValidation from "../validation/absenValidation.js";
+import puppeteer from "puppeteer"
+import ejs from 'ejs'
 
 const pembimbingDudiLogin = async (body) => {
   body = await validate(pembimbingDudiValidation.pembimbingDudiLogin, body)
@@ -157,6 +160,8 @@ const AccDcnPengajuanPkl = async (body,id_pengajuan) => {
       siswa : true
     }
   })
+
+  console.log(findPengajuan.dudi.pembimbing_dudi[0]);
 
   if(!findPengajuan) {
     throw new responseError(404,"pengajuan tidak ditemukan")
@@ -427,6 +432,91 @@ const findLaporanPklById = async (id) => {
   return findLaporan;
 };
 
+// absen
+const cetakAbsen = async (query) => {
+  query = await validate(absenValidation.findAbsenFilterValidation,query)
+
+  if(query.month_ago) {
+    query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago + 1)
+}
+
+  const data = await db.absen.findMany({
+    where : {
+        AND : [
+            {
+                id_siswa : query.id_siswa
+            },
+            {
+                siswa : {
+                    id_pembimbing_dudi : query.id_pembimbing_dudi
+                }
+            },
+            {
+                siswa : {
+                    id_dudi : query.id_dudi
+                }
+            },
+            {
+                OR : [
+                    {
+                        tanggal : query.tanggal
+                    },
+                    {
+                        AND : [
+                            {
+                                tanggal : {
+                                    gte : query.tanggal_start
+                                }
+                            },
+                            {
+                                tanggal : {
+                                    lte : query.tanggal_end
+                                }
+                            },
+                        ]
+                    }
+                ]
+            },
+            {
+                tanggal : query.month_ago
+            }
+        ]
+    },
+    orderBy : {
+        tanggal : "desc",
+    },
+    select : {
+        tanggal : true,
+        absen_masuk : true,
+        absen_pulang : true,
+        status_absen_masuk : true,
+        status_absen_keluar : true,
+        siswa : {
+            select : {
+                nama : true,
+                jurusan : true,
+                dudi : {
+                  select : {
+                    nama_instansi_perusahaan : true
+                  }
+                }
+            }
+        }
+    }
+  })
+
+  const html = fs.readFileSync("index.ejs",{encoding : "utf-8"})
+  console.log(html);
+
+  const browser = await puppeteer.launch({ headless: true});
+  const page = await browser.newPage();
+  await page.setContent(ejs.render(html,{data : data}))
+  const pdf = await page.pdf({ format : "a4",path : "pdf.pdf"});
+
+  await browser.close();
+
+  return data
+}
 export default {
 
   // pembimbing dudi login 
@@ -456,5 +546,9 @@ export default {
   deleteLaporanPkl,
   findAllLaporanPkl,
   findLaporanPklById,
+
+
+  // absen
+  cetakAbsen
 };
 

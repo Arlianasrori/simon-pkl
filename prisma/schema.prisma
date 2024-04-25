@@ -208,15 +208,22 @@ model absen_jadwal {
   id_pembimbing_dudi Int
   tanggal_mulai String
   tanggal_berakhir String
-  batas_absen_masuk String
-  batas_absen_pulang String
   selisih_tanggal_day String
 
   absen absen[]
+  hari hari_absen[]
   dudi dudi @relation(fields: [id_dudi],references: [id])
   pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id])
 }
+model hari_absen {
+  id Int @id @default(autoincrement())
+  id_jadwal Int
+  nama String
+  batas_absen_masuk String
+  batas_absen_pulang String
 
+  jadwal absen_jadwal @relation(fields: [id_jadwal],references: [id])
+}
 model absen {
   id Int @id
   id_absen_jadwal Int
@@ -227,7 +234,8 @@ model absen {
   status_absen_masuk status_absen_masuk_keluar 
   status_absen_keluar status_absen_masuk_keluar?
   foto String? @db.VarChar(1500)
-  izin izin_absen[]
+  status status_absen
+  keterangan_absen izin_absen[]
 
   jadwal_absen absen_jadwal @relation(fields: [id_absen_jadwal],references: [id])
   siswa siswa @relation(fields: [id_siswa],references: [id])
@@ -236,7 +244,7 @@ model izin_absen {
   id Int @id
   id_absen Int
   note String @db.VarChar(30000)
-  status_izin status_izin
+  status_izin status_other_absen
 
   absen absen @relation(fields: [id_absen],references: [id])
 }
@@ -317,9 +325,8 @@ model notification_read {
 }
 
 enum status_absen {
-  datang
-  pulang
-  izin
+  hadir
+  tidak_hadir
 }
 
 enum status_cancel_pkl {
@@ -336,7 +343,7 @@ enum status_absen_masuk_keluar {
   izin
 }
 
-enum status_izin {
-  sakit
-  acara
+enum status_other_absen {
+  izin
+  telat
 }

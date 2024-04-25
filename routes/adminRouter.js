@@ -8,7 +8,7 @@ export const adminRouter = express.Router()
 adminRouter.post('/adminLogin',adminController.adminLogin)
 
 // middleware
-adminRouter.use(adminMiddleware)
+// adminRouter.use(adminMiddleware)
 
 // admin logout 
 adminRouter.delete('/adminLogout',adminController.adminLogout)

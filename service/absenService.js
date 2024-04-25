@@ -12,7 +12,7 @@ import axios from "axios"
 
 
 
-const addJadwalAbsen = async (body) => {
+const addJadwalAbsen = async (body,day) => {
     body.selisih_tanggal_day = getselish(body.tanggal_mulai,body.tanggal_berakhir)
     body = await validate(absenValidation.addJadwalAbsen,body)
 
@@ -34,9 +34,27 @@ const addJadwalAbsen = async (body) => {
         throw new responseError(404,"invalid id dudi")
     }
 
+    return db.$transaction(async tx => {
+        const createJadwal = await tx.absen_jadwal.create({
+            data : body
+        })
+        console.log(day);
 
-    return db.absen_jadwal.create({
-        data : body
+        for (let i = 0; i < day.length; i++) {
+            day[i].id_jadwal = createJadwal.id
+            if(i !== day.length - 1) {
+                if(day[i].nama == day[i + 1].nama) {
+                    throw new responseError(400,"duplicate day")
+                }
+            }
+            
+        }
+    
+        const createDay = await tx.hari_absen.createMany({
+            data : day
+        })
+
+        return {jadwal : createJadwal,day : createDay}
     })
 }
 
@@ -90,6 +108,7 @@ const addAbsenMasuk = async (body,image,url) => {
             id : parseInt(body.id_absen_jadwal)
         },
         select : {
+            id : true,
             tanggal_mulai : true,
             tanggal_berakhir : true,
             batas_absen_masuk : true,
@@ -102,8 +121,7 @@ const addAbsenMasuk = async (body,image,url) => {
         throw new responseError(404,"jadwal absen tidak ditemukan")
     }
 
-
-    const {dateNow,hourNow} = await validasiAbsenMasuk(findJadwalAbsen,body)
+    const {dateNow,hourNow,day,absen} = await validasiAbsenMasuk(findJadwalAbsen,body)
     body.tanggal = dateNow
     body.absen_masuk = hourNow
 
@@ -115,35 +133,47 @@ const addAbsenMasuk = async (body,image,url) => {
     })
     body.foto = fullPath
 
-    if(hourNow > findJadwalAbsen.batas_absen_pulang) {
+    const findDay = await db.hari_absen.findFirst({
+        where : {
+            AND : [
+                {
+                    id_jadwal : findJadwalAbsen.id
+                },
+                {
+                    nama : day
+                }
+            ]
+        }
+    })
+
+    if(hourNow > findDay.batas_absen_pulang) {
             body.status_absen_masuk = "tidak_hadir"
+            body.status = "tidak_hadir"
             body = await validate(absenValidation.addAbsenMasukValidation,body)
             await db.absen.create({
                 data : body
             })
             throw new responseError(400,"anda dinyatakn tidak hadir karena telah melewati batas absen")
-        }else if (hourNow > findJadwalAbsen.batas_absen_masuk) {
-            body.status_absen_masuk = "telat"
-            body = await validate(absenValidation.addAbsenMasukValidation,body)
-            const adddAbsen = await db.absen.create({
-                data : body
-            })
-            return {data : adddAbsen,msg : "anda telat dalam absen masuk,penuhi batas jam kerja anda sebelum absen pulang"}
+        }else if (hourNow > findDay.batas_absen_masuk) {
+            return {succes_absen : false,msg : "anda telat untuk absen masuk,silahkan isi keterangan anda untuk absen"}
         }
 
     body.status_absen_masuk = "hadir"
+    body.status = "hadir"
     body = await validate(absenValidation.addAbsenMasukValidation,body)
-    return db.absen.create({
+    return db.absen.update({
+    where : {
+        id : absen[0].id
+    },
     data : body
     })
-   
 }
 
 const addAbsenPulang = async (body) => {
     const cekradius = await cekRadiusKoordinat({latitude : body.latitude,longtitude : body.longtitude},{id : body.id_siswa})
 
     if(!cekradius.insideRadius) {
-        throw new responseError(400,"anda berada diluar radius,silahkan masuk kedalam radius untuk absen")
+        throw new responseError(400,"anda berada diluar radius,silahkan masuk kedalam radius untuk absen,atau absen diluar radius")
     }
     const findSiswa = await db.siswa.findUnique({
         where : {
@@ -155,35 +185,35 @@ const addAbsenPulang = async (body) => {
         throw new responseError(404,"siswa tidak ditemukan")
     }
 
-    const findAbsen = await db.absen.findUnique({
-        where : {
-            id : body.id
-        },
-        select : {
-            jadwal_absen : true,
-            absen_masuk : true,
-            absen_pulang : true
-        }
-    })
+    // const findAbsen = await db.absen.findUnique({
+    //     where : {
+    //         id : body.id
+    //     },
+    //     select : {
+    //         jadwal_absen : true,
+    //         absen_masuk : true,
+    //         absen_pulang : true
+    //     }
+    // })
 
-    if(!findAbsen) {
-        throw new responseError(404,"anda belum melakukan absen masuk")
-    }
+    // if(!findAbsen) {
+    //     throw new responseError(404,"anda belum melakukan absen masuk")
+    // }
 
-    if(findAbsen.absen_pulang) {
-        throw new responseError(400,"anda telah melakukan absen pulang")
-    }
+    // if(findAbsen.absen_pulang) {
+    //     throw new responseError(400,"anda telah melakukan absen pulang")
+    // }
 
-    const validasi = await validasiAbsen(findAbsen.jadwal_absen.tanggal_mulai,findAbsen.jadwal_absen.selisih_tanggal_day,findAbsen.absen_masuk,findAbsen.jadwal_absen.batas_absen_pulang,findAbsen.jadwal_absen.batas_absen_masuk)
+    const validasi = await validasiAbsen(body)
 
-    body.absen_pulang = validasi
+    body.absen_pulang = validasi.hourNow
     body.status_absen_pulang = "hadir"
     body = await validate(absenValidation.addAbsenKeluarValidation,body)
 
 
     return db.absen.update({
         where : {
-            id : body.id
+            id : validasi.id
         },
         data : body
     })
@@ -254,7 +284,7 @@ const absenTidakMemenuhiJam = async (body) => {
 const findAbsen = async (id_siswa) => {
     id_siswa = await validate(adminValidation.idValidation,id_siswa)
 
-    return db.absen.findFirst({
+    return db.absen.findMany({
         where : {
             id_siswa : id_siswa
         },
@@ -264,7 +294,7 @@ const findAbsen = async (id_siswa) => {
             absen_pulang : true,
             jadwal_absen : true,
             status_absen_masuk : true,
-            status_absen_pulang : true,
+            status_absen_keluar : true,
             foto : true,
             izin : {
                 select : {
@@ -331,7 +361,7 @@ const findAbsenFilter = async (query) => {
             ]
         },
         orderBy : {
-            tanggal : "desc"
+            tanggal : "desc",
         },
         select : {
             id : true,
@@ -351,6 +381,90 @@ const findAbsenFilter = async (query) => {
             }
         }
     })
+}
+const analisisAbsen = async (query) => {
+    query = await validate(absenValidation.findAbsenFilterValidation,query)
+
+    if(query.month_ago) {
+        query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago + 1)
+    }
+    console.log(query);
+
+    return db.$queryRaw`SELECT COUNT(status_absen_masuk) filter (where status_absen_masuk = 'hadir') as absen_masuk_hadir,COUNT(status_absen_masuk) filter (where absen_masuk = 'tidak_hadir') as absen_masuk_tidak_hadir,COUNT(absen_masuk) filter (where status_absen_masuk = 'telat') as absen_masuk_telat,COUNT(status_absen_masuk) filter (where status_absen_masuk = 'izin') as absen_masuk_izin,
+    COUNT(status_absen_keluar) filter (where status_absen_keluar = 'hadir') as absen_keluar_hadir,COUNT(status_absen_keluar) filter (where status_absen_keluar = 'tidak_hadir') as absen_keluar_tidak_hadir,COUNT(status_absen_keluar) filter (where status_absen_keluar = 'telat') as absen_keluar_telat,COUNT(status_absen_keluar) filter (where status_absen_keluar = 'izin') as absen_keluar_izin,
+    id_siswa,siswa.nama
+    FROM absen
+    INNER JOIN siswa ON absen.id_siswa = siswa.id
+    WHERE absen.id_siswa = ${query.id_siswa} AND siswa.id_pembimbing_dudi = ${query.id_pembimbing_dudi} AND siswa.id_guru_pembimbing = ${query.id_guru_pembimbing} AND siswa.id_dudi = ${query.id_dudi} AND (absen.tanggal = ${query.tanggal} OR (absen.tanggal >= ${query.tanggal_start} AND absen.tanggal <= ${query.tanggal_end})) AND absen.tanggal = ${query.month_ago}
+    GROUP BY id_siswa,nama`
+    // return db.absen.findMany({
+    //     where : {
+    //         AND : [
+    //             {
+    //                 id_siswa : query.id_siswa
+    //             },
+    //             {
+    //                 siswa : {
+    //                     id_pembimbing_dudi : query.id_pembimbing_dudi
+    //                 }
+    //             },
+    //             {
+    //                 siswa : {
+    //                     id_guru_pembimbing : query.id_guru_pembimbing
+    //                 }
+    //             },
+    //             {
+    //                 siswa : {
+    //                     id_dudi : query.id_dudi
+    //                 }
+    //             },
+    //             {
+    //                 OR : [
+    //                     {
+    //                         tanggal : query.tanggal
+    //                     },
+    //                     {
+    //                         AND : [
+    //                             {
+    //                                 tanggal : {
+    //                                     gte : query.tanggal_start
+    //                                 }
+    //                             },
+    //                             {
+    //                                 tanggal : {
+    //                                     lte : query.tanggal_end
+    //                                 }
+    //                             },
+    //                         ]
+    //                     }
+    //                 ]
+    //             },
+    //             {
+    //                 tanggal : query.month_ago
+    //             }
+    //         ]
+    //     },
+    //     orderBy : {
+    //         tanggal : "desc"
+    //     },
+    //     select : {
+    //         id : true,
+    //         tanggal : true,
+    //         absen_masuk : true,
+    //         absen_pulang : true,
+    //         status_absen_masuk : true,
+    //         status_absen_keluar : true,
+    //         foto : true,
+    //         jadwal_absen : true,
+    //         siswa : {
+    //             select : {
+    //                 id : true,
+    //                 nama : true,
+    //                 nis : true
+    //             }
+    //         }
+    //     }
+    // })
 }
 
 
@@ -505,6 +619,7 @@ export default {
     findAbsen,
     absenTidakMemenuhiJam,
     findAbsenFilter,
+    analisisAbsen,
 
 
     // kordinat absen
