@@ -2,8 +2,9 @@ import absenService from "../service/absenService.js";
 // jadwal absen 
 const addJadwalAbsen = async (req,res,next) => {
     try {
-        const body = req.body
-        const result = await absenService.addJadwalAbsen(body)
+        const body = req.body.jadwal
+        const day = req.body.day
+        const result = await absenService.addJadwalAbsen(body,day)
         res.status(201).json({
             msg : "succes",
             data : result

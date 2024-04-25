@@ -7,8 +7,6 @@ const addJadwalAbsen = joi.object({
     id_pembimbing_dudi : joi.number().required(),
     tanggal_mulai : joi.string().required(),
     tanggal_berakhir : joi.string().required(),
-    batas_absen_masuk : joi.string().required(),
-    batas_absen_pulang : joi.string().required(),
     selisih_tanggal_day : joi.string().required(),
 })
 

@@ -12,7 +12,7 @@ import axios from "axios"
 
 
 
-const addJadwalAbsen = async (body) => {
+const addJadwalAbsen = async (body,day) => {
     body.selisih_tanggal_day = getselish(body.tanggal_mulai,body.tanggal_berakhir)
     body = await validate(absenValidation.addJadwalAbsen,body)
 
@@ -34,9 +34,25 @@ const addJadwalAbsen = async (body) => {
         throw new responseError(404,"invalid id dudi")
     }
 
+    return db.$transaction(async tx => {
+        const createJadwal = await tx.absen_jadwal.create({
+            data : body
+        })
 
-    return db.absen_jadwal.create({
-        data : body
+        day.forEach((day,i) => {
+            day.id_jadwal = createJadwal.id
+            if(i !== day.length - 1) {
+                if(day[i].nama == day[i + 1].nama) {
+                    throw new responseError(400,"duplicate day")
+                }
+            }
+        });
+    
+        const createDay = await tx.hari_absen.createMany({
+            data : day
+        })
+
+        return {jadwal : createJadwal,day : createDay}
     })
 }
 
@@ -90,6 +106,7 @@ const addAbsenMasuk = async (body,image,url) => {
             id : parseInt(body.id_absen_jadwal)
         },
         select : {
+            id : true,
             tanggal_mulai : true,
             tanggal_berakhir : true,
             batas_absen_masuk : true,
@@ -103,7 +120,8 @@ const addAbsenMasuk = async (body,image,url) => {
     }
 
 
-    const {dateNow,hourNow} = await validasiAbsenMasuk(findJadwalAbsen,body)
+
+    const {dateNow,hourNow,day,absen} = await validasiAbsenMasuk(findJadwalAbsen,body)
     body.tanggal = dateNow
     body.absen_masuk = hourNow
 
@@ -115,7 +133,20 @@ const addAbsenMasuk = async (body,image,url) => {
     })
     body.foto = fullPath
 
-    if(hourNow > findJadwalAbsen.batas_absen_pulang) {
+    const findDay = await db.hari_absen.findFirst({
+        where : {
+            AND : [
+                {
+                    id_jadwal : findJadwalAbsen.id
+                },
+                {
+                    nama : day
+                }
+            ]
+        }
+    })
+
+    if(hourNow > findDay.batas_absen_pulang) {
             body.status_absen_masuk = "tidak_hadir"
             body.status = "tidak_hadir"
             body = await validate(absenValidation.addAbsenMasukValidation,body)
@@ -123,24 +154,26 @@ const addAbsenMasuk = async (body,image,url) => {
                 data : body
             })
             throw new responseError(400,"anda dinyatakn tidak hadir karena telah melewati batas absen")
-        }else if (hourNow > findJadwalAbsen.batas_absen_masuk) {
+        }else if (hourNow > findDay.batas_absen_masuk) {
             return {succes_absen : false,msg : "anda telat untuk absen masuk,silahkan isi keterangan anda untuk absen"}
         }
 
     body.status_absen_masuk = "hadir"
     body.status = "hadir"
     body = await validate(absenValidation.addAbsenMasukValidation,body)
-    return db.absen.create({
+    return db.absen.update({
+    where : {
+        id : absen[0].id
+    },
     data : body
     })
-   
 }
 
 const addAbsenPulang = async (body) => {
     const cekradius = await cekRadiusKoordinat({latitude : body.latitude,longtitude : body.longtitude},{id : body.id_siswa})
 
     if(!cekradius.insideRadius) {
-        throw new responseError(400,"anda berada diluar radius,silahkan masuk kedalam radius untuk absen")
+        throw new responseError(400,"anda berada diluar radius,silahkan masuk kedalam radius untuk absen,atau absen diluar radius")
     }
     const findSiswa = await db.siswa.findUnique({
         where : {

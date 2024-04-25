@@ -213,10 +213,19 @@ model absen_jadwal {
   selisih_tanggal_day String
 
   absen absen[]
+  hari hari_absen[]
   dudi dudi @relation(fields: [id_dudi],references: [id])
   pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id])
 }
+model hari_absen {
+  id Int @id
+  id_jadwal Int
+  nama String
+  batas_absen_masuk String
+  batas_absen_pulang String
 
+  jadwal absen_jadwal @relation(fields: [id_jadwal],references: [id])
+}
 model absen {
   id Int @id
   id_absen_jadwal Int
