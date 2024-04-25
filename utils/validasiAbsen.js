@@ -22,7 +22,7 @@ export const validasiAbsen = async (tanggal_mulai,selisih_tanggal_day,absen_masu
     })
 
     if(!cekWaktu.absen) {
-        throw new responseError(400,"invalid time")
+        throw new responseError(400,"")
     }
 
     if(selisih_tanggal_on_day < 0) {
