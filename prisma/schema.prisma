@@ -228,13 +228,13 @@ model absen {
   id Int @id
   id_absen_jadwal Int
   id_siswa Int
-  tanggal String
-  absen_masuk String
+  tanggal String?
+  absen_masuk String?
   absen_pulang String?
-  status_absen_masuk status_absen_masuk_keluar 
-  status_absen_keluar status_absen_masuk_keluar?
+  status_absen_masuk status_absen_masuk_keluar? 
+  status_absen_pulang status_absen_masuk_keluar?
   foto String? @db.VarChar(1500)
-  status status_absen
+  status status_absen?
   keterangan_absen izin_absen[]
 
   jadwal_absen absen_jadwal @relation(fields: [id_absen_jadwal],references: [id])

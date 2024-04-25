@@ -438,7 +438,7 @@ const cetakAbsen = async (query) => {
 
   if(query.month_ago) {
     query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago + 1)
-}
+  }
 
   const data = await db.absen.findMany({
     where : {
@@ -506,7 +506,6 @@ const cetakAbsen = async (query) => {
   })
 
   const html = fs.readFileSync("index.ejs",{encoding : "utf-8"})
-  console.log(html);
 
   const browser = await puppeteer.launch({ headless: true});
   const page = await browser.newPage();

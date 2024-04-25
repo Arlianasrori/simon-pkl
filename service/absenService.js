@@ -96,11 +96,11 @@ const findJadwalAbsenById = async (id) => {
 
 // absen
 const addAbsenMasuk = async (body,image,url) => {
-    const cekradius = await cekRadiusKoordinat({latitude : body.latitude,longtitude : body.longtitude},{id : body.id_siswa})
+    // const cekradius = await cekRadiusKoordinat({latitude : body.latitude,longtitude : body.longtitude},{id : body.id_siswa})
 
-    if(!cekradius.insideRadius) {
-        throw new responseError(400,"anda berada diluar radius,silahkan masuk kedalam radius untuk absen")
-    }
+    // if(!cekradius.insideRadius) {
+    //     throw new responseError(400,"anda berada diluar radius,silahkan masuk kedalam radius untuk absen")
+    // }
 
     body.id = generateId()
     const findJadwalAbsen = await db.absen_jadwal.findUnique({
@@ -111,8 +111,6 @@ const addAbsenMasuk = async (body,image,url) => {
             id : true,
             tanggal_mulai : true,
             tanggal_berakhir : true,
-            batas_absen_masuk : true,
-            batas_absen_pulang : true,
             selisih_tanggal_day : true,
         }
     })
@@ -120,8 +118,9 @@ const addAbsenMasuk = async (body,image,url) => {
     if(!findJadwalAbsen) {
         throw new responseError(404,"jadwal absen tidak ditemukan")
     }
-
+    //  console.log(body);
     const {dateNow,hourNow,day,absen} = await validasiAbsenMasuk(findJadwalAbsen,body)
+    console.log(absen);
     body.tanggal = dateNow
     body.absen_masuk = hourNow
 
@@ -132,6 +131,7 @@ const addAbsenMasuk = async (body,image,url) => {
         }
     })
     body.foto = fullPath
+    // console.log(day);
 
     const findDay = await db.hari_absen.findFirst({
         where : {
@@ -145,18 +145,18 @@ const addAbsenMasuk = async (body,image,url) => {
             ]
         }
     })
-
-    if(hourNow > findDay.batas_absen_pulang) {
-            body.status_absen_masuk = "tidak_hadir"
-            body.status = "tidak_hadir"
-            body = await validate(absenValidation.addAbsenMasukValidation,body)
-            await db.absen.create({
-                data : body
-            })
-            throw new responseError(400,"anda dinyatakn tidak hadir karena telah melewati batas absen")
-        }else if (hourNow > findDay.batas_absen_masuk) {
-            return {succes_absen : false,msg : "anda telat untuk absen masuk,silahkan isi keterangan anda untuk absen"}
-        }
+    // console.log(findDay);
+    // if(hourNow > findDay.batas_absen_pulang) {
+    //         body.status_absen_masuk = "tidak_hadir"
+    //         body.status = "tidak_hadir"
+    //         body = await validate(absenValidation.addAbsenMasukValidation,body)
+    //         await db.absen.create({
+    //             data : body
+    //         })
+    //         throw new responseError(400,"anda dinyatakn tidak hadir karena telah melewati batas absen")
+    //     }else if (hourNow > findDay.batas_absen_masuk) {
+    //         return {succes_absen : false,msg : "anda telat untuk absen masuk,silahkan isi keterangan anda untuk absen"}
+    //     }
 
     body.status_absen_masuk = "hadir"
     body.status = "hadir"
@@ -185,32 +185,17 @@ const addAbsenPulang = async (body) => {
         throw new responseError(404,"siswa tidak ditemukan")
     }
 
-    // const findAbsen = await db.absen.findUnique({
-    //     where : {
-    //         id : body.id
-    //     },
-    //     select : {
-    //         jadwal_absen : true,
-    //         absen_masuk : true,
-    //         absen_pulang : true
-    //     }
-    // })
-
-    // if(!findAbsen) {
-    //     throw new responseError(404,"anda belum melakukan absen masuk")
-    // }
-
-    // if(findAbsen.absen_pulang) {
-    //     throw new responseError(400,"anda telah melakukan absen pulang")
-    // }
-
     const validasi = await validasiAbsen(body)
 
     body.absen_pulang = validasi.hourNow
     body.status_absen_pulang = "hadir"
     body = await validate(absenValidation.addAbsenKeluarValidation,body)
 
-
+    console.log(await db.absen.findFirst({
+        where : {
+            id : validasi.id
+        }
+    }));
     return db.absen.update({
         where : {
             id : validasi.id

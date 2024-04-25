@@ -19,10 +19,11 @@ const addAbsenMasukValidation = joi.object({
     tanggal : joi.string().required(),
     absen_masuk : joi.string().required(),
     status_absen_masuk : joi.valid("hadir","telat","tidak_hadir").required(),
+    status : joi.string(),
     foto : joi.string().max(2500).required()
 })
 const addAbsenKeluarValidation = joi.object({
-    id : joi.number().required(),
+    // id : joi.number().required(),
     id_siswa : joi.number().required(),
     absen_pulang : joi.string().required(),
     status_absen_pulang : joi.valid("hadir","telat","tidak_hadir").required()

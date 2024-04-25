@@ -62,6 +62,7 @@ const getAllSiswaPembimbingDudi = async (req, res, next) => {
 // pengajuan pkl
 const getAllPengajuanPkl = async (req, res, next) => {
   try {
+    console.log(req.pembimbingDudi);
     const id_pembimbing_dudi = req.pembimbingDudi.id
     const result = await pembimbingDudiService.getAllPengajuanPkl(id_pembimbing_dudi);
     res.status(200).json({

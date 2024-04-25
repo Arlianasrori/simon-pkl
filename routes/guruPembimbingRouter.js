@@ -29,3 +29,5 @@ guruPembimbingRouter.get("/findLaporanPkl/:id", guruPembimbingController.findLap
 // get laporan pkl siswa
 guruPembimbingRouter.get("/getLaporanPklSiswa/:id_guru_pembimbing", guruPembimbingController.getLaporanPklSiswa)
 guruPembimbingRouter.get("/getAllLaporanPklSiswa/:id_guru_pembimbing", guruPembimbingController.getAllLaporanPklSiswa)
+
+// get absen siswa yang dia bimbing,datanya jadiin pdf
