@@ -19,3 +19,5 @@
 //     console.log(tanggal);
 //     res.send("hay")
 // })
+
+cek absen,absen with izin dan telat,analisis absen,absen diluar radius

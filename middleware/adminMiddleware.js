@@ -3,7 +3,6 @@ import { db } from "../config/prismaClient.js"
 
 export const adminMiddleware = async (req,res,next) => {
     const token = req.cookies.acces_token
-    console.log(token);
 
     if(!token){
         return res.status(401).json({msg : "unauthorized"})

@@ -13,7 +13,6 @@ const addJadwalAbsen = joi.object({
 
 // absen
 const addAbsenMasukValidation = joi.object({
-    id : joi.number().required(),
     id_absen_jadwal : joi.number().required(),
     id_siswa : joi.number().required(),
     tanggal : joi.string().required(),
@@ -23,7 +22,6 @@ const addAbsenMasukValidation = joi.object({
     foto : joi.string().max(2500).required()
 })
 const addAbsenKeluarValidation = joi.object({
-    // id : joi.number().required(),
     id_siswa : joi.number().required(),
     absen_pulang : joi.string().required(),
     status_absen_pulang : joi.valid("hadir","telat","tidak_hadir").required()
