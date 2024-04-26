@@ -133,6 +133,19 @@ const getAllLaporanPklSiswa = async (req, res, next) => {
         next (error)
     }
 }
+const cetakAbsen = async (req, res, next) => {
+        try {
+          const query = req.query
+          query.id_guru_pembimbing = req.guruPembimbing.id
+          const result = await guruPembimbingService.cetakAbsen(query)
+          res.status(200).json({
+            msg: "Success",
+            data: result,
+          })
+        } catch (error) {
+          next(error)
+        }
+      }
 export default {
     guruPembimbingLogin,
     getGuruPembimbing,
@@ -144,5 +157,6 @@ export default {
     findLaporanPklById,
 
     getLaporanPklSiswa,
-    getAllLaporanPklSiswa
+    getAllLaporanPklSiswa,
+    cetakAbsen
 }

@@ -4,11 +4,11 @@ import { guruPembimbingMiddleware } from "../middleware/guruPembimbingMiddleware
 
 export const guruPembimbingRouter = express.Router()
 
-// middleware
-guruPembimbingRouter.use(guruPembimbingMiddleware)
-
 // guru pembimbing login 
 guruPembimbingRouter.post("/login",guruPembimbingController.guruPembimbingLogin)
+
+// middleware
+guruPembimbingRouter.use(guruPembimbingMiddleware)
 
 // middleware
 guruPembimbingRouter.use(guruPembimbingMiddleware)
@@ -29,3 +29,6 @@ guruPembimbingRouter.get("/findLaporanPkl/:id", guruPembimbingController.findLap
 // get laporan pkl siswa
 guruPembimbingRouter.get("/getLaporanPklSiswa/:id_guru_pembimbing", guruPembimbingController.getLaporanPklSiswa)
 guruPembimbingRouter.get("/getAllLaporanPklSiswa/:id_guru_pembimbing", guruPembimbingController.getAllLaporanPklSiswa)
+
+// absen
+guruPembimbingRouter.get("/cetakAbsen",guruPembimbingController.cetakAbsen)

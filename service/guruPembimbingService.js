@@ -3,8 +3,12 @@ import { db } from "../config/prismaClient.js";
 import responseError from "../error/responseError.js";
 import { selectSiswaObject } from "../utils/siswaSelect.js";
 import adminValidation from "../validation/adminValidation.js";
+import absenValidation from "../validation/absenValidation.js";
 import jwt from "jsonwebtoken"
+import fs from "fs"
 import bcrypt from "bcryptjs"
+import puppeteer from "puppeteer"
+import ejs from 'ejs'
 import guruPembimbingValidation from "../validation/guruPembimbingValidation.js";
 
 const guruPembimbingLogin = async (body) => {
@@ -142,6 +146,93 @@ const getAllLaporanPklSiswa = async (id_guru_pembimbing) => {
   }
 }
 
+// absen
+const cetakAbsen = async (query) => {
+  query = await validate(absenValidation.findAbsenFilterValidation,query)
+
+  if(query.month_ago) {
+    query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago + 1)
+}
+
+  const data = await db.absen.findMany({
+    where : {
+        AND : [
+            {
+                id_siswa : query.id_siswa
+            },
+            {
+                siswa : {
+                    id_guru_pembimbing : query.id_guru_pembimbing
+                }
+            },
+            {
+                siswa : {
+                    id_dudi : query.id_dudi
+                }
+            },
+            {
+                OR : [
+                    {
+                        tanggal : query.tanggal
+                    },
+                    {
+                        AND : [
+                            {
+                                tanggal : {
+                                    gte : query.tanggal_start
+                                }
+                            },
+                            {
+                                tanggal : {
+                                    lte : query.tanggal_end
+                                }
+                            },
+                        ]
+                    }
+                ]
+            },
+            {
+                tanggal : query.month_ago
+            }
+        ]
+    },
+    orderBy : {
+        tanggal : "desc",
+    },
+    select : {
+        tanggal : true,
+        absen_masuk : true,
+        absen_pulang : true,
+        status_absen_masuk : true,
+        status_absen_keluar : true,
+        status : true,
+        siswa : {
+            select : {
+                nama : true,
+                jurusan : true,
+                dudi : {
+                  select : {
+                    nama_instansi_perusahaan : true
+                  }
+                }
+            }
+        }
+    }
+  })
+
+  const html = fs.readFileSync("index.ejs",{encoding : "utf-8"})
+  console.log(html);
+
+  const browser = await puppeteer.launch({ headless: true});
+  const page = await browser.newPage();
+  await page.setContent(ejs.render(html,{data : data}))
+  const pdf = await page.pdf({ format : "a4",path : "p.pdf"});
+
+  await browser.close();
+
+  return data
+}
+
 export default {
 
   // guru pembimbing login 
@@ -153,5 +244,8 @@ export default {
 
   // laporan pkl 
   getLaporanPklSiswa,
-  getAllLaporanPklSiswa
+  getAllLaporanPklSiswa,
+
+  // cetakAbsen
+  cetakAbsen 
 };
