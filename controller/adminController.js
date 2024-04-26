@@ -812,20 +812,28 @@ const findAbsenFilter = async (req,res,next) => {
         next(error)
     }
 }
-
 const cekToken = async (req, res, next) => {
     try {
-        req.admin = {username}
+        const username = req.admin.username
 
-        const findToken = await db.admin.findUnique ({
-            where: username
+        const findToken = await db.admin.findFirst ({
+            where: {
+                username: username
+            },
+            select : {
+                id: true,
+                username: true
+            }
         })
 
         if(!findToken) {
             throw new responseError(404, "Admin Belum Login")
         }
+        res.status(200).json({
+        msg : "succes",
+        data: findToken
 
-        return findToken
+        })
     } catch (error) {
         next(error)
     }
@@ -834,7 +842,7 @@ const adminLogout = async (req, res, next) => {
     try {
       res.clearCookie("acces_token", "refresh_token")
       .status(200).json({
-        msg : "succes"
+        msg : "succes",
     })
     } catch (error) {
       next(error)
@@ -935,11 +943,8 @@ export default {
     findAllAbsen,
     findAbsenById,
     findAbsenFilter,
+    findAbsenFilter,
 
     // cekToken
     cekToken,
-
-    
-    findAbsenFilter
-
 }
