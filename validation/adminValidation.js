@@ -1,5 +1,10 @@
 import joi from "joi"
 
+const adminLogin = joi.object ({
+  username : joi.string().max(255).required(),
+  password : joi.string().max(255).required()
+})
+  
 // admin validation 
 const addAdminValidation = joi.object ({
   id : joi.number().required(),
@@ -232,11 +237,29 @@ const PengajuanPklfilterValidation = joi.valid("proses","diterima","ditolak")
 
 
 // laporan pkl
+const searchLaporanPklSiswa = joi.object({
+  id_dudi : joi.number().optional(),
+  id_siswa : joi.number().optional(),
+  id_pembimbing_dudi: joi.number().optional(),
+  topik_pekerjaan : joi.string().optional(),
+  rujukan_kompetensi_dasar : joi.string().optional(),
+  tanggal : joi.string().optional(),
+  tanggal_start : joi.string().optional(),
+  tanggal_end : joi.string().optional(),
+  month_ago : joi.number().optional()
+})
 const searchLaporanPkl = joi.object({
   id_dudi : joi.number().optional(),
   id_siswa : joi.number().optional(),
-  id_pembimbing_dudi: joi.number().optional()
+  id_pembimbing_dudi: joi.number().optional(),
+  id_guru_Pembimbing: joi.number().optional(),
+  keterangan : joi.string().optional(),
+  tanggal : joi.string().optional(),
+  tanggal_start : joi.string().optional(),
+  tanggal_end : joi.string().optional(),
+  month_ago : joi.number().optional()
 })
+
 
 
 // laporan absen
@@ -246,8 +269,11 @@ const searchAbsen = joi.object({
   id_pembimbing_dudi: joi.number().optional()
 })
 
-
 export default {
+
+  // admin login 
+  adminLogin,
+
   // public
     idValidation,
     updateAlamatValidation,
@@ -301,6 +327,7 @@ export default {
 
     // laporan pkl
     searchLaporanPkl,
+    searchLaporanPklSiswa,
 
 
     // absen 

@@ -1,7 +1,17 @@
 import express from "express"
 import adminController from "../controller/adminController.js"
+import { adminMiddleware } from "../middleware/adminMiddleware.js"
 
 export const adminRouter = express.Router()
+
+// admin login 
+adminRouter.post('/adminLogin',adminController.adminLogin)
+
+// middleware
+adminRouter.use(adminMiddleware)
+
+// admin logout 
+adminRouter.delete('/adminLogout',adminController.adminLogout)
 
 // admin router 
 adminRouter.post('/addAdmin', adminController.addAdmin)
@@ -12,7 +22,7 @@ adminRouter.get('/getAllAdmin', adminController.getAllAdmin)
 
 // siswa router
 adminRouter.post('/addSiswa',adminController.addSiswa)
-adminRouter.get('/findSiswaById/:id',adminController.findSiswaById)
+adminRouter.get('/findSiswa/:id',adminController.findSiswaById)
 adminRouter.get('/findAllSiswa',adminController.findAllSiswa)
 adminRouter.get('/findSiswaFilter',adminController.findsiswafilter)
 adminRouter.get('/findSiswaHaventPkl',adminController.findSiswaHaventPkl)

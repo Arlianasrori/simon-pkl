@@ -11,6 +11,19 @@ const addNotification = async (body) => {
     body.id = generateId()
     body = await validate(notificationValidation.addNotificationValidation,body)
 
+    if(body.id_siswa)  {
+        const findSiswa = await db.siswa.findFirst({
+            where : {
+                id : body.id_siswa
+            }
+        })
+
+        if(!findSiswa) {
+            throw new responseError(404,"siswa tidak ditemukan")
+        }
+
+    }
+
     return db.notification.create({
         data : body
     })

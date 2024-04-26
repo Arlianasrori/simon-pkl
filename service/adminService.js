@@ -13,7 +13,36 @@ import { selectLaporanpklSiswaObject } from "../utils/laporanPklSiswaSelect.js"
 import { selectAbsenObject } from "../utils/absenSelect.js"
 import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js"
 import { selectKelasObject } from "../utils/kelasSelect.js"
+import jwt from "jsonwebtoken"
 
+const adminLogin = async (body) => {
+    body = await validate(adminValidation.adminLogin, body)
+  
+    const findAdmin = await db.admin.findFirst({
+      where: {
+        username : body.username
+      }
+    })
+    
+    if (!findAdmin) {
+      throw new responseError (400, "username atau password salah")
+    }
+  
+    const isPassowrd = bcrypt.compare(body.password, findAdmin.password)
+    if(!isPassowrd) {
+        throw new responseError(400,"username atau password salah")
+    }
+  
+    const payload = {
+        username : body.username,
+        password : body.password,
+    }
+     
+    const acces_token_admin = jwt.sign(payload,process.env.TOKEN_SECRET_ADMIN,{expiresIn : "2d"})
+    const refresh_token_admin = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_ADMIN,{expiresIn : "60d"})
+  
+    return {acces_token_admin,refresh_token_admin}
+  }
 // admin service 
 const addAdmin = async (body) => {
     body.id = generateId()
@@ -1039,7 +1068,6 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
     if(!findDudi) {
         throw new responseError(404,"data dudi tidak ditemukan")
     }
-
     return db.$transaction(async (tx) => {
         const addPembimbingDudi = await tx.pembimbing_dudi.create({
             data : PembimbingDudi,
@@ -1295,9 +1323,48 @@ const findLaporanPklFilter = async (query) => {
                     id_siswa :  query.id_siswa
                 },
                 {
+                    siswa : {
+                        id_guru_pembimbing : query.id_guru_Pembimbing
+                    }
+                },
+                {
                     id_pembimbing_dudi : query.id_pembimbing_dudi
+                },
+                {
+                    AND : [
+                    {
+                      keterangan : query.keterangan
+                    },
+                    {
+                        OR : [
+                            {
+                                tanggal : query.tanggal
+                            },
+                            {
+                                AND : [
+                                    {
+                                        tanggal : {
+                                            gte : query.tanggal_start
+                                        }
+                                    },
+                                    {
+                                        tanggal : {
+                                            lte : query.tanggal_end
+                                        }
+                                    },
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        tanggal : query.month_ago
+                    }
+                ]
                 }
             ]
+        },
+        orderBy : {
+            tanggal : "desc"
         },
         select : selectLaporanpklObject
     })
@@ -1328,7 +1395,8 @@ const findLaporanPklSiswaById = async (id) => {
     return findLaporan
 }
 const findLaporanPklSiswaFilter = async (query) => {
-    query = await validate(adminValidation.searchLaporanPkl,query)
+    console.log(query);
+    query = await validate(adminValidation.searchLaporanPklSiswa,query)
 
     const findLaporan = await db.laporan_siswa_pkl.findMany({
         where : {
@@ -1341,7 +1409,46 @@ const findLaporanPklSiswaFilter = async (query) => {
                 },
                 {
                     id_pembimbing_dudi : query.id_pembimbing_dudi
-                }
+                },
+                   {
+                    siswa : {
+                        id_guru_pembimbing : query.id_guru_Pembimbing
+                    }
+                },
+                {
+                    AND : [
+                      {
+                        rujukan_kompetensi_dasar : query.rujukan_kompetensi_dasar
+                      },
+                      {
+                        topik_pekerjaan : query.topik_pekerjaan
+                      },
+                      {
+                          OR : [
+                              {
+                                  tanggal : query.tanggal
+                              },
+                              {
+                                  AND : [
+                                      {
+                                          tanggal : {
+                                              gte : query.tanggal_start
+                                          }
+                                      },
+                                      {
+                                          tanggal : {
+                                              lte : query.tanggal_end
+                                          }
+                                      },
+                                  ]
+                              }
+                          ]
+                      },
+                      {
+                          tanggal : query.month_ago
+                      }
+                    ]
+                  }
             ]
         },
         select : selectLaporanpklSiswaObject
@@ -1396,6 +1503,10 @@ const findAbsenFilter = async (query) => {
 }
 export default {
 
+    // admin login 
+    adminLogin,
+
+    
     // admin 
     addAdmin,
     updateAdmin,

@@ -1,10 +1,10 @@
 import joi from "joi"
 
-const getGuruPembimbing = joi.number().required()
-
-const getSiswa = joi.number().required()
+const guruPembimbingLogin = joi.object ({
+    nip : joi.number().required(),
+    password : joi.string().max(255).required()
+})
 
 export default {
-    getGuruPembimbing,
-    getSiswa
+    guruPembimbingLogin
 }

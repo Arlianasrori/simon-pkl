@@ -1,5 +1,10 @@
 import joi from "joi"
 
+const pembimbingDudiLogin = joi.object ({
+    username : joi.string().max(255).required(),
+    password : joi.string().max(255).required()
+})
+
 const getIdValidation = joi.number().required()
 
 const statusvalidation = joi.object({
@@ -16,12 +21,21 @@ const addLaporanPkl = joi.object({
     id_siswa : joi.number().required(),
     id_dudi : joi.number().required(),
     id_pembimbing_dudi : joi.number().required(),
-    tanggal : joi.date().required(),
-    keterangan : joi.string().max(1500)
+    tanggal : joi.string().required(),
+    keterangan : joi.string().max(1500).required(),
+    file_laporan : joi.string().max(1500).optional()
 })
+
+const updateLaporanPkl = joi.object ({
+    keterangan : joi.string().max(1500).optional(),
+    file_laporan : joi.string().max(1500).optional()
+})
+
 export default {
+    pembimbingDudiLogin,
     statusvalidation,
     getIdValidation,
     statusCancelValidation,
-    addLaporanPkl
+    addLaporanPkl,
+    updateLaporanPkl,
 }

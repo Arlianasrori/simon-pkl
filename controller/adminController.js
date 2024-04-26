@@ -2,6 +2,25 @@ import { db } from "../config/prismaClient.js"
 import responseError from "../error/responseError.js"
 import adminService from "../service/adminService.js"
 
+const adminLogin = async (req,res,next) => {
+    try {
+        const body = req.body
+        const result = await adminService.adminLogin(body)
+        res.status(201).cookie("acces_token",result.acces_token_admin,{
+            maxAge : 24 * 60 * 60 * 60,
+            httpOnly: true,
+        }).cookie("refresh_token",result.refresh_token_admin,{
+            maxAge : 24 * 60 * 60 * 60,
+            httpOnly: true,
+        }).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+  }
+
 // admin controller 
 const addAdmin = async (req, res, next) => {
     try {
@@ -64,6 +83,7 @@ const getAllAdmin = async (req,res,next) => {
         next(error)
     }
 }
+
 // siswa controller
 const addSiswa = async (req,res,next) => {
     try {
@@ -332,8 +352,6 @@ const deleteKelas = async (req,res,next) => {
         next(error)
     }
 }
-
-
 
 // guru pembimbing controller
 const addGuruPembimbing = async (req,res,next) => {
@@ -770,8 +788,7 @@ const findAllAbsen = async (req,res,next) => {
     }
 }
 const findAbsenById = async (req,res,next) => {
-    try {
-        const id = parseInt(req.params.id)
+    try {        const id = parseInt(req.params.id)
         const result = await adminService.findAbsenById(id)
     
         res.status(200).json({
@@ -795,6 +812,7 @@ const findAbsenFilter = async (req,res,next) => {
         next(error)
     }
 }
+
 const cekToken = async (req, res, next) => {
     try {
         req.admin = {username}
@@ -812,15 +830,32 @@ const cekToken = async (req, res, next) => {
         next(error)
     }
 }
+const adminLogout = async (req, res, next) => {
+    try {
+      res.clearCookie("acces_token", "refresh_token")
+      .status(200).json({
+        msg : "succes"
+    })
+    } catch (error) {
+      next(error)
+    }
+  }
 export default {
 
-     // admin 
+    // adminLogin
+    adminLogin,
+    
+    // adminLogout 
+    adminLogout,
+    
+    // admin 
     addAdmin,
     updateAdmin,
     deleteAdmin,
     getAdminById,
     getAllAdmin,
-    
+
+
     // siswa
     addSiswa,
     findSiswaById,
@@ -902,5 +937,9 @@ export default {
     findAbsenFilter,
 
     // cekToken
-    cekToken
+    cekToken,
+
+    
+    findAbsenFilter
+
 }
