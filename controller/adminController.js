@@ -1,3 +1,5 @@
+import { db } from "../config/prismaClient.js"
+import responseError from "../error/responseError.js"
 import adminService from "../service/adminService.js"
 
 // admin controller 
@@ -793,6 +795,23 @@ const findAbsenFilter = async (req,res,next) => {
         next(error)
     }
 }
+const cekToken = async (req, res, next) => {
+    try {
+        req.admin = {username}
+
+        const findToken = await db.admin.findUnique ({
+            where: username
+        })
+
+        if(!findToken) {
+            throw new responseError(404, "Admin Belum Login")
+        }
+
+        return findToken
+    } catch (error) {
+        next(error)
+    }
+}
 export default {
 
      // admin 
@@ -880,5 +899,8 @@ export default {
     // absen
     findAllAbsen,
     findAbsenById,
-    findAbsenFilter
+    findAbsenFilter,
+
+    // cekToken
+    cekToken
 }
