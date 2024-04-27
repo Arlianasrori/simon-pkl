@@ -17,6 +17,7 @@
 //     };
 //     const tanggal = date.toLocaleDateString("id",options)
 //     console.log(tanggal);
+//    
 //     res.send("hay")
 // })
 

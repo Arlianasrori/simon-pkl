@@ -34,6 +34,10 @@ const absenTidakMemenuhiJamValidation = joi.object({
     status_izin : joi.valid("sakit","acara"),
     status : joi.string().required()
 })
+const izinAbsenValidation = joi.object({
+    id_siswa : joi.number().required(),
+    keterangan : joi.string().required()
+})
 const findAbsenFilterValidation = joi.object({
     id_Siswa : joi.number().optional(),
     id_pembimbing_dudi : joi.number().optional(),
@@ -70,6 +74,7 @@ export default {
     addAbsenKeluarValidation,
     absenTidakMemenuhiJamValidation,
     findAbsenFilterValidation,
+    izinAbsenValidation,
 
 
     // kordinat absen

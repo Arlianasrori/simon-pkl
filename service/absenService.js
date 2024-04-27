@@ -279,9 +279,267 @@ const absenTidakMemenuhiJam = async (body) => {
     })
 }
 
+
+// izin telat
 const absenIzinTelat = async (body) => {
+    body = await validate(absenValidation.izinAbsenValidation,body)
+    const cekradius = await cekRadiusKoordinat({latitude : body.latitude,longtitude : body.longtitude},{id : body.id_siswa})
+    const data = {}
+
+    if(!cekradius.insideRadius) {
+        throw new responseError(400,"anda berada diluar radius,silahkan masuk kedalam radius untuk absen,atau absen diluar radius")
+    }
+
+    const Now = new Date()
+
+    const dateNow = Now.toISOString().substring(0, 10)
+    const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"}).split(" ")
+
+    const findSiswa = await db.siswa.findUnique({
+        where : {
+            id : body.id_siswa
+        },
+        select : {
+            id : true,
+            absen : {
+                where : {
+                    tanggal : dateNow
+                },
+                select : {
+                    jadwal_absen : true,
+                    id : true,
+                    status_absen_masuk : true,
+                    status_absen_pulang : true                 
+                }
+            }
+        }
+    })
+
+    if(!findSiswa) {
+        throw new responseError(404,"siswa tidak ditemukan")
+    }
+
+    const hourNow = datelocal[1]
+    const selisih_tanggal_on_day = parseInt(getselish(findSiswa.absen[0].jadwal_absen.tanggal_mulai,dateNow))
+
+    if(selisih_tanggal_on_day < 0) {
+        throw new responseError(400,"tanggal absen tidak sesuai dengan jadwal")
+    }else if(selisih_tanggal_on_day > findSiswa.absen[0].jadwal_absen.selisih_tanggal_day) {
+        throw new responseError(400,"tanggal absen tidak sesuai dengan jadawal")
+    }
+
+    if(!findSiswa.absen[0]) {
+        throw new responseError(400,"something went wrong")
+    }
+
+    const findDay = await db.hari_absen.findFirst({
+        where : {
+            AND : [
+                {
+                    id_jadwal : findSiswa.absen[0].jadwal_absen.id
+                },
+                {
+                    nama : {
+                        equals : datelocal[0],
+                        mode : "insensitive"
+                    },
+                    
+                }
+            ]
+        }
+    })
+
     
+
+    if(!findDay) {
+        throw  new responseError(400,"jadwal absen untuk hari ini tidak ditemukan")
+    }
+   
+    if(findSiswa.absen[0].status_absen_masuk) { 
+        if(findSiswa.absen[0].status_absen_pulang) {
+            throw new responseError(400,"anda sudah melakukan absen pulang")
+        } 
+
+        data.absen_pulang = hourNow
+        data.status_absen_pulang = body.status
+        data.status = "hadir"
+
+        return db.$transaction(async tx => {
+            const updateAbsen = await tx.absen.update({
+                where : {
+                    id : findSiswa.absen[0].id
+                },
+                data : data
+            })
+            await tx.izin_absen_keluar.create({
+                data : {
+                    id : parseInt(generateId()),
+                    note : body.keterangan,
+                    status_izin : body.status,
+                    id_absen : updateAbsen.id
+                }
+            })
+    
+            return "succes"
+        })
+    }else {
+        if(hourNow > findDay.batas_absen_pulang) {
+            throw new responseError(400,"anda telah melewati batas absen masuk")
+        }
+
+        data.absen_masuk = hourNow
+        data.status_absen_masuk = body.status
+    
+        return db.$transaction(async tx => {
+            const updateAbsen = await tx.absen.update({
+                where : {
+                    id : findSiswa.absen[0].id
+                },
+                data : data
+            })
+            await tx.izin_absen_masuk.create({
+                data : {
+                    id : parseInt(generateId()),
+                    note : body.keterangan,
+                    status_izin : body.status,
+                    id_absen : updateAbsen.id
+                }
+            })
+    
+            return "success"
+        })
+    }
+
 }
+
+
+// diluar radius
+const absendiluarRadius = async (body) => {
+    body = await validate(absenValidation.izinAbsenValidation,body)
+    const data = {}
+
+    const Now = new Date()
+
+    const dateNow = Now.toISOString().substring(0, 10)
+    const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"}).split(" ")
+
+    const findSiswa = await db.siswa.findUnique({
+        where : {
+            id : body.id_siswa
+        },
+        select : {
+            id : true,
+            absen : {
+                where : {
+                    tanggal : dateNow
+                },
+                select : {
+                    jadwal_absen : true,
+                    id : true,
+                    status_absen_masuk : true,
+                    status_absen_pulang : true                 
+                }
+            }
+        }
+    })
+
+    if(!findSiswa) {
+        throw new responseError(404,"siswa tidak ditemukan")
+    }
+
+    const hourNow = datelocal[1]
+    const selisih_tanggal_on_day = parseInt(getselish(findSiswa.absen[0].jadwal_absen.tanggal_mulai,dateNow))
+
+    if(selisih_tanggal_on_day < 0) {
+        throw new responseError(400,"tanggal absen tidak sesuai dengan jadwal")
+    }else if(selisih_tanggal_on_day > findSiswa.absen[0].jadwal_absen.selisih_tanggal_day) {
+        throw new responseError(400,"tanggal absen tidak sesuai dengan jadawal")
+    }
+
+    if(!findSiswa.absen[0]) {
+        throw new responseError(400,"something went wrong")
+    }
+
+    const findDay = await db.hari_absen.findFirst({
+        where : {
+            AND : [
+                {
+                    id_jadwal : findSiswa.absen[0].jadwal_absen.id
+                },
+                {
+                    nama : {
+                        equals : datelocal[0],
+                        mode : "insensitive"
+                    },
+                    
+                }
+            ]
+        }
+    })
+
+    
+
+    if(!findDay) {
+        throw  new responseError(400,"jadwal absen untuk hari ini tidak ditemukan")
+    }
+   
+    if(findSiswa.absen[0].status_absen_masuk) {   
+        if(findSiswa.absen[0].status_absen_pulang) {
+            throw new responseError(400,"anda sudah melakukan absen pulang")
+        }   
+        data.absen_pulang = hourNow
+        data.status_absen_pulang = "diluar_radius"
+        data.status = "hadir"
+
+        return db.$transaction(async tx => {
+            const updateAbsen = await tx.absen.update({
+                where : {
+                    id : findSiswa.absen[0].id
+                },
+                data : data
+            })
+            await tx.izin_absen_keluar.create({
+                data : {
+                    id : parseInt(generateId()),
+                    note : body.keterangan,
+                    status_izin : "diluar_radius",
+                    id_absen : updateAbsen.id
+                }
+            })
+    
+            return "succes"
+        })
+    }else {
+        if(hourNow > findDay.batas_absen_pulang) {
+            throw new responseError(400,"anda telah melewati batas absen masuk")
+        }
+
+        data.absen_masuk = hourNow
+        data.status_absen_pulang = "diluar_radius"
+    
+        return db.$transaction(async tx => {
+            const updateAbsen = await tx.absen.update({
+                where : {
+                    id : findSiswa.absen[0].id
+                },
+                data : data
+            })
+            await tx.izin_absen_masuk.create({
+                data : {
+                    id : parseInt(generateId()),
+                    note : body.keterangan,
+                    status_izin : "diluar_radius",
+                    id_absen : updateAbsen.id
+                }
+            })
+    
+            return "succes"
+        })
+    }
+
+}
+
+
 const findAbsen = async (id_siswa) => {
     id_siswa = await validate(adminValidation.idValidation,id_siswa)
 
@@ -621,6 +879,8 @@ export default {
     absenTidakMemenuhiJam,
     findAbsenFilter,
     analisisAbsen,
+    absenIzinTelat,
+    absendiluarRadius,
 
 
     // kordinat absen
