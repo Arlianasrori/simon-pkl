@@ -20,5 +20,6 @@
 //    
 //     res.send("hay")
 // })
+done : absen with izin dan telat,absen diluar radius
 
-cek absen,absen with izin dan telat,analisis absen,absen diluar radius
+belum : cek absen,,analisis absen,
