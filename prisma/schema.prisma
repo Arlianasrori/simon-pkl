@@ -142,6 +142,7 @@ model dudi {
   deksripsi String @db.VarChar(1500)
 
   alamat alamat_dudi?
+  kouta kouta_siswa?
   siswa siswa[]
   pengajuan_pkl pengajuan_pkl[]
   absen_jadwal absen_jadwal[]
@@ -151,6 +152,15 @@ model dudi {
   pembimbing_dudi Pembimbing_dudi[]
   pengajuan_cancel_pkl pengajuan_cancel_pkl[]
   kordinat_absen kordinat_absen[]
+}
+model kouta_siswa {
+  id Int @id
+  id_dudi Int @unique
+  jumlah_pria Int
+  jumlah_wanita Int
+  total Int
+
+  dudi dudi @relation(fields: [id_dudi],references: [id])
 }
 model alamat_pembimbing_dudi {
   id_pembimbing_dudi Int @id
