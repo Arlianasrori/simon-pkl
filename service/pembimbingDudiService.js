@@ -435,7 +435,7 @@ const findLaporanPklById = async (id) => {
 // absen
 const cetakAbsen = async (query) => {
   query = await validate(absenValidation.findAbsenFilterValidation,query)
-
+console.log(query);
   if(query.month_ago) {
     query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago + 1)
 }
@@ -505,12 +505,17 @@ const cetakAbsen = async (query) => {
     }
   })
 
+  const findPembimbingDudi = await db.pembimbing_dudi.findFirst({
+  where: {
+    id : query.id_pembimbing_dudi
+  },
+  })
+
   const html = fs.readFileSync("index.ejs",{encoding : "utf-8"})
-  console.log(html);
 
   const browser = await puppeteer.launch({ headless: true});
   const page = await browser.newPage();
-  await page.setContent(ejs.render(html,{data : data}))
+  await page.setContent(ejs.render(html,{data : data,nama : findPembimbingDudi.nama, tanggal_start: query.tanggal_start, tanggal_end: query.tanggal_end}))
   const pdf = await page.pdf({ format : "a4",path : "pdf.pdf"});
 
   await browser.close();
