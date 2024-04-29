@@ -94,6 +94,19 @@ const absenDiluarRadius = async (req,res,next) => {
         next(error)
     }
 }
+const cekAbsen = async (req,res,next) => {
+    try {
+        const body = req.body
+
+        const result = await absenService.cekAbsen(body)
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 const absenTidakMemenuhiJam = async (req,res,next) => {
     try {
         const body = req.body
@@ -218,6 +231,7 @@ export default {
     analisisAbsen,
     absenIzintelat,
     absenDiluarRadius,
+    cekAbsen,
 
     // kordinat absen
     addKordinatAbsen,

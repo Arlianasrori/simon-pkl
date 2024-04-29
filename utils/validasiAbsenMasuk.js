@@ -3,25 +3,28 @@ import { getselish } from "./getSelishDatehour.js"
 import { db } from "../config/prismaClient.js"
 
 
-export const validasiAbsenMasuk = async (findJadwalAbsen,body) => {
+export const validasiAbsenMasuk = async (body) => {
     const Now = new Date()
 
     const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
     const hourNow = datelocal.split(" ")[1]
 
-    const dateNow = Now.toISOString().substring(0, 10)
-    const selisih_tanggal_on_day = parseInt(getselish(findJadwalAbsen.tanggal_mulai,dateNow))
-
     // find absen
-    const findSiswa = await db.siswa.findUnique({
+    const findSiswa = await db.siswa.findFirst({
         where : {
-            id : parseInt(body.id_siswa)
+            id : body.id_siswa
         },
         select : {
             id : true,
             absen : {
                 where : {
                     tanggal : dateNow
+                },
+                select : {
+                    jadwal_absen : true,
+                    id : true,
+                    status_absen_masuk : true,
+                    status_absen_pulang : true                 
                 }
             }
         }
@@ -35,9 +38,12 @@ export const validasiAbsenMasuk = async (findJadwalAbsen,body) => {
         throw new responseError(400,"anda telah melakukan absen masuk")
     }
 
+    const dateNow = Now.toISOString().substring(0, 10)
+    const selisih_tanggal_on_day = parseInt(getselish(findSiswa.absen[0].jadwal_absen.tanggal_mulai,dateNow))
+
     if(selisih_tanggal_on_day < 0) {
         throw new responseError(400,"tanggal absen tidak sesuai dengan jadwal")
-    }else if(selisih_tanggal_on_day > findJadwalAbsen.selisih_tanggal_day) {
+    }else if(selisih_tanggal_on_day > findSiswa.absen[0].jadwal_absen.selisih_tanggal_day) {
         throw new responseError(400,"tanggal absen tidak sesuai dengan jadawal")
     }
 

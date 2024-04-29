@@ -31,13 +31,13 @@ import { db } from "./config/prismaClient.js";
 // WHERE notification.isi = 'selamat anda tela\ diterimah untuk bekerja diperusahaan'
 // GROUP BY id_siswa,nama`
 
-console.log(await db.$queryRaw`SELECT COUNT(status_absen_masuk) filter (where status_absen_masuk = 'hadir') as absen_masuk_hadir,COUNT(status_absen_masuk) filter (where absen_masuk = 'tidak_hadir') as absen_masuk_tidak_hadir,COUNT(absen_masuk) filter (where status_absen_masuk = 'telat') as absen_masuk_telat,COUNT(status_absen_masuk) filter (where status_absen_masuk = 'izin') as absen_masuk_izin,
-COUNT(status_absen_keluar) filter (where status_absen_keluar = 'hadir') as absen_keluar_hadir,COUNT(status_absen_keluar) filter (where status_absen_keluar = 'tidak_hadir') as absen_keluar_tidak_hadir,COUNT(status_absen_keluar) filter (where status_absen_keluar = 'telat') as absen_keluar_telat,COUNT(status_absen_keluar) filter (where status_absen_keluar = 'izin') as absen_keluar_izin,
-id_siswa,siswa.nama
-FROM absen
-INNER JOIN siswa ON absen.id_siswa = siswa.id
-WHERE? absen.id_siswa = 1616 AND absen.id = 2222
-GROUP BY id_siswa,nama`);
+// console.log(await db.$queryRaw`SELECT COUNT(status_absen_masuk) filter (where status_absen_masuk = 'hadir') as absen_masuk_hadir,COUNT(status_absen_masuk) filter (where absen_masuk = 'tidak_hadir') as absen_masuk_tidak_hadir,COUNT(absen_masuk) filter (where status_absen_masuk = 'telat') as absen_masuk_telat,COUNT(status_absen_masuk) filter (where status_absen_masuk = 'izin') as absen_masuk_izin,
+// COUNT(status_absen_keluar) filter (where status_absen_keluar = 'hadir') as absen_keluar_hadir,COUNT(status_absen_keluar) filter (where status_absen_keluar = 'tidak_hadir') as absen_keluar_tidak_hadir,COUNT(status_absen_keluar) filter (where status_absen_keluar = 'telat') as absen_keluar_telat,COUNT(status_absen_keluar) filter (where status_absen_keluar = 'izin') as absen_keluar_izin,
+// id_siswa,siswa.nama
+// FROM absen
+// INNER JOIN siswa ON absen.id_siswa = siswa.id
+// WHERE? absen.id_siswa = 1616 AND absen.id = 2222
+// GROUP BY id_siswa,nama`);
 
 // siswa.forEach(e => {
 //     db.absen.count({
@@ -46,3 +46,13 @@ GROUP BY id_siswa,nama`);
 //        }
 //     })
 // })
+
+const j = await db.$queryRaw`SELECT COUNT(status_absen_masuk) filter (where status_absen_masuk = 'hadir') as absen_masuk_hadir,COUNT(status_absen_masuk) filter (where absen_masuk = 'tidak_hadir') as absen_masuk_tidak_hadir,COUNT(absen_masuk) filter (where status_absen_masuk = 'telat') as absen_masuk_telat,COUNT(status_absen_masuk) filter (where status_absen_masuk = 'izin') as absen_masuk_izin,
+    COUNT(status_absen_pulang) filter (where status_absen_pulang = 'hadir') as absen_keluar_hadir,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'tidak_hadir') as absen_keluar_tidak_hadir,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'telat') as absen_keluar_telat,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'izin') as absen_keluar_izin,
+    id_siswa,siswa.nama
+    FROM absen
+    INNER JOIN siswa ON absen.id_siswa = siswa.id
+    WHERE absen.id_siswa = $1123 AND siswa.id_pembimbing_dudi = 2345
+    GROUP BY id_siswa,nama`
+
+    console.log(j);
