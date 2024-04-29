@@ -120,7 +120,7 @@ const addAbsenMasuk = async (body,image,url) => {
         throw new responseError(400,"anda berada diluar radius,silahkan masuk kedalam radius untuk absen")
     }
 
-    const {dateNow,hourNow,day,absen} = await validasiAbsenMasuk(body)
+    const {dateNow,hourNow,day,absen,jadwal} = await validasiAbsenMasuk(body)
     body.tanggal = dateNow
     body.absen_masuk = hourNow
 
@@ -136,7 +136,7 @@ const addAbsenMasuk = async (body,image,url) => {
         where : {
             AND : [
                 {
-                    id_jadwal : findJadwalAbsen.id
+                    id_jadwal : jadwal.id
                 },
                 {
                     nama : {
@@ -417,7 +417,7 @@ const absenIzinTelat = async (body) => {
 
 // diluar radius
 const absendiluarRadius = async (body) => {
-    body = await validate(absenValidation.izinAbsenValidation,body)
+    body = await validate(absenValidation.absenDiluarRadiusValidation,body)
     const data = {}
 
     const Now = new Date()
@@ -492,7 +492,7 @@ const absendiluarRadius = async (body) => {
         data.absen_pulang = hourNow
         data.status_absen_pulang = "diluar_radius"
         data.status = "hadir"
-
+        
         return db.$transaction(async tx => {
             const updateAbsen = await tx.absen.update({
                 where : {
@@ -571,10 +571,10 @@ const cekAbsen = async (body) => {
                             AND : [
                                 {
                                     tanggal_mulai : {
-                                        gte : dateNow
+                                        lte : dateNow
                                     },
                                     tanggal_berakhir : {
-                                        lte : dateNow
+                                        gte : dateNow
                                     }
                                 }
                             ]
@@ -585,11 +585,17 @@ const cekAbsen = async (body) => {
         }
     })
 
+    console.log(dateNow);
+
     if(!findSiswa) {
         throw new responseError(404,"siswa tidak ditemukan")
     }
 
     if(!findSiswa.absen[0]) {
+        console.log(findSiswa.dudi.absen_jadwal[0]);
+        if(!findSiswa.dudi.absen_jadwal[0]) {
+            return {absen : false,msg : "jadawl absen tidak ditemukan hari ini"}
+        }
         const findDay = await db.hari_absen.findFirst({
             where : {
                 AND : [
@@ -643,7 +649,9 @@ const findAbsen = async (id_siswa) => {
             absen_pulang : true,
             jadwal_absen : true,
             status_absen_masuk : true,
-            status_absen_keluar : true,
+            status_absen_pulang : true,
+            keterangan_absen_masuk : true,
+            keterangan_absen_keluar : true,
             foto : true,
             izin : {
                 select : {
@@ -718,7 +726,9 @@ const findAbsenFilter = async (query) => {
             absen_masuk : true,
             absen_pulang : true,
             status_absen_masuk : true,
-            status_absen_keluar : true,
+            status_absen_pulang : true,
+            keterangan_absen_masuk : true,
+            keterangan_absen_keluar : true,
             foto : true,
             jadwal_absen : true,
             siswa : {

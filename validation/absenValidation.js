@@ -36,7 +36,10 @@ const absenTidakMemenuhiJamValidation = joi.object({
 })
 const izinAbsenValidation = joi.object({
     id_siswa : joi.number().required(),
-    keterangan : joi.string().required()
+    keterangan : joi.string().required(),
+    latitude : joi.string().required(),
+    longtitude : joi.string().required(),
+    status : joi.string().required()
 })
 const findAbsenFilterValidation = joi.object({
     id_Siswa : joi.number().optional(),
@@ -47,6 +50,10 @@ const findAbsenFilterValidation = joi.object({
     tanggal : joi.string().optional(),
     tanggal_start : joi.string().optional(),
     tanggal_end : joi.string().optional(),
+})
+const absenDiluarRadiusValidation = joi.object({
+    id_siswa : joi.number().required(),
+    keterangan : joi.string().required()
 })
 
 
@@ -75,6 +82,7 @@ export default {
     absenTidakMemenuhiJamValidation,
     findAbsenFilterValidation,
     izinAbsenValidation,
+    absenDiluarRadiusValidation,
 
 
     // kordinat absen
