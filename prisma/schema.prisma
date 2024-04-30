@@ -13,14 +13,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum jenis_kelamin {
-  laki
-  perempuan
+model sekolah {
+  id Int @id
+  npsn Int @unique
+  nama String @db.VarChar(255)
+
+  admin admin[]
+  siswa siswa[]
+  jurusan jurusan[]
+  guru_pembimbing guru_pembimbing[]
+  pembimbing_dudi Pembimbing_dudi[]
+  dudi dudi[]
 }
 model admin {
   id Int @id
+  id_sekolah Int
   username String @db.VarChar(255)
   password String @db.VarChar(255)
+
+  sekolah sekolah @relation(fields: [id_sekolah],references: [id])
+}
+enum jenis_kelamin {
+  laki
+  perempuan
 }
 enum status_pkl {
   pkl
@@ -41,6 +56,7 @@ model siswa {
   status status_pkl @default(belum_pkl)
   id_jurusan Int
   id_kelas Int
+  id_sekolah Int 
 
   jurusan jurusan @relation(fields: [id_jurusan],references: [id])
   kelas kelas @relation(fields: [id_kelas],references: [id])
@@ -53,6 +69,7 @@ model siswa {
   notification_read notification_read[]
   absen absen[]
 
+  sekolah sekolah @relation(fields: [id_sekolah],references: [id])
   guru_pembimbing guru_pembimbing @relation(fields: [id_guru_pembimbing],references: [id])
   dudi dudi? @relation(fields: [id_dudi],references: [id])
   pembimbing_dudi Pembimbing_dudi? @relation(fields: [id_pembimbing_dudi],references: [id])
@@ -60,9 +77,12 @@ model siswa {
 model jurusan {
   id Int @id
   nama String @db.VarChar(255)
+  id_sekolah Int
 
   kelas kelas[]
   siswa siswa[]
+
+  sekolah sekolah @relation(fields: [id_sekolah],references: [id])
 }
 model kelas {
   id Int @id
@@ -94,12 +114,14 @@ model guru_pembimbing {
   tanggal_lahir String
   agama String @db.VarChar(255)
   password String @db.VarChar(255)
+  id_sekolah Int
 
   siswa siswa[]
   notification notification[]
   alamat alamat_guru_Pembimbing?
   kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
 
+  sekolah sekolah @relation(fields: [id_sekolah],references: [id])
 }
 model alamat_guru_Pembimbing {
   id_guru_Pembimbing Int @id
@@ -121,6 +143,7 @@ model Pembimbing_dudi {
   password String @db.VarChar(255)
   jenis_kelamin jenis_kelamin
   agama String @db.VarChar(255)
+  add_by Int 
 
   siswa siswa[]
   alamat alamat_pembimbing_dudi?
@@ -133,6 +156,7 @@ model Pembimbing_dudi {
   kordinat kordinat_absen[]
 
   dudi dudi @relation(fields: [id_dudi],references: [id])
+  sekolah sekolah @relation(fields: [add_by],references: [id])
 }
 model dudi {
   id Int @id
@@ -140,6 +164,7 @@ model dudi {
   no_telepon String @db.VarChar(12) 
   bidang String @db.VarChar(255)
   deksripsi String @db.VarChar(1500)
+  add_by Int
 
   alamat alamat_dudi?
   siswa siswa[]
@@ -151,6 +176,8 @@ model dudi {
   pembimbing_dudi Pembimbing_dudi[]
   pengajuan_cancel_pkl pengajuan_cancel_pkl[]
   kordinat_absen kordinat_absen[]
+
+  sekolah sekolah @relation(fields: [add_by],references: [id])
 }
 model alamat_pembimbing_dudi {
   id_pembimbing_dudi Int @id

@@ -19,69 +19,6 @@ const adminLogin = async (req,res,next) => {
     }
   }
 
-// admin controller 
-const addAdmin = async (req, res, next) => {
-    try {
-        const result = await adminService.addAdmin(req.body)
-        res.status(200).json({
-        msg : "succes",
-        data : result
-        })
-    } catch (error) {
-        next(error)
-    }
-}
-
-const updateAdmin = async (req, res, next) => {
-    try {
-        const id = parseInt(req.params.id)
-        const body = req.body
-        const result = await adminService.updateAdmin(id, body)
-        res.status(200).json({
-            msg : "succes",
-            data : result
-            })
-    } catch (error) {
-        next(error)
-    }
-}
-
-const deleteAdmin = async (req, res, next) => {
-    try {
-        const result = await adminService.deleteAdmin(req.params.id)
-        res.status(200).json({
-            msg : "succes",
-            data : result
-        })
-    } catch (error) {
-        next(error)
-    }
-}
-
-const getAdminById = async (req, res, next) => {
-    try {
-        const result = await adminService.getAdminById(req.params.id)
-        res.status(200).json({
-            msg : "succes",
-            data : result
-        })
-    } catch (error) {
-        next(error)
-    }
-}
-const getAllAdmin = async (req,res,next) => {
-    try {
-        const result = await adminService.getAllAdmin()
-
-        res.status(200).json({
-            msg : "succes",
-            data : result
-        })
-    } catch (error) {
-        next(error)
-    }
-}
-
 // siswa controller
 const addSiswa = async (req,res,next) => {
     try {
@@ -827,13 +764,6 @@ export default {
     
     // adminLogout 
     adminLogout,
-    
-    // admin 
-    addAdmin,
-    updateAdmin,
-    deleteAdmin,
-    getAdminById,
-    getAllAdmin,
 
 
     // siswa

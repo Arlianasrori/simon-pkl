@@ -6,6 +6,7 @@ import { guruPembimbingRouter } from "../routes/guruPembimbingRouter.js"
 import { notificationRouter } from "../routes/notificationRouter.js"
 import { errorMiddleware } from "../middleware/errorMiddleware.js"
 import { absenRouter } from "../routes/absenRouter.js"
+import { adminDeveloperRouter } from "../routes/adminDeveloperRouter.js"
 import fileUpload from "express-fileupload"
 import env from "dotenv"
 import cookieParser from "cookie-parser"
@@ -31,5 +32,6 @@ app.use("/dudi",pembimbingDudiRouter)
 app.use("/notification",notificationRouter)
 app.use("/pembimbingDudi",pembimbingDudiRouter)
 app.use("/absen",absenRouter)
+app.use("/developer",adminDeveloperRouter)
 
 app.use(errorMiddleware)
