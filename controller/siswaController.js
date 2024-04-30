@@ -277,10 +277,25 @@ try {
 }
 }
 
+const updatePasswordSiswa = async (req, res, next) => {
+  try {
+    const id = req.params.id
+    const body = req.body.password
+    const result = await siswaService.updatePasswordSiswa(id,body)
+    res.status(200).json({
+      msg: "Success",
+      data: result,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export default {
 
   // siswa login 
   siswaLogin,
+  updatePasswordSiswa,
 
   // get siswa & dudi 
   getSiswaById,

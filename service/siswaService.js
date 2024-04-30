@@ -501,10 +501,38 @@ const findLaporanSiswaPklById = async (id) => {
   return findLaporan;
 };
 
+const updatePasswordSiswa = async (id, password) => {
+  id = await validate (adminValidation.idValidation,id)
+  password = await validate(siswaValidation.updatePasswordSiswa, password)
+
+  const findSiswa = await db.siswa.findUnique ({
+    where: {
+      id: id
+    }
+  })
+
+  if (!findSiswa) {
+    throw new responseError(404, "Siswa tidak ditemukan");
+  }
+
+  password = await bcrypt.hash(password,10)
+
+  return db.siswa.update ({
+    where: {
+      id: id
+    },
+    data: {
+      password : password
+    },
+    select: selectSiswaObject
+  })
+}
+
 export default {
 
   // siswa login 
   siswaLogin,
+  updatePasswordSiswa,
 
   // Get DUDI & Siswa
   getSiswaById,
