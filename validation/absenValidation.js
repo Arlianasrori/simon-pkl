@@ -13,16 +13,15 @@ const addJadwalAbsen = joi.object({
 
 // absen
 const addAbsenMasukValidation = joi.object({
-    id : joi.number().required(),
     id_absen_jadwal : joi.number().required(),
     id_siswa : joi.number().required(),
     tanggal : joi.string().required(),
     absen_masuk : joi.string().required(),
     status_absen_masuk : joi.valid("hadir","telat","tidak_hadir").required(),
+    status : joi.string(),
     foto : joi.string().max(2500).required()
 })
 const addAbsenKeluarValidation = joi.object({
-    id : joi.number().required(),
     id_siswa : joi.number().required(),
     absen_pulang : joi.string().required(),
     status_absen_pulang : joi.valid("hadir","telat","tidak_hadir").required()
@@ -34,6 +33,10 @@ const absenTidakMemenuhiJamValidation = joi.object({
     note : joi.string().max(30000).required(),
     status_izin : joi.valid("sakit","acara"),
     status : joi.string().required()
+})
+const izinAbsenValidation = joi.object({
+    id_siswa : joi.number().required(),
+    keterangan : joi.string().required()
 })
 const findAbsenFilterValidation = joi.object({
     id_Siswa : joi.number().optional(),
@@ -71,6 +74,7 @@ export default {
     addAbsenKeluarValidation,
     absenTidakMemenuhiJamValidation,
     findAbsenFilterValidation,
+    izinAbsenValidation,
 
 
     // kordinat absen

@@ -18,6 +18,7 @@ export const pembimbingDudiMiddleware = async (req,res,next) => {
             }
         }
         req.pembimbingDudi = pembimbingDudi
+        console.log("j");
         return pembimbingDudi
     })
 
@@ -38,6 +39,6 @@ export const pembimbingDudiMiddleware = async (req,res,next) => {
             msg : pembimbingDudi.msg
         })
     }
-    
+    console.log("hay");
      next()
 }

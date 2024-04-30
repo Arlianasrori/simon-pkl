@@ -438,7 +438,7 @@ const cetakAbsen = async (query) => {
 console.log(query);
   if(query.month_ago) {
     query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago + 1)
-}
+  }
 
   const data = await db.absen.findMany({
     where : {
@@ -522,6 +522,99 @@ console.log(query);
 
   return data
 }
+
+// Kuota SISWA 
+const addKuotaSiswa = async (body) => {
+  body.id = generateId()
+  body.total = body.jumlah_pria + body.jumlah_wanita
+  body = await validate(pembimbingDudiValidation.addKuotaSiswaValidation, body)
+
+  const findDudi = await db.dudi.findUnique ({
+    where: {
+      id: body.id_dudi
+    }
+  })
+
+  if(!findDudi) {
+    throw new responseError(404, "Dudi tidak ditemukan")
+  }
+
+  const findKouta = await db.kouta_siswa.findFirst({
+    where : { 
+      id_dudi : body.id_dudi
+    }
+  })
+
+  if(findKouta) {
+    throw new responseError (400, "Kuota untuk dudi ini sudah ditambahkan")
+  }
+
+  return db.kouta_siswa.create ({
+    data: body,
+    select : {
+      jumlah_pria: true,
+      jumlah_wanita: true,
+      total: true
+    }
+  })
+}
+
+const updateKuotaSiswa = async (id,body) => {
+
+  id = await validate(adminValidation.idValidation,id)
+  const findKuotaSiswa = await db.kouta_siswa.findUnique ({
+    where: {
+      id: id
+    }
+  })
+
+  if(!findKuotaSiswa) {
+    throw new responseError (404, "Kuota siswa di dudi ini tidak ditemukan")
+  }
+
+  if(body.jumlah_pria && body.jumlah_wanita) {
+    body.total = body.jumlah_pria + body.jumlah_wanita
+  }else if(body.jumlah_pria) {
+    body.total = body.jumlah_pria + findKuotaSiswa.jumlah_wanita
+  }else if(body.jumlah_wanita) {
+    body.total = body.jumlah_wanita + findKuotaSiswa.jumlah_pria
+  }
+
+  body = await validate(pembimbingDudiValidation.updateKuotaSiswaValidation, body)
+
+  return db.kouta_siswa.update({
+    where: {
+      id: id
+    },
+    data: body,
+    select: {
+      jumlah_pria: true,
+      jumlah_wanita: true,
+      total: true
+    }
+  })
+}
+
+const deleteKuotaSiswa = async (id) => {
+  id = await validate(adminValidation.idValidation, id) 
+
+  const findkuotaSiswa = await db.kouta_siswa.findUnique({
+    where : {
+      id: id
+    }
+  })
+
+  if(!findkuotaSiswa) {
+    throw new responseError(404, "Kuota siswa di dudi ini telah dihapus")
+  }
+
+  return db.kouta_siswa.delete ({
+    where: {
+      id: id
+    }
+  })
+}
+
 export default {
 
   // pembimbing dudi login 
@@ -554,6 +647,11 @@ export default {
 
 
   // absen
-  cetakAbsen
+  cetakAbsen,
+
+  // Kuota Siswa 
+  addKuotaSiswa,
+  updateKuotaSiswa,
+  deleteKuotaSiswa
 };
 

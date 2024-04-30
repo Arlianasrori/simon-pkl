@@ -39,3 +39,9 @@ pembimbingDudiRouter.get("/findLaporanPklFilter",pembimbingDudiController.findLa
 
 // absen
 pembimbingDudiRouter.get("/cetakAbsen",pembimbingDudiController.cetakAbsen)
+
+// Kuota Siswa
+pembimbingDudiRouter.post("/addKuotaSiswa",pembimbingDudiController.addKuotaSiswa)
+pembimbingDudiRouter.put("/updateKuotaSiswa/:id",pembimbingDudiController.updateKuotaSiswa)
+pembimbingDudiRouter.delete("/deleteKuotaSiswa/:id",pembimbingDudiController.deleteKuotaSiswa)
+

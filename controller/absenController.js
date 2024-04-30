@@ -68,6 +68,32 @@ const addAbsenPulang = async (req,res,next) => {
         next(error)
     }
 }
+const absenIzintelat = async (req,res,next) => {
+    try {
+        const body = req.body
+
+        const result = await absenService.absenIzinTelat(body)
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const absenDiluarRadius = async (req,res,next) => {
+    try {
+        const body = req.body
+
+        const result = await absenService.absendiluarRadius(body)
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 const absenTidakMemenuhiJam = async (req,res,next) => {
     try {
         const body = req.body
@@ -190,6 +216,8 @@ export default {
     findAbsen,
     findAbsenFilter,
     analisisAbsen,
+    absenIzintelat,
+    absenDiluarRadius,
 
     // kordinat absen
     addKordinatAbsen,

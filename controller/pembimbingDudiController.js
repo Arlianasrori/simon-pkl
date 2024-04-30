@@ -62,6 +62,7 @@ const getAllSiswaPembimbingDudi = async (req, res, next) => {
 // pengajuan pkl
 const getAllPengajuanPkl = async (req, res, next) => {
   try {
+    console.log(req.pembimbingDudi);
     const id_pembimbing_dudi = req.pembimbingDudi.id
     const result = await pembimbingDudiService.getAllPengajuanPkl(id_pembimbing_dudi);
     res.status(200).json({
@@ -230,19 +231,59 @@ const findLaporanPklFilter= async (req, res, next) => {
 }
 
   // absen
-  const cetakAbsen= async (req, res, next) => {
-    try {
-      const query = req.query
-      query.id_pembimbing_dudi = req.pembimbingDudi.id
-      const result = await pembimbingDudiService.cetakAbsen(query)
-      res.status(200).json({
-        msg: "Success",
-        data: result,
-      })
-    } catch (error) {
-      next(error)
-    }
+const cetakAbsen= async (req, res, next) => {
+  try {
+    const query = req.query
+    query.id_pembimbing_dudi = req.pembimbingDudi.id
+    const result = await pembimbingDudiService.cetakAbsen(query)
+     res.status(200).json({
+      msg: "Success",
+      data: result,
+     })
+  } catch (error) {
+    next(error)
   }
+}
+
+// Kuota SIswa 
+const addKuotaSiswa = async (req,res,next) => {
+  try {
+    const result = await pembimbingDudiService.addKuotaSiswa(req.body)
+    res.status(200).json({
+    msg: "Success",
+    data: result,
+    })
+  } catch (error) {                 
+  next(error)
+  }
+}
+
+const updateKuotaSiswa = async (req, res, next) => {
+  try {
+    const id = req.params.id
+    const body = req.body
+    const result = await pembimbingDudiService.updateKuotaSiswa(id,body)
+    res.status(200).json({
+    msg: "Success",
+    data: result,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const deleteKuotaSiswa = async (req, res, next) => {
+  try {
+    const id = req.params.id
+    const result = await pembimbingDudiService.deleteKuotaSiswa(id)
+    res.status(200).json({
+      msg: "Success",
+      data: result,
+      })
+  } catch (error) {
+    next(error)
+  }
+}
 export default {
 
   // pembimbing dudi login 
@@ -274,5 +315,10 @@ export default {
 
 
   // absen
-  cetakAbsen
+  cetakAbsen,
+
+  // Kuota SISWA 
+  addKuotaSiswa,
+  updateKuotaSiswa,
+  deleteKuotaSiswa
 };

@@ -31,6 +31,20 @@ const updateLaporanPkl = joi.object ({
     file_laporan : joi.string().max(1500).optional()
 })
 
+// kuota Siwa 
+const addKuotaSiswaValidation = joi.object ({
+    id : joi.number().required(), 
+    id_dudi : joi.number().required(), 
+    jumlah_pria : joi.number().required(), 
+    jumlah_wanita : joi.number().required(), 
+    total : joi.number().required(),
+})
+const updateKuotaSiswaValidation = joi.object ({
+    jumlah_pria : joi.number().optional(), 
+    jumlah_wanita : joi.number().optional(), 
+    total : joi.number().required(),
+})
+
 export default {
     pembimbingDudiLogin,
     statusvalidation,
@@ -38,4 +52,6 @@ export default {
     statusCancelValidation,
     addLaporanPkl,
     updateLaporanPkl,
+    addKuotaSiswaValidation,
+    updateKuotaSiswaValidation
 }
