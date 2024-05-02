@@ -28,10 +28,10 @@ const adminLogin = async (body) => {
       throw new responseError (400, "username atau password salah")
     }
   
-    const isPassowrd = bcrypt.compare(body.password, findAdmin.password)
-    if(!isPassowrd) {
-        throw new responseError(400,"username atau password salah")
-    }
+    // const isPassowrd = bcrypt.compare(body.password, findAdmin.password)
+    // if(!isPassowrd) {
+    //     throw new responseError(400,"username atau password salah")
+    // }
   
     const payload = {
         username : body.username,
@@ -99,7 +99,7 @@ const addSiswa = async (siswa,alamat) => {
     if(!findKelas) {
         throw new responseError(404,"data kelas tidak ditemukan")
     }
-
+    siswa.id_sekolah = 1234
     return db.$transaction(async (tx) => {
         const addSiswa = await tx.siswa.create({
             data : siswa,
@@ -296,7 +296,7 @@ const addJurusan = async (body) => {
     body.id = generateId()
     console.log(body);
     body = await validate(adminValidation.addJurusanValidation,body)
-
+    body.id_sekolah = 1234
     return db.jurusan.create({
         data : body
     })
@@ -515,7 +515,7 @@ const addGuruPembimbing = async (guru,alamat) => {
     if(findGuruPembimbing) {
         throw new responseError(400,"guru pemimbing sudah terdaftar")
     }
-    
+    guru.id_sekolah = 1234
     return db.$transaction(async (tx) => {
         const addGuruPembimbimg = await tx.guru_pembimbing.create({
             data : guru,
@@ -747,6 +747,8 @@ const addDudi = async (dudi,alamat) => {
     }
 
     return db.$transaction(async (tx) => {
+        dudi.add_by = 1234
+        console.log(dudi);
         const addDudi = await tx.dudi.create({
             data : dudi,
             select : {
@@ -973,6 +975,9 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
         throw new responseError(404,"data dudi tidak ditemukan")
     }
     return db.$transaction(async (tx) => {
+        PembimbingDudi.add_by = 1234
+        console.log(PembimbingDudi);
+        PembimbingDudi.password = await bcrypt.hash(PembimbingDudi.password,10)
         const addPembimbingDudi = await tx.pembimbing_dudi.create({
             data : PembimbingDudi,
             select : selectPebimbingDudiObject

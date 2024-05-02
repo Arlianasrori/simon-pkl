@@ -43,7 +43,7 @@ enum status_pkl {
 }
 model siswa {
   id Int @id
-  nis Int @unique
+  nis String @unique
   nama String @db.VarChar(255)
   jenis_kelamin jenis_kelamin
   no_telepon String @db.VarChar(12) @unique
@@ -106,7 +106,7 @@ model alamat_siswa {
 } 
 model guru_pembimbing {
   id Int @id
-  nip Int @unique
+  nip String @unique
   nama String @db.VarChar(255)
   no_telepon String @db.VarChar(12) @unique
   jenis_kelamin jenis_kelamin
