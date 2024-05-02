@@ -1,25 +1,6 @@
 import adminService from "../service/adminService.js";
 import siswaService from "../service/siswaService.js";
 
-const siswaLogin = async (req,res,next) => {
-  try {
-      const body = req.body
-      const result = await siswaService.siswaLogin(body)
-      res.status(201).cookie("acces_token",result.acces_token_siswa,{
-          maxAge : 24 * 60 * 60 * 60,
-          httpOnly: true,
-      }).cookie("refresh_token",result.refresh_token_siswa,{
-          maxAge : 24 * 60 * 60 * 60,
-          httpOnly: true,
-      }).json({
-          msg : "succes",
-          data : result
-      })
-  } catch (error) {
-      next(error)
-  }
-}
-
 const getSiswaById = async (req, res, next) => {
   try {
     const result = await siswaService.getSiswaById(req.siswa.id);
@@ -278,10 +259,6 @@ try {
 }
 
 export default {
-
-  // siswa login 
-  siswaLogin,
-
   // get siswa & dudi 
   getSiswaById,
   getDudi,

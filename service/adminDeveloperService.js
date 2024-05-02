@@ -8,7 +8,35 @@ import adminValidation from "../validation/adminValidation.js"
 import { adminDeveloperSelect } from "../utils/adminSelect.js"
 
 // sekolah
+const addSekolah = async (sekolah,alamat) => {
+    console.log(sekolah);
+    sekolah.id = generateId()
+    sekolah = await validate(adminDeveloperValidation.addSekolahValidation,sekolah)
+    alamat.id_sekolah = sekolah.id
+    alamat = await validate(adminDeveloperValidation.addAlamatValidation,alamat)
 
+    const findSekolah = await db.sekolah.findFirst({
+        where : {
+            id : sekolah.id
+        }
+    })
+
+    if(findSekolah) {
+        throw new responseError(400,"something wrong")
+    }
+
+    return db.$transaction(async tx => {
+        const addSekolah = await tx.sekolah.create({
+            data : sekolah
+        })
+
+        const addAlamat = await tx.alamat_sekolah.create({
+            data : alamat
+        })
+
+        return {sekolah : addSekolah,alamat : addAlamat}
+    })
+}
 
 
 
@@ -31,7 +59,7 @@ const addAdmin = async (body) => {
 
     const findSekolah = await db.sekolah.findUnique({
         where : {
-            id : body.id_siswa
+            id : body.id_sekolah
         }
     })
 
@@ -58,10 +86,11 @@ const updateAdmin = async (id, body) => {
     if (!findAdmin) {
         throw new responseError (404, "Admin tidak ditemukan")
     }
+
     return db.admin.update({
       where: {
         id: id
-      },
+    },
     data: body,
     select: adminDeveloperSelect
     })
@@ -112,6 +141,11 @@ const getAllAdmin = async () => {
 }
 
 export default {
+    // sekolah
+    addSekolah,
+
+
+    // admin
     addAdmin,
     deleteAdmin,
     updateAdmin,

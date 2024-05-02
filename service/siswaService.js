@@ -11,38 +11,6 @@ import { checkPklSiswa } from "../utils/checkPklSiswa.js";
 import { selectCancelPkl } from "../utils/cancelPkl.js";
 import { file } from "../utils/imageSaveUtilsLaporanPklSiswa.js";
 import { selectLaporanSiswaPkl } from "../utils/LaporanSiswaPklUtil.js";
-import jwt from "jsonwebtoken"
-import bcrypt from "bcryptjs"
-
-const siswaLogin = async (body) => {
-  body = await validate(siswaValidation.siswaLogin, body)
-
-  const findSiswa = await db.siswa.findUnique({
-    where: {
-      nis : body.nis
-    }
-  })
-  
-  if (!findSiswa) {
-    throw new responseError (404, "nis atau password salah")
-  }
-
-  const isPassowrd = bcrypt.compare(body.password, findSiswa.password)
-  if(!isPassowrd) {
-      throw new responseError(400,"nis atau password salah")
-  }
-
-  const payload = {
-      id : findSiswa.id,
-      nis : body.nis,
-      password : body.password,
-  }
-   
-  const acces_token_siswa = jwt.sign(payload,process.env.TOKEN_SECRET_SISWA,{expiresIn : "2d"})
-  const refresh_token_siswa = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_SISWA,{expiresIn : "60d"})
-
-  return {acces_token_siswa,refresh_token_siswa}
-}
 
 const getSiswaById = async (id) => {
   id = await validate(adminValidation.idValidation, id);
@@ -502,10 +470,6 @@ const findLaporanSiswaPklById = async (id) => {
 };
 
 export default {
-
-  // siswa login 
-  siswaLogin,
-
   // Get DUDI & Siswa
   getSiswaById,
   getDudi,

@@ -18,12 +18,25 @@ model sekolah {
   npsn Int @unique
   nama String @db.VarChar(255)
 
+  alamat alamat_sekolah?
   admin admin[]
   siswa siswa[]
   jurusan jurusan[]
   guru_pembimbing guru_pembimbing[]
   pembimbing_dudi Pembimbing_dudi[]
   dudi dudi[]
+}
+
+model alamat_sekolah {
+  id_sekolah Int @id
+  detail_tempat String @db.VarChar(255)
+  desa String @db.VarChar(255)
+  kecamatan String @db.VarChar(255)
+  kabupaten String @db.VarChar(255)
+  provinsi String @db.VarChar(255)
+  negara String @db.VarChar(255)
+
+  sekolah sekolah @relation(fields: [id_sekolah],references: [id])
 }
 model admin {
   id Int @id

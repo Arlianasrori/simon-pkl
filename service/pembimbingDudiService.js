@@ -9,42 +9,10 @@ import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js";
 import generateId from "../utils/generateIdUtils.js";
 import { fileLaporaPkl } from "../utils/imageSaveUtilsLaporanPkl.js";
 import { selectLaporanPkl } from "../utils/LaporanSiswaPklUtil.js";
-import jwt from "jsonwebtoken"
-import bcrypt from "bcryptjs"
 import fs from "fs"
 import absenValidation from "../validation/absenValidation.js";
 import puppeteer from "puppeteer"
 import ejs from 'ejs'
-
-const pembimbingDudiLogin = async (body) => {
-  body = await validate(pembimbingDudiValidation.pembimbingDudiLogin, body)
-
-  const findPembimbingDudi = await db.pembimbing_dudi.findFirst({
-    where: {
-      username : body.username
-    }
-  })
-  
-  if (!findPembimbingDudi) {
-    throw new responseError (404, "username atau password salah")
-  }
-
-  const isPassowrd = bcrypt.compare(body.password, findPembimbingDudi.password)
-  if(!isPassowrd) {
-      throw new responseError(400,"username atau password salah")
-  }
-
-  const payload = {
-      id : findPembimbingDudi.id,
-      username : body.username,
-      password : body.password,
-  }
-   
-  const acces_token_pembimbing_dudi = jwt.sign(payload,process.env.TOKEN_SECRET_PEMBIMBING_DUDI,{expiresIn : "2d"})
-  const refresh_token_pembimbing_dudi = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_PEMBIMBING_DUDI,{expiresIn : "60d"})
-
-  return {acces_token_pembimbing_dudi,refresh_token_pembimbing_dudi}
-}
 
 const getPembimbingDudiById = async (id) => {
   id = await validate(pembimbingDudiValidation.getIdValidation, id);
@@ -517,11 +485,7 @@ const cetakAbsen = async (query) => {
   return data
 }
 export default {
-
-  // pembimbing dudi login 
-  pembimbingDudiLogin,
    
-
   getPembimbingDudiById,
   getSiswaPembimbingDudi,
   getAllSiswaPembimbingDudi,
