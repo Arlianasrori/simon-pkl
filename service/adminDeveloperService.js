@@ -49,7 +49,7 @@ const addAdmin = async (body) => {
 
     const findAdmin = await db.admin.findUnique ({
         where: {
-            id: body.id
+            username : body.username
         }
     })
 

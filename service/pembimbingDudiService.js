@@ -101,7 +101,7 @@ const getPengajuanPklById = async (id) => {
   });
 
   if (!findPengajuanPkl) {
-    throw new responseError(404, "Pengajuan PKL tidak ditemukan");
+    throw new responseError(404,"Pengajuan PKL tidak ditemukan");
   }
 
   return findPengajuanPkl;

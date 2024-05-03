@@ -15,13 +15,17 @@ export const adminMiddleware = async (req,res,next) => {
                 msg : err.message
             }
         }
-        req.admin = admin
         return admin
     })
 
     const findAdmin = await db.admin.findFirst({
         where : {
             username : admin.username
+        },
+        select : {
+            id : true,
+            username : true,
+            id_sekolah : true
         }
     })
 
@@ -36,6 +40,8 @@ export const adminMiddleware = async (req,res,next) => {
             msg : admin.msg
         })
     }
+
+    req.admin = findAdmin
     
      next()
 }
