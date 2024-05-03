@@ -1,3 +1,5 @@
+import { db } from "../config/prismaClient.js"
+import responseError from "../error/responseError.js"
 import adminService from "../service/adminService.js"
 
 const adminLogin = async (req,res,next) => {
@@ -14,6 +16,20 @@ const adminLogin = async (req,res,next) => {
             msg : "succes",
             data : result
         })
+    } catch (error) {
+        next(error)
+    }
+  }
+
+  const updatePassword = async (req, res, next) => {
+    try {
+        const id = req.params.id
+        const body = req.body.password
+        const result = await adminService.updatePassword(id, body)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+            })
     } catch (error) {
         next(error)
     }
@@ -50,7 +66,8 @@ const findSiswaById = async (req, res, next) => {
 }
 const findAllSiswa = async (req,res,next) => {
     try {
-        const result = await adminService.findAllSiswa(req.admin)
+        const page = req.query.page
+        const result = await adminService.findAllSiswa(page,req.admin)
 
         res.status(200).json({
             msg : "succes",
@@ -75,7 +92,8 @@ const findSiswaHaventPkl = async (req,res,next) => {
 const findsiswafilter = async (req,res,next) => {
     try {
         const queryFilter = req.query
-        const result = await adminService.findSiswaFilter(queryFilter,req.admin)
+        const page = req.query.page
+        const result = await adminService.findSiswaFilter(queryFilter,req.admin,page)
        
         res.status(200).json({
             msg : "succes",
@@ -158,7 +176,8 @@ const deleteJurusan = async (req,res,next) => {
 }
 const findAllJurusan = async (req,res,next) => {
     try {
-        const result = await adminService.findAllJurusan(req.admin)
+        const page = req.query.page
+        const result = await adminService.findAllJurusan(page,req.admin)
 
         res.status(200).json({
             msg : "succes",
@@ -226,7 +245,8 @@ const addKelas = async (req,res,next) => {
 }
 const findAllKelas = async (req,res,next) => {
     try {
-        const result = await adminService.findAllkelas(req.admin)
+        const page = req.query.page
+        const result = await adminService.findAllkelas(page,req.admin)
     
         res.status(200).json({
             msg : "succes",
@@ -310,7 +330,8 @@ const addGuruPembimbing = async (req,res,next) => {
 
 const findAllGuruPembimbing = async (req,res,next) => {
     try {
-        const result = await adminService.findAllGuruPembimbing(req.admin)
+        const page = req.query.page
+        const result = await adminService.findAllGuruPembimbing(page,req.admin)
 
         res.status(200).json({
             msg : "succes",
@@ -395,7 +416,7 @@ const deleteGuruPembimbing = async (req,res,next) => {
 const addDudi = async (req,res,next) => {
     try {
         const dudi = req.body.dudi
-        dudi.id_sekolah = req.admin.id_sekolah
+        dudi.add_by = req.admin.id_sekolah
         const alamat = req.body.alamat
 
         const result = await adminService.addDudi(dudi,alamat)
@@ -410,7 +431,8 @@ const addDudi = async (req,res,next) => {
 }
 const findAllDudi = async (req,res,next) => {
     try {
-        const result = await adminService.findAllDudi(req.admin)
+        const page = req.query.page
+        const result = await adminService.findAllDudi(page,req.admin)
 
         res.status(200).json({
             msg : "succes",
@@ -436,7 +458,8 @@ const findDudiById = async (req,res,next) => {
 const findDudiFilter = async (req,res,next) => {
     try {
         const query = req.query
-        const result = await adminService.findDudiFilter(query,req.admin)
+        const page = req.query.page
+        const result = await adminService.findDudiFilter(query,req.admin,page)
 
         res.status(200).json({
             msg : "succes",
@@ -508,7 +531,8 @@ const addPembimbingDudi = async (req,res,next) => {
 }
 const findAllPembimbingDudi = async (req,res,next) => {
     try {
-        const result = await adminService.findAllPembimbingDudi(req.admin)
+        const page = req.query.page
+        const result = await adminService.findAllPembimbingDudi(req.admin,page)
 
         res.status(200).json({
             msg : "succes",
@@ -592,8 +616,8 @@ const deletePembimbingDudi = async (req,res,next) => {
 // pengajuan pkl
 const findAllPengajuanPkl = async (req,res,next) => {
     try {
-        
-        const result = await adminService.findAllPengajuanPkl(req.admin)
+        const page = req.querypage
+        const result = await adminService.findAllPengajuanPkl(page,req.admin)
 
         res.status(200).json({
             msg : "succes",
@@ -634,7 +658,8 @@ const findPengajuanPklById = async (req,res,next) => {
 // laporan pkl
 const findAllLaporanPkl = async (req,res,next) => {
     try {
-        const result = await adminService.findAllLaporanPkl(req.admin)
+        const page = req.query.page
+        const result = await adminService.findAllLaporanPkl(page,req.admin)
     
         res.status(200).json({
             msg : "succes",
@@ -676,7 +701,8 @@ const findLaporanPklFilter = async (req,res,next) => {
 // laporan pkl siswa
 const findAllLaporanPklSiswa = async (req,res,next) => {
     try {
-        const result = await adminService.findAllLaporanSiswaPkl(req.admin)
+        const page = req.query.page
+        const result = await adminService.findAllLaporanSiswaPkl(page,req.admin)
     
         res.status(200).json({
             msg : "succes",
@@ -702,7 +728,9 @@ const findLaporanPklSiswaById = async (req,res,next) => {
 const findLaporanPklSiswaFilter = async (req,res,next) => {
     try {
         const query = req.query
-        const result = await adminService.findLaporanPklSiswaFilter(query,req.admin)
+        const page = req.query.page
+
+        const result = await adminService.findLaporanPklSiswaFilter(query,req.admin,page)
     
         res.status(200).json({
             msg : "succes",
@@ -753,11 +781,37 @@ const findAbsenFilter = async (req,res,next) => {
         next(error)
     }
 }
+const cekToken = async (req, res, next) => {
+    try {
+        const username = req.admin.username
+
+        const findToken = await db.admin.findFirst ({
+            where: {
+                username: username
+            },
+            select : {
+                id: true,
+                username: true
+            }
+        })
+
+        if(!findToken) {
+            throw new responseError(404, "Admin Belum Login")
+        }
+        res.status(200).json({
+        msg : "succes",
+        data: findToken
+
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 const adminLogout = async (req, res, next) => {
     try {
       res.clearCookie("acces_token", "refresh_token")
       .status(200).json({
-        msg : "succes"
+        msg : "succes",
     })
     } catch (error) {
       next(error)
@@ -766,6 +820,8 @@ const adminLogout = async (req, res, next) => {
 export default {   
     // admin login
     adminLogin,
+    updatePassword,
+    
     // adminLogout 
     adminLogout,
 
@@ -848,6 +904,9 @@ export default {
     // absen
     findAllAbsen,
     findAbsenById,
-    findAbsenFilter
+    findAbsenFilter,
+    findAbsenFilter,
 
+    // cekToken
+    cekToken,
 }

@@ -8,6 +8,9 @@ export const pembimbingDudiRouter = express.Router()
 // middleware
 pembimbingDudiRouter.use(pembimbingDudiMiddleware)
 
+// updatePasswordSiswa
+// pembimbingDudiRouter.put("/updatePassword/:id",pembimbingDudiController.updatePassword)
+
 pembimbingDudiRouter.get('/getPembimbingDudi', pembimbingDudiController.getPembimbingDudiById)
 pembimbingDudiRouter.get('/getSiswaPembimbingDudi/:id', pembimbingDudiController.getSiswaPembimbingDudi)
 pembimbingDudiRouter.get('/getAllSiswaPembimbingDudi', pembimbingDudiController.getAllSiswaPembimbingDudi)
@@ -36,3 +39,9 @@ pembimbingDudiRouter.get("/findLaporanPklFilter",pembimbingDudiController.findLa
 
 // absen
 pembimbingDudiRouter.get("/cetakAbsen",pembimbingDudiController.cetakAbsen)
+
+// Kuota Siswa
+pembimbingDudiRouter.post("/addKuotaSiswa",pembimbingDudiController.addKuotaSiswa)
+pembimbingDudiRouter.put("/updateKuotaSiswa/:id",pembimbingDudiController.updateKuotaSiswa)
+pembimbingDudiRouter.delete("/deleteKuotaSiswa/:id",pembimbingDudiController.deleteKuotaSiswa)
+

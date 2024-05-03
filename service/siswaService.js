@@ -11,6 +11,35 @@ import { checkPklSiswa } from "../utils/checkPklSiswa.js";
 import { selectCancelPkl } from "../utils/cancelPkl.js";
 import { file } from "../utils/imageSaveUtilsLaporanPklSiswa.js";
 import { selectLaporanSiswaPkl } from "../utils/LaporanSiswaPklUtil.js";
+import bcrypt from "bcryptjs"
+import pembimbingDudiValidation from "../validation/pembimbingDudiValidation.js";
+
+const updatePassword = async (id, password) => {
+  id = await validate (adminValidation.idValidation,id)
+  password = await validate(pembimbingDudiValidation.updatePassword, password)
+
+  const findSiswa = await db.siswa.findUnique ({
+    where: {
+      id: id
+    }
+  })
+
+  if (!findSiswa) {
+    throw new responseError(404, "Siswa tidak ditemukan");
+  }
+
+  password = await bcrypt.hash(password,10)
+
+  return db.siswa.update ({
+    where: {
+      id: id
+    },
+    data: {
+      password : password
+    },
+    select: selectSiswaObject
+  })
+}
 
 const getSiswaById = async (id) => {
   id = await validate(adminValidation.idValidation, id);
@@ -19,7 +48,7 @@ const getSiswaById = async (id) => {
     where: {
       id: id,
     },
-    select: selectSiswaObject,
+    select: selectSiswaObject
   });
 
   if (!findSiswa) {
@@ -58,6 +87,84 @@ const getDudiById = async (id,siswa) => {
   }
   return findDudi;
 };
+
+const getDudiFilter = async (query,page,siswa) => {
+  query = await validate(adminValidation.searchDudiValidation,query)
+  page = await validate(siswaValidation.pageValidation,page)
+
+  const findDudi = await db.dudi.findMany({
+    where : {
+        AND : [
+          {
+            add_by : siswa.id_sekolah
+          },
+            {
+                AND : [
+                    {
+                        nama_instansi_perusahaan : {
+                            contains : query.nama_instansi_perusahaan,
+                            mode : 'insensitive'
+                        }
+                    },
+                    {
+                        bidang : {
+                            contains : query.bidang,
+                            mode : 'insensitive'
+                        }
+                    },
+                    {
+                        alamat : {
+                            AND : [
+                                {
+                                    negara : {
+                                        contains : query.negara,
+                                        mode : "insensitive"
+                                    }
+                                },
+                                {
+                                    provinsi : {
+                                        contains : query.provinsi,
+                                        mode : "insensitive"
+                                    }
+                                },
+                                {
+                                    kabupaten : {
+                                        contains : query.kabupaten,
+                                        mode : "insensitive"
+                                    }
+                                },
+                                {
+                                    kecamatan : {
+                                        contains : query.kecamatan,
+                                        mode : "insensitive"
+                                    }
+                                },
+                                {
+                                    desa : {
+                                        contains : query.desa,
+                                        mode : "insensitive"
+                                    }
+                                },
+                                {
+                                    detail_tempat : {
+                                        contains : query.detail_tempat,
+                                        mode : "insensitive"
+                                    }
+                                },
+                            ]
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    skip : 10 * (page - 1),
+    take : 10,
+    select : selectDudiObject
+  })
+
+  return {dudi : findDudi,page : page,count : findDudi.length}
+}
 
 const getDudiByName = async (nama,siswa) => {
   nama = await validate(siswaValidation.NameValidation, nama);
@@ -144,6 +251,7 @@ const addPengajuanPkl = async (body,siswa) => {
       status: true,
       dudi: true,
       pengajuan_pkl: true,
+      jenis_kelamin : true
     },
   });
 
@@ -177,10 +285,46 @@ const addPengajuanPkl = async (body,siswa) => {
         }
       ]
     },
+    select : {
+      id : true,
+      tersedia : true,
+      kouta : true,
+      siswa : {
+        where : {
+          jenis_kelamin : findSiswa.jenis_kelamin
+        }
+      },
+      _count : {
+        select : {
+          siswa : true,
+        }
+      },
+    }
   });
+  console.log(findDudi);
 
   if (!findDudi) {
     throw new responseError(404, "data dudi tidak ditemukan");
+  }
+
+  if(!findDudi.tersedia) {
+    throw new responseError(400,"pengajuan untuk dudi ini tidak tersedia")
+  }
+
+  if(findDudi.kouta.total == findDudi._count.siswa) {
+    throw new responseError(400,"kouta sudah penuh")
+  }
+
+  if(findSiswa.jenis_kelamin == "perempuan") {
+    if(findDudi.siswa.length == findDudi.kouta.jumlah_wanita) {
+      throw new responseError(400,"kouta untuk perempuan sudah penuh")
+    }
+  }
+
+  if(findSiswa.jenis_kelamin == "pria") {
+    if(findDudi.siswa.length == findDudi.kouta.jumlah_pria) {
+      throw new responseError(400,"kouta untuk pria sudah penuh")
+    }
   }
 
   return db.pengajuan_pkl.create({
@@ -515,12 +659,14 @@ const findLaporanSiswaPklById = async (id) => {
 };
 
 export default {
+  updatePassword,
   // Get DUDI & Siswa
   getSiswaById,
   getDudi,
   getDudiByName,
   getDudiByAlamat,
   getDudiById,
+  getDudiFilter,
 
   // pengajuan pkl
   addPengajuanPkl,

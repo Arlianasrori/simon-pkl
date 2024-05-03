@@ -14,6 +14,8 @@ import { selectAbsenObject } from "../utils/absenSelect.js"
 import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js"
 import { selectKelasObject } from "../utils/kelasSelect.js"
 import jwt from "jsonwebtoken"
+import pembimbingDudiValidation from "../validation/pembimbingDudiValidation.js"
+import siswaValidation from "../validation/siswaValidation.js"
 
 // admin login
 const adminLogin = async (body) => {
@@ -45,6 +47,35 @@ const adminLogin = async (body) => {
     return {acces_token_admin,refresh_token_admin}
   }
 
+const updatePassword = async (id, password) => {
+    id = await validate(adminValidation.idValidation, id)
+    password = await validate(pembimbingDudiValidation.updatePassword, password)
+  
+    const findAdmin = await db.admin.findUnique({
+      where: {
+        id: id
+      }
+    })
+  
+    if (!findAdmin) {
+      throw new responseError (404, "Admin tidak ditemukan")
+    }
+  
+    password = await bcrypt.hash(password,10)
+  
+    return db.admin.update ({
+      where: {
+        id: id
+      },
+      data: {
+        password : password
+      },
+        select: {
+            id: true,
+            username: true
+      },
+    })
+  }
 // siswa service
 const addSiswa = async (siswa,alamat) => {
     siswa.id = generateId()
@@ -135,13 +166,19 @@ const findSiswaById = async (id,admin) => {
     return findSiswa
 }
 
-const findAllSiswa = async (admin) => {
-    return db.siswa.findMany({
+const findAllSiswa = async (page,admin) => {
+    page = await validate(siswaValidation.pageValidation,page)
+
+    const findSiswa = await db.siswa.findMany({
         where : {
             id : admin.id_sekolah
         },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectSiswaObject
     })
+
+    return {siswa : findSiswa,page : page,count : findSiswa.length}
 }
 const findSiswaHaventPkl = async (admin) => {
     return db.siswa.findMany({
@@ -159,8 +196,9 @@ const findSiswaHaventPkl = async (admin) => {
         select : selectSiswaObject
     })
 }
-const findSiswaFilter = async (query,admin) => {
+const findSiswaFilter = async (query,admin,page) => {
     query = await validate(adminValidation.searchSiswaValidation,query)
+    page = await validate(siswaValidation.pageValidation,page)
 
     const findSiswa = await db.siswa.findMany({
         where : {
@@ -232,6 +270,8 @@ const findSiswaFilter = async (query,admin) => {
                 }
             ]
         },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectSiswaObject
     })
 
@@ -373,12 +413,18 @@ const deleteJurusan = async (id) => {
         }
     })
 }
-const findAllJurusan = async (admin) => {
-    return db.jurusan.findMany({
+const findAllJurusan = async (page,admin) => {
+    page = await validate(siswaValidation.pageValidation,page)
+
+    const findJurusan = await db.jurusan.findMany({
         where : {
             id_sekolah : admin.id_sekolah
-        }
+        },
+        skip : 10 * (page - 1),
+        take : 10
     })
+
+    return {jurusan : findJurusan,page : page,count : findJurusan.length}
 } 
 const findJurusanById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
@@ -507,15 +553,21 @@ const deleteKelas = async (id,admin) => {
         select : selectKelasObject
     })
 }
-const findAllkelas = async (admin) => {
-    return db.kelas.findMany({
+const findAllkelas = async (page,admin) => {
+    page = await validate(siswaValidation.pageValidation,page)
+
+    const findKelas = await db.kelas.findMany({
         where : {
             jurusan : {
                 id_sekolah : admin.id_sekolah
             }
         },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectKelasObject
     })
+
+    return {kelas : findKelas,page : page,count : findKelas.length}
 } 
 const findKelasById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
@@ -618,6 +670,8 @@ const addGuruPembimbing = async (guru,alamat) => {
 
     guru.password = await bcrypt.hash(guru.password,10)
 
+    console.log(guru);
+
     const findGuruPembimbing = await db.guru_pembimbing.findFirst({
        where : {
         OR : [
@@ -634,6 +688,7 @@ const addGuruPembimbing = async (guru,alamat) => {
     if(findGuruPembimbing) {
         throw new responseError(400,"guru pemimbing sudah terdaftar")
     }
+    console.log(guru);
 
     return db.$transaction(async (tx) => {
         const addGuruPembimbimg = await tx.guru_pembimbing.create({
@@ -762,13 +817,18 @@ const deleteGuruPembimbing = async (identify,admin) => {
     })
 }
 
-const findAllGuruPembimbing = async (admin) => {
-    return db.guru_pembimbing.findMany({
+const findAllGuruPembimbing = async (page,admin) => {
+    page = await validate(siswaValidation.pageValidation,page)
+    const findGuruPembimbing = await db.guru_pembimbing.findMany({
         where : {
             id_sekolah : admin.id_sekolah
         },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectGuruPembimbingPbject
     })
+
+    return {guruPembimbing : findGuruPembimbing,page : page,count : findGuruPembimbing.length}
 }
 const findGuruPembimbingById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
@@ -922,13 +982,19 @@ const addDudi = async (dudi,alamat) => {
     })
 }
 
-const findAllDudi = async (admin) => {
-    return db.dudi.findMany({
+const findAllDudi = async (page,admin) => {
+    page = await validate(siswaValidation.pageValidation,page)
+
+    const findDudi = await db.dudi.findMany({
         where : {
             add_by : admin.id_sekolah
         },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectDudiObject
     })
+
+    return {dudi: findDudi,page : page,count : findDudi.length}
 }
 
 const findDudiById = async (id,admin) => {
@@ -1060,8 +1126,9 @@ const deleteDudi = async (id,admin) => {
     })
 }
 
-const findDudiFilter = async (query,admin) => {
+const findDudiFilter = async (query,admin,page) => {
     query = await validate(adminValidation.searchDudiValidation,query)
+    page = await validate(siswaValidation.pageValidation,page)
 
     const findDudi = await db.dudi.findMany({
         where : {
@@ -1129,10 +1196,12 @@ const findDudiFilter = async (query,admin) => {
                 }
             ]
         },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectDudiObject
     })
 
-    return {count : findDudi.length,data : findDudi}
+    return {dudi : findDudi,page : page,count : findDudi.length}
 }
 
 
@@ -1149,7 +1218,7 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
             id : PembimbingDudi.id
         }
     })
-    
+
     if(findPembimbingDudi) {
         throw new responseError(400,"data pembimbing dudi telah ditambahkan")
     }
@@ -1168,6 +1237,8 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
         }
     })
 
+    PembimbingDudi.password = await bcrypt.hash(PembimbingDudi.password, 10)
+
     if(!findDudi) {
         throw new responseError(404,"data dudi tidak ditemukan")
     }
@@ -1184,11 +1255,15 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
         return {pembimbingDudi : addPembimbingDudi,alamat : addAlamatDudi}
     })
 }
-const findAllPembimbingDudi = async (admin) => {
+const findAllPembimbingDudi = async (admin,page) => {
+    page = await validate(siswaValidation.pageValidation,page)
+
     return db.pembimbing_dudi.findMany({
         where : {
             add_by : admin.id_sekolah
         },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectPebimbingDudiObject
     })
 }
@@ -1399,15 +1474,21 @@ const deletePembimbingDudi = async (id,admin) => {
 
 // pengajuan PKL
 
-const findAllPengajuanPkl = async (admin) => {
-    return db.pengajuan_pkl.findMany({
+const findAllPengajuanPkl = async (page,admin) => {
+    page = await validate(siswaValidation.pageValidation,page)
+
+    const findPengajuan = await db.pengajuan_pkl.findMany({
         where : {
             siswa : {
                 id_sekolah : admin.id_sekolah
             }
         },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectPengajuanPklObject
     })
+
+    return {pengajuan : findPengajuan,page : page,count : findPengajuan.length}
 }
 const findAllPengajuanPklFilter = async (query,admin) => {
     query = await validate(adminValidation.PengajuanPklfilterValidation,query)
@@ -1453,15 +1534,20 @@ const findPengajuanPklById = async (id,admin) => {
 
 // laporan pembimbing dudi pkl
 
-const findAllLaporanPkl = async (admin) => {
-    return db.laporan_pkl.findMany({
+const findAllLaporanPkl = async (page,admin) => {
+    page = await validate(siswaValidation.pageValidation,page)
+    const findLaporan = await db.laporan_pkl.findMany({
         where : {
             siswa : {
                 id_sekolah : admin.id_sekolah
             }
         },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectLaporanpklObject
     })
+
+    return {laporan : findLaporan,page : page,count : findLaporan.length}
 }
 const findLaporanPklById = async (id) => {
     id = await validate(adminValidation.idValidation,id)
@@ -1559,15 +1645,20 @@ const findLaporanPklFilter = async (query,admin) => {
 
 
 // laporan siswa pkl
-const findAllLaporanSiswaPkl = async (admin) => {
-    return db.laporan_siswa_pkl.findMany({
+const findAllLaporanSiswaPkl = async (page,admin) => {
+    page = await validate(siswaValidation.pageValidation,page)
+    const findLaporan = await db.laporan_siswa_pkl.findMany({
         where : {
             siswa : {
                 id_sekolah : admin.id_sekolah
             }
         },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectLaporanpklSiswaObject
     })
+
+    return {laporan : findLaporan,page : page,count : findLaporan.length}
 }
 const findLaporanPklSiswaById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
@@ -1593,8 +1684,9 @@ const findLaporanPklSiswaById = async (id,admin) => {
     }
     return findLaporan
 }
-const findLaporanPklSiswaFilter = async (query,admin) => {
+const findLaporanPklSiswaFilter = async (query,admin,page) => {
     query = await validate(adminValidation.searchLaporanPklSiswa,query)
+    page = await validate(siswaValidation.pageValidation,page)
 
     const findLaporan = await db.laporan_siswa_pkl.findMany({
         where : {
@@ -1658,6 +1750,8 @@ const findLaporanPklSiswaFilter = async (query,admin) => {
                 }
             ]
         },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectLaporanpklSiswaObject
     })
 
@@ -1734,6 +1828,7 @@ const findAbsenFilter = async (query,admin) => {
 export default {
     // admin login
     adminLogin,
+    updatePassword,
 
     // siswa
     addSiswa,

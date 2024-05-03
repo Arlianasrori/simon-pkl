@@ -24,6 +24,20 @@ const getDudi = async (req, res, next) => {
     next(error);
   }
 };
+const getDudiFilter = async (req, res, next) => {
+  try {
+    const query = req.query
+    const page = req.query.page
+    const siswa = req.siswa
+    const result = await siswaService.getDudiFilter(query,page,siswa);
+    res.status(200).json({
+      msg: "succes",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 const getDudiByName = async (req, res, next) => {
   try {
@@ -130,7 +144,7 @@ const findPengajuanPklByStatus = async (req, res, next) => {
 // cancel pkl
 const addCancelPkl = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id_siswa);
+    const id = req.siswa.id
 
     const result = await siswaService.addCancelPkl(id);
     res.status(200).json({
@@ -184,6 +198,7 @@ const cancelPengajuanCancelPkl = async (req, res, next) => {
 const AddLaporanSiswaPkl = async (req, res, next) => {
   try {
     const body = req.body;
+    body.id_siswa = req.siswa.id
     const image = req.files.dokumentasi;
     const url = `http://${req.hostname}:2008/laporan_siswa_pkl`;
 
@@ -261,13 +276,30 @@ try {
 }
 }
 
+const updatePassword = async (req, res, next) => {
+  try {
+    const id = req.params.id
+    const body = req.body.password
+    const result = await siswaService.updatePasswordSiswa(id,body)
+    res.status(200).json({
+      msg: "Success",
+      data: result,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export default {
+  updatePassword,
+
   // get siswa & dudi 
   getSiswaById,
   getDudi,
   getDudiByName,
   getDudiByAlamat,
   getDudiById,
+  getDudiFilter,
 
   // pengajuan pkl
   addPengajuanPkl,

@@ -3,7 +3,48 @@ import { db } from "../config/prismaClient.js";
 import responseError from "../error/responseError.js";
 import { selectSiswaObject } from "../utils/siswaSelect.js";
 import adminValidation from "../validation/adminValidation.js";
+import absenValidation from "../validation/absenValidation.js";
+import fs from "fs"
+import puppeteer from "puppeteer"
+import ejs from 'ejs'
 import guruPembimbingValidation from "../validation/guruPembimbingValidation.js";
+import pembimbingDudiValidation from "../validation/pembimbingDudiValidation.js";
+
+
+const updatePassword = async (id, password) => {
+  id = await validate(adminValidation.idValidation, id)
+  password = await validate(pembimbingDudiValidation.updatePassword, password)
+
+  const findGuruPembimbing = await db.guru_pembimbing.findUnique({
+    where: {
+      id: id
+    }
+  })
+
+  if (!findGuruPembimbing) {
+    throw new responseError (404, "Guru Pembimbing tidak ditemukan")
+  }
+
+  password = await bcrypt.hash(password,10)
+
+  return db.guru_pembimbing.update ({
+    where: {
+      id: id
+    },
+    data: {
+      password : password
+    },
+      select: {
+      nip: true,
+      nama: true,
+      no_telepon: true,
+      jenis_kelamin: true,
+      tempat_lahir: true,
+      tanggal_lahir: true,
+      agama: true,
+    },
+  })
+}
 
 const getGuruPembimbing = async (id) => {
   id = await validate(adminValidation.idValidation, id);
@@ -110,13 +151,104 @@ const getAllLaporanPklSiswa = async (id_guru_pembimbing) => {
   }
 }
 
-export default {
+// absen
+const cetakAbsen = async (query) => {
+  query = await validate(absenValidation.findAbsenFilterValidation,query)
 
+  if(query.month_ago) {
+    query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago + 1)
+}
+
+  const data = await db.absen.findMany({
+    where : {
+        AND : [
+            {
+                id_siswa : query.id_siswa
+            },
+            {
+                siswa : {
+                    id_guru_pembimbing : query.id_guru_pembimbing
+                }
+            },
+            {
+                siswa : {
+                    id_dudi : query.id_dudi
+                }
+            },
+            {
+                OR : [
+                    {
+                        tanggal : query.tanggal
+                    },
+                    {
+                        AND : [
+                            {
+                                tanggal : {
+                                    gte : query.tanggal_start
+                                }
+                            },
+                            {
+                                tanggal : {
+                                    lte : query.tanggal_end
+                                }
+                            },
+                        ]
+                    }
+                ]
+            },
+            {
+                tanggal : query.month_ago
+            }
+        ]
+    },
+    orderBy : {
+        tanggal : "desc",
+    },
+    select : {
+        tanggal : true,
+        absen_masuk : true,
+        absen_pulang : true,
+        status_absen_masuk : true,
+        status_absen_keluar : true,
+        status : true,
+        siswa : {
+            select : {
+                nama : true,
+                jurusan : true,
+                dudi : {
+                  select : {
+                    nama_instansi_perusahaan : true
+                  }
+                }
+            }
+        }
+    }
+  })
+
+  const html = fs.readFileSync("index.ejs",{encoding : "utf-8"})
+
+  const browser = await puppeteer.launch({ headless: true});
+  const page = await browser.newPage();
+  await page.setContent(ejs.render(html,{data : data}))
+  const pdf = await page.pdf({ format : "a4",path : "p.pdf"});
+
+  await browser.close();
+
+  return data
+}
+
+export default {
+  updatePassword,
+
+  // guru pembimbing
   getGuruPembimbing,
   getSiswa,
   getAllSiswaGuruPembimbing,
 
   // laporan pkl 
   getLaporanPklSiswa,
-  getAllLaporanPklSiswa
+  getAllLaporanPklSiswa,
+
+  // cetakAbsen
+  cetakAbsen 
 };

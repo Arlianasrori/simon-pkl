@@ -43,8 +43,15 @@
     </div>
     <div class="body">
         <h2 style="font-weight: bold; text-decoration: underline;">DAFTAR HADIR PKL</h2>
-        <div style="width: 94%;">
-            <p> <span style="font-weight: 600;">tanggal</span> : senin, 7 juni 2024 - rabu, 9 juni 2024</p>
+        <div style="line-height: 6px; width: 94%;">
+          <div style="width: 94%;">
+              <p><span style="font-weight: 1000;">
+                <%= nama %>
+               </span></p>
+          </div>
+          <div style="width: 94%;" >
+              <p> <span style="font-weight: 600;">Tanggal</span> : <%= tanggal_start %> - <%= tanggal_end %></p>
+          </div>
         </div>
         <div class="table" style="width: 94%;display: flex;justify-content: center;">
             <table class="my_table" style="width: 100%;font-size: 12px;">
@@ -56,6 +63,7 @@
                   <th rowspan="2" style="width: 100px;">Tanggal</th>
                   <th colspan="2">Absen Masuk</th>
                   <th colspan="2">Absen pulang</th>
+                  <th rowspan="2">Status</th>
                 </tr>
                 <tr>
                   <td style="font-weight: bold;width: 50px;">jam</td>
@@ -88,6 +96,11 @@
                       silahkan absen pulang
                     <% } else { %>
                       <%= data.status_absen_keluar%>
+                    <%} %></td>
+                    <td><% if (data.status == null) { %>
+                      -
+                    <% } else { %>
+                      <%= data.status%>
                     <%} %></td>
                   </tr>
                 <% }); %>       

@@ -47,7 +47,7 @@ const addAdmin = async (body) => {
     
     body.password = await bcrypt.hash(body.password,10)
 
-    const findAdmin = await db.admin.findUnique ({
+    const findAdmin = await db.admin.findFirst({
         where: {
             username : body.username
         }
