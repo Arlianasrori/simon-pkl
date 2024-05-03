@@ -8,20 +8,24 @@ export const adminMiddleware = async (req,res,next) => {
         return res.status(401).json({msg : "unauthorized"})
     }
     
-    const admin = await jwt.verify(token,process.env.SECRET_KEY,(err,admin) => {
+    const admin = await jwt.verify(token,process.env.TOKEN_SECRET_ADMIN,(err,admin) => {
         if(err){
             return {
                 status : 401,
                 msg : err.message
             }
         }
-        req.admin = admin
         return admin
     })
 
     const findAdmin = await db.admin.findFirst({
         where : {
             username : admin.username
+        },
+        select : {
+            id : true,
+            username : true,
+            id_sekolah : true
         }
     })
 
@@ -36,6 +40,8 @@ export const adminMiddleware = async (req,res,next) => {
             msg : admin.msg
         })
     }
+
+    req.admin = findAdmin
     
      next()
 }

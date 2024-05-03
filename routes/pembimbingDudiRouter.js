@@ -5,9 +5,6 @@ import { pembimbingDudiMiddleware } from "../middleware/pembimbingDudiMiddleware
 export const pembimbingDudiRouter = express.Router()
 
 
-// pembimbing dudi login 
-pembimbingDudiRouter.post("/Login",pembimbingDudiController.pembimbingDudiLogin)
-
 // middleware
 pembimbingDudiRouter.use(pembimbingDudiMiddleware)
 

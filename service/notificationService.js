@@ -65,8 +65,8 @@ const readNotification = async (id,id_siswa) => {
             id : true,
             judul : true,
             isi : true,
-            read : true
-        }
+            read : true     
+        }            
     })
     if(!findNotif){
         throw new responseError(400,"notif tidak ditemukan")

@@ -10,7 +10,6 @@ export const file = async (image,url) => {
     const fullName = `${new Date().getTime()}-${fileName}`
     const fullPath = `${url}/${fullName}`
     const pathSaveFile = `./public/images/${fullName}`
-    console.log(pathSaveFile);
 
     return {fullPath,pathSaveFile}
 }

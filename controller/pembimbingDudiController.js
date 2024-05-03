@@ -1,25 +1,6 @@
 import adminService from "../service/adminService.js"
 import pembimbingDudiService from "../service/pembimbingDudiService.js"
 
-const pembimbingDudiLogin = async (req,res,next) => {
-  try {
-      const body = req.body
-      const result = await pembimbingDudiService.pembimbingDudiLogin(body)
-      res.status(201).cookie("acces_token",result.acces_token_pembimbing_dudi,{
-          maxAge : 24 * 60 * 60 * 60,
-          httpOnly: true,
-      }).cookie("refresh_token",result.refresh_token_pembimbing_dudi,{
-          maxAge : 24 * 60 * 60 * 60,
-          httpOnly: true,
-      }).json({
-          msg : "succes",
-          data : result
-      })
-  } catch (error) {
-      next(error)
-  }
-}
-
 const getPembimbingDudiById = async (req, res, next) => {
   try {
     const result = await pembimbingDudiService.getPembimbingDudiById(req.pembimbingDudi.id);
@@ -167,7 +148,9 @@ const AddLaporanPkl = async (req, res, next) => {
 
 const updateLaporanPkl = async (req, res, next) => {
   try {
-    const result = await pembimbingDudiService.updateLaporanPkl(parseInt(req.params.id),req.body)
+    const image = req.files.file_laporan;
+    const url = `http://${req.hostname}:2008/laporan_pkl`;
+    const result = await pembimbingDudiService.updateLaporanPkl(parseInt(req.params.id),req.body,image,url)
     res.status(200).json({
       msg: "Success",
       data: result,
@@ -182,7 +165,7 @@ const deleteLaporanPkl = async (req, res, next) => {
   try {
     const result = await pembimbingDudiService.deleteLaporanPkl(parseInt(req.params.id))
     res.status(200).json({
-      msg: "Laporan Anda Telah Dihapus",
+      msg: "Laporan Anda Berhasil Dihapus",
       data: result,
     })
   } catch (error) { 
@@ -242,9 +225,6 @@ const findLaporanPklFilter= async (req, res, next) => {
     }
   }
 export default {
-
-  // pembimbing dudi login 
-  pembimbingDudiLogin,
 
   getPembimbingDudiById,
   getSiswaPembimbingDudi,

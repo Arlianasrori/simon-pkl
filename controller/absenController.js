@@ -2,8 +2,9 @@ import absenService from "../service/absenService.js";
 // jadwal absen 
 const addJadwalAbsen = async (req,res,next) => {
     try {
-        const body = req.body
-        const result = await absenService.addJadwalAbsen(body)
+        const body = req.body.jadwal
+        const day = req.body.day
+        const result = await absenService.addJadwalAbsen(body,day)
         res.status(201).json({
             msg : "succes",
             data : result
@@ -59,6 +60,45 @@ const addAbsenPulang = async (req,res,next) => {
         const body = req.body
 
         const result = await absenService.addAbsenPulang(body)
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const absenIzintelat = async (req,res,next) => {
+    try {
+        const body = req.body
+
+        const result = await absenService.absenIzinTelat(body)
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const absenDiluarRadius = async (req,res,next) => {
+    try {
+        const body = req.body
+
+        const result = await absenService.absendiluarRadius(body)
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const cekAbsen = async (req,res,next) => {
+    try {
+        const body = req.body
+
+        const result = await absenService.cekAbsen(body)
         res.status(201).json({
             msg : "succes",
             data : result
@@ -189,6 +229,9 @@ export default {
     findAbsen,
     findAbsenFilter,
     analisisAbsen,
+    absenIzintelat,
+    absenDiluarRadius,
+    cekAbsen,
 
     // kordinat absen
     addKordinatAbsen,

@@ -17,6 +17,9 @@ absenRouter.post("/absenIzin",absenController.absenTidakMemenuhiJam)
 absenRouter.get("/findAbsen/:id_siswa",absenController.findAbsen)
 absenRouter.get("/findAbsenFilter",absenController.findAbsenFilter)
 absenRouter.get("/analisisAbsen",absenController.analisisAbsen)
+absenRouter.post("/izinTelat",absenController.absenIzintelat)
+absenRouter.post("/absenDiLuarRadius",absenController.absenDiluarRadius)
+absenRouter.post("/cekStatusAbsen",absenController.cekAbsen)
 
 
 // kordinat absen

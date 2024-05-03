@@ -17,5 +17,9 @@
 //     };
 //     const tanggal = date.toLocaleDateString("id",options)
 //     console.log(tanggal);
+//    
 //     res.send("hay")
 // })
+done : absen with izin dan telat,absen diluar radius
+
+belum : cek absen,,analisis absen,

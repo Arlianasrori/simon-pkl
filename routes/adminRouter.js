@@ -4,18 +4,14 @@ import { adminMiddleware } from "../middleware/adminMiddleware.js"
 
 export const adminRouter = express.Router()
 
-// middleware
-// adminRouter.use(adminMiddleware)
-
 // admin login 
 adminRouter.post('/adminLogin',adminController.adminLogin)
 
-// admin router 
-adminRouter.post('/addAdmin', adminController.addAdmin)
-adminRouter.put('/updateAdmin/:id', adminController.updateAdmin)
-adminRouter.delete('/deleteAdmin/:id', adminController.deleteAdmin)
-adminRouter.get('/getAdminById/:id', adminController.getAdminById)
-adminRouter.get('/getAllAdmin', adminController.getAllAdmin)
+// middleware
+adminRouter.use(adminMiddleware)
+
+// admin logout 
+adminRouter.delete('/adminLogout',adminController.adminLogout)
 
 // siswa router
 adminRouter.post('/addSiswa',adminController.addSiswa)

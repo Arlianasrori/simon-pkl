@@ -3,27 +3,29 @@ import { getselish } from "./getSelishDatehour.js"
 import { db } from "../config/prismaClient.js"
 
 
-export const validasiAbsenMasuk = async (findJadwalAbsen,body) => {
+export const validasiAbsenMasuk = async (body) => {
     const Now = new Date()
 
-    const hourNow = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit"}).split(" ")[1]
-    const dateNow = `${Now.getFullYear()}-${("0" + (Now.getMonth() + 1)).slice(-2)}-${("0" + (Now.getDay())).slice(-2)}`
-    const selisih_tanggal_on_day = parseInt(getselish(findJadwalAbsen.tanggal_mulai,dateNow))
+    const dateNow = Now.toISOString().substring(0, 10)
+    const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
+    const hourNow = datelocal.split(" ")[1]
 
-    const reset = "00.00"
-
-    if( reset == hourNow ) {
-        throw new responseError(400,"invalid")
-    }
-
-    const findSiswa = await db.siswa.findUnique({
+    // find absen
+    const findSiswa = await db.siswa.findFirst({
         where : {
             id : parseInt(body.id_siswa)
         },
         select : {
+            id : true,
             absen : {
                 where : {
                     tanggal : dateNow
+                },
+                select : {
+                    jadwal_absen : true,
+                    id : true,
+                    status_absen_masuk : true,
+                    status_absen_pulang : true                 
                 }
             }
         }
@@ -33,15 +35,18 @@ export const validasiAbsenMasuk = async (findJadwalAbsen,body) => {
         throw new responseError(404,"data siswa tidak ditemukan")
     }
 
-    if(findSiswa.absen[0]) {
+    if(findSiswa.absen[0].absen_masuk) {
         throw new responseError(400,"anda telah melakukan absen masuk")
     }
 
+    const selisih_tanggal_on_day = parseInt(getselish(findSiswa.absen[0].jadwal_absen.tanggal_mulai,dateNow))
+    console.log(findSiswa.absen[0].jadwal_absen);
+
     if(selisih_tanggal_on_day < 0) {
         throw new responseError(400,"tanggal absen tidak sesuai dengan jadwal")
-    }else if(selisih_tanggal_on_day > findJadwalAbsen.selisih_tanggal_day) {
+    }else if(selisih_tanggal_on_day > findSiswa.absen[0].jadwal_absen.selisih_tanggal_day) {
         throw new responseError(400,"tanggal absen tidak sesuai dengan jadawal")
     }
 
-    return {dateNow,hourNow}
+    return {dateNow,hourNow,day : datelocal.split(" ")[0],absen : findSiswa.absen[0],jadwal : findSiswa.absen[0].jadwal_absen}
 }

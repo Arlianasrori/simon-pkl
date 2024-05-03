@@ -4,23 +4,12 @@ const adminLogin = joi.object ({
   username : joi.string().max(255).required(),
   password : joi.string().max(255).required()
 })
-  
-// admin validation 
-const addAdminValidation = joi.object ({
-  id : joi.number().required(),
-  username: joi.string().max(255).required(),
-  password: joi.string().max(255).required()
-})
-
-const updateAdminValidation = joi.object ({
-  username: joi.string().max(255).optional(),
-  password: joi.string().max(255).optional()
-})
 
 // siswa Validation 
 const addSiswaValidation = joi.object({
   id : joi.number().required(),
   nis : joi.number().required(),
+  id_sekolah : joi.number().required(),
   nama : joi.string().max(255).required(),
   id_kelas : joi.number().required(),
   id_jurusan : joi.number().required(),
@@ -82,6 +71,7 @@ const namaValidation = joi.string().max(255).required()
 // jurusan 
 const addJurusanValidation = joi.object({
   id : joi.number().required(),
+  id_sekolah : joi.number().required(),
   nama : joi.string().max(255).required()
 })
 
@@ -108,6 +98,7 @@ const searchKelasValidation = joi.object({
 // guruPembimbing validation
 const addGuruPembimbingValidation = joi.object({
     id : joi.number().required(),
+    id_sekolah : joi.number().required(),
     nip : joi.number().required(),
     nama : joi.string().max(255).required(),
     no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).required(),
@@ -154,6 +145,7 @@ const updateGuruPembimbingValidation = joi.object({
 // dudi validation
 const addDudiValidation = joi.object({
   id : joi.number().required(),
+  add_by : joi.number().required(),
   nama_instansi_perusahaan : joi.string().max(255).required(),
   no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).required(),
   bidang : joi.string().max(255).required(),
@@ -191,6 +183,7 @@ const searchDudiValidation = joi.object({
 // pembimbing dudi validation
 const addPembimbingDudiValidation = joi.object({
   id : joi.number().required(),
+  id_sekolah : joi.number().required(),
   id_dudi : joi.number().required(),
   nama : joi.string().max(255).required(),
   username : joi.string().max(255).required(),
@@ -277,10 +270,6 @@ export default {
   // public
     idValidation,
     updateAlamatValidation,
-
-  // admin 
-  addAdminValidation,
-  updateAdminValidation,
     
   // siswa
     addSiswaValidation ,

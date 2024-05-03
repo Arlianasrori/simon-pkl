@@ -1,25 +1,6 @@
 import adminService from "../service/adminService.js"
 import guruPembimbingService from "../service/guruPembimbingService.js"
 
-const guruPembimbingLogin = async (req,res,next) => {
-    try {
-        const body = req.body
-        const result = await guruPembimbingService.guruPembimbingLogin(body)
-        res.status(201).cookie("acces_token",result.acces_token_guru_pembimbing,{
-            maxAge : 24 * 60 * 60 * 60,
-            httpOnly: true,
-        }).cookie("refresh_token",result.refresh_token_guru_pembimbing,{
-            maxAge : 24 * 60 * 60 * 60,
-            httpOnly: true,
-        }).json({
-            msg : "succes",
-            data : result
-        })
-    } catch (error) {
-        next(error)
-    }
-  }
-
 const getGuruPembimbing = async (req, res, next) => {
     try {
         const result = await guruPembimbingService.getGuruPembimbing(req.guruPembimbing.id)
@@ -109,13 +90,39 @@ const findLaporanPklById = async (req, res, next) => {
         next(error)
     }
 }
+const getLaporanPklSiswa = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id_guru_pembimbing)
+        const result = await guruPembimbingService.getLaporanPklSiswa(id)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const getAllLaporanPklSiswa = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id_guru_pembimbing)
+        const result = await guruPembimbingService.getAllLaporanPklSiswa(id)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next (error)
+    }
+}
 export default {
-    guruPembimbingLogin,
     getGuruPembimbing,
     getSiswa,
     getAllSiswaGuruPembimbing,
     findLaporanPklSiswaFilter,
     findLaporanPklSiswaById,
     findLaporanPklFilter,
-    findLaporanPklById
+    findLaporanPklById,
+
+    getLaporanPklSiswa,
+    getAllLaporanPklSiswa
 }
