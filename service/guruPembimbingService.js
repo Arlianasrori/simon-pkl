@@ -10,6 +10,7 @@ import bcrypt from "bcryptjs"
 import puppeteer from "puppeteer"
 import ejs from 'ejs'
 import guruPembimbingValidation from "../validation/guruPembimbingValidation.js";
+import pembimbingDudiValidation from "../validation/pembimbingDudiValidation.js";
 
 const guruPembimbingLogin = async (body) => {
   body = await validate(guruPembimbingValidation.guruPembimbingLogin, body)
@@ -39,6 +40,41 @@ const guruPembimbingLogin = async (body) => {
   const refresh_token_guru_pembimbing = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_GURU_PEMBIMBING,{expiresIn : "60d"})
 
   return {acces_token_guru_pembimbing,refresh_token_guru_pembimbing}
+}
+
+const updatePassword = async (id, password) => {
+  id = await validate(adminValidation.idValidation, id)
+  password = await validate(pembimbingDudiValidation.updatePassword, password)
+
+  const findGuruPembimbing = await db.guru_pembimbing.findUnique({
+    where: {
+      id: id
+    }
+  })
+
+  if (!findGuruPembimbing) {
+    throw new responseError (404, "Guru Pembimbing tidak ditemukan")
+  }
+
+  password = await bcrypt.hash(password,10)
+
+  return db.guru_pembimbing.update ({
+    where: {
+      id: id
+    },
+    data: {
+      password : password
+    },
+      select: {
+      nip: true,
+      nama: true,
+      no_telepon: true,
+      jenis_kelamin: true,
+      tempat_lahir: true,
+      tanggal_lahir: true,
+      agama: true,
+    },
+  })
 }
 
 const getGuruPembimbing = async (id) => {
@@ -237,6 +273,7 @@ export default {
 
   // guru pembimbing login 
   guruPembimbingLogin,
+  updatePassword,
 
   getGuruPembimbing,
   getSiswa,

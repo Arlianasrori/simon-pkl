@@ -40,7 +40,6 @@ const UpdateLaporanSiswaPkl = joi.object ({
   rujukan_kompetensi_dasar : joi.string().max(255).optional(),
   dokumentasi : joi.string().max(1500).optional()
 })
-const updatePasswordSiswa = joi.string().max(255).required()
 
 export default {
   siswaLogin,
@@ -50,5 +49,4 @@ export default {
   findPengajuanByStatus,
   addLaporanSiswaPkl,
   UpdateLaporanSiswaPkl,
-  updatePasswordSiswa
 };

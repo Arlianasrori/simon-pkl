@@ -5,6 +5,8 @@ const pembimbingDudiLogin = joi.object ({
     password : joi.string().max(255).required()
 })
 
+const updatePassword = joi.string().max(255).required()
+
 const getIdValidation = joi.number().required()
 
 const statusvalidation = joi.object({
@@ -31,7 +33,7 @@ const updateLaporanPkl = joi.object ({
     file_laporan : joi.string().max(1500).optional()
 })
 
-// kuota Siwa 
+// kuota Siswa
 const addKuotaSiswaValidation = joi.object ({
     id : joi.number().required(), 
     id_dudi : joi.number().required(), 
@@ -47,6 +49,7 @@ const updateKuotaSiswaValidation = joi.object ({
 
 export default {
     pembimbingDudiLogin,
+    updatePassword,
     statusvalidation,
     getIdValidation,
     statusCancelValidation,

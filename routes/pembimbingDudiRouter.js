@@ -11,6 +11,9 @@ pembimbingDudiRouter.post("/login",pembimbingDudiController.pembimbingDudiLogin)
 // middleware
 pembimbingDudiRouter.use(pembimbingDudiMiddleware)
 
+// updatePasswordSiswa
+pembimbingDudiRouter.put("/updatePassword/:id",pembimbingDudiController.updatePassword)
+
 pembimbingDudiRouter.get('/getPembimbingDudi', pembimbingDudiController.getPembimbingDudiById)
 pembimbingDudiRouter.get('/getSiswaPembimbingDudi/:id', pembimbingDudiController.getSiswaPembimbingDudi)
 pembimbingDudiRouter.get('/getAllSiswaPembimbingDudi', pembimbingDudiController.getAllSiswaPembimbingDudi)

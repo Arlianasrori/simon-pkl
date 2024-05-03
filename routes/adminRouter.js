@@ -10,6 +10,9 @@ adminRouter.post('/adminLogin',adminController.adminLogin)
 // middleware
 adminRouter.use(adminMiddleware)
 
+// update password Admin 
+adminRouter.put('/updatePassword/:id',adminController.updatePassword)
+
 // admin logout 
 adminRouter.delete('/adminLogout',adminController.adminLogout)
 

@@ -11,7 +11,7 @@ guruPembimbingRouter.post("/login",guruPembimbingController.guruPembimbingLogin)
 guruPembimbingRouter.use(guruPembimbingMiddleware)
 
 // middleware
-guruPembimbingRouter.use(guruPembimbingMiddleware)
+guruPembimbingRouter.put("/updatePassword/:id", guruPembimbingController.updatePassword)
 
 guruPembimbingRouter.get("/getGuruPembimbing", guruPembimbingController.getGuruPembimbing)
 guruPembimbingRouter.get("/getSiswa/:id_siswa", guruPembimbingController.getSiswa)

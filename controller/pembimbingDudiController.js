@@ -12,11 +12,25 @@ const pembimbingDudiLogin = async (req,res,next) => {
           maxAge : 24 * 60 * 60 * 60,
           httpOnly: true,
       }).json({
-          msg : "succes",
+          msg : "Success",
           data : result
       })
   } catch (error) {
       next(error)
+  }
+}
+
+const updatePassword = async (req, res, next) => {
+  try {
+    const id = req.params.id
+    const body = req.body.password
+    const result = await pembimbingDudiService.updatePassword(id, body)
+    res.status(200).json({
+      msg : "Success",
+      data : result
+    })
+  } catch (error) {
+    next(error)
   }
 }
 
@@ -288,6 +302,7 @@ export default {
 
   // pembimbing dudi login 
   pembimbingDudiLogin,
+  updatePassword,
 
   getPembimbingDudiById,
   getSiswaPembimbingDudi,

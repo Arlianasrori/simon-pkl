@@ -277,7 +277,7 @@ try {
 }
 }
 
-const updatePasswordSiswa = async (req, res, next) => {
+const updatePassword = async (req, res, next) => {
   try {
     const id = req.params.id
     const body = req.body.password
@@ -295,7 +295,7 @@ export default {
 
   // siswa login 
   siswaLogin,
-  updatePasswordSiswa,
+  updatePassword,
 
   // get siswa & dudi 
   getSiswaById,

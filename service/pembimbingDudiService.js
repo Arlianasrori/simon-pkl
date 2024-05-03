@@ -15,6 +15,7 @@ import fs from "fs"
 import absenValidation from "../validation/absenValidation.js";
 import puppeteer from "puppeteer"
 import ejs from 'ejs'
+import { selectPebimbingDudiObject } from "../utils/pembimbingDudiSelect.js";
 
 const pembimbingDudiLogin = async (body) => {
   body = await validate(pembimbingDudiValidation.pembimbingDudiLogin, body)
@@ -46,6 +47,33 @@ const pembimbingDudiLogin = async (body) => {
   return {acces_token_pembimbing_dudi,refresh_token_pembimbing_dudi}
 }
 
+const updatePassword = async (id, password) => {
+  id = await validate(adminValidation.idValidation, id)
+  password = await validate(pembimbingDudiValidation.updatePassword, password)
+
+  const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
+    where: {
+      id: id
+    }
+  })
+
+  if (!findPembimbingDudi) {
+    throw new responseError (404, "Pembimbing dudi tidak ditemukan")
+  }
+
+  password = await bcrypt.hash(password,10)
+
+  return db.pembimbing_dudi.update ({
+    where: {
+      id: id
+    },
+    data: {
+      password : password
+    },
+    select: selectPebimbingDudiObject
+  })
+}
+
 const getPembimbingDudiById = async (id) => {
   id = await validate(pembimbingDudiValidation.getIdValidation, id);
 
@@ -53,14 +81,7 @@ const getPembimbingDudiById = async (id) => {
     where: {
       id: id,
     },
-    select: {
-      id_dudi: true,
-      nama: true,
-      username: true,
-      no_telepon: true,
-      jenis_kelamin: true,
-      agama: true,
-    },
+    select: selectPebimbingDudiObject
   });
 
   if (!findPembimbingDudi) {
@@ -161,7 +182,6 @@ const AccDcnPengajuanPkl = async (body,id_pengajuan) => {
     }
   })
 
-  console.log(findPengajuan.dudi.pembimbing_dudi[0]);
 
   if(!findPengajuan) {
     throw new responseError(404,"pengajuan tidak ditemukan")
@@ -548,14 +568,25 @@ const addKuotaSiswa = async (body) => {
   if(findKouta) {
     throw new responseError (400, "Kuota untuk dudi ini sudah ditambahkan")
   }
+  return db.$transaction(async tx => {
+    const addkouta = await tx.kouta_siswa.create ({
+      data: body,
+      select : {
+        jumlah_pria: true,
+        jumlah_wanita: true,
+        total: true
+      }
+    })
+    await tx.dudi.update({
+      where: {
+        id: body.id_dudi
+      },
+      data : {
+        tersedia : true
+      }
+    })
 
-  return db.kouta_siswa.create ({
-    data: body,
-    select : {
-      jumlah_pria: true,
-      jumlah_wanita: true,
-      total: true
-    }
+    return {kouta : addkouta,tersedia : true}
   })
 }
 
@@ -619,6 +650,7 @@ export default {
 
   // pembimbing dudi login 
   pembimbingDudiLogin,
+  updatePassword,
    
 
   getPembimbingDudiById,

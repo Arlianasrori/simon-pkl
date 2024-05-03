@@ -140,6 +140,7 @@ model dudi {
   no_telepon String @db.VarChar(12) 
   bidang String @db.VarChar(255)
   deksripsi String @db.VarChar(1500)
+  tersedia Boolean @default(false)
 
   alamat alamat_dudi?
   kouta kouta_siswa?

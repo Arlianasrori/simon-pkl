@@ -14,6 +14,7 @@ import { selectAbsenObject } from "../utils/absenSelect.js"
 import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js"
 import { selectKelasObject } from "../utils/kelasSelect.js"
 import jwt from "jsonwebtoken"
+import pembimbingDudiValidation from "../validation/pembimbingDudiValidation.js"
 
 const adminLogin = async (body) => {
     body = await validate(adminValidation.adminLogin, body)
@@ -42,6 +43,35 @@ const adminLogin = async (body) => {
     const refresh_token_admin = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_ADMIN,{expiresIn : "60d"})
   
     return {acces_token_admin,refresh_token_admin}
+  }
+  const updatePassword = async (id, password) => {
+    id = await validate(adminValidation.idValidation, id)
+    password = await validate(pembimbingDudiValidation.updatePassword, password)
+  
+    const findAdmin = await db.admin.findUnique({
+      where: {
+        id: id
+      }
+    })
+  
+    if (!findAdmin) {
+      throw new responseError (404, "Admin tidak ditemukan")
+    }
+  
+    password = await bcrypt.hash(password,10)
+  
+    return db.admin.update ({
+      where: {
+        id: id
+      },
+      data: {
+        password : password
+      },
+        select: {
+            id: true,
+            username: true
+      },
+    })
   }
 // admin service 
 const addAdmin = async (body) => {
@@ -1050,7 +1080,7 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
             id : PembimbingDudi.id
         }
     })
-    console.log(findPembimbingDudi);
+
     if(findPembimbingDudi) {
         throw new responseError(400,"data pembimbing dudi telah ditambahkan")
     }
@@ -1064,6 +1094,8 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
             id : PembimbingDudi.id_dudi
         }
     })
+
+    PembimbingDudi.password = await bcrypt.hash(PembimbingDudi.password, 10)
 
     if(!findDudi) {
         throw new responseError(404,"data dudi tidak ditemukan")
@@ -1505,6 +1537,7 @@ export default {
 
     // admin login 
     adminLogin,
+    updatePassword,
 
     
     // admin 

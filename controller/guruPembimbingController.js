@@ -12,7 +12,21 @@ const guruPembimbingLogin = async (req,res,next) => {
             maxAge : 24 * 60 * 60 * 60,
             httpOnly: true,
         }).json({
-            msg : "succes",
+            msg : "Success",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+  }
+
+  const updatePassword = async (req, res, next) => {
+    try {
+        const id = req.params.id
+        const body = req.body.password
+        const result = await guruPembimbingService.updatePassword(id, body)
+        res.status(200).json({
+            msg : "Success",
             data : result
         })
     } catch (error) {
@@ -24,7 +38,7 @@ const getGuruPembimbing = async (req, res, next) => {
     try {
         const result = await guruPembimbingService.getGuruPembimbing(req.guruPembimbing.id)
         res.status(200).json({
-            msg : "succes",
+            msg : "Success",
             data : result
         })
     } catch (error) {
@@ -36,7 +50,7 @@ const getSiswa = async (req, res, next) => {
     try {
         const result = await guruPembimbingService.getSiswa(req.params.id_siswa)
         res.status(200).json({
-            msg : "succes",
+            msg : "Success",
             data : result
         })
     } catch (error) {
@@ -48,7 +62,7 @@ const getAllSiswaGuruPembimbing = async (req, res, next) => {
     try {
         const result = await guruPembimbingService.getAllSiswaGuruPembimbing(req.guruPembimbing.id)
         res.status(200).json({
-            msg : "succes",
+            msg : "Success",
             data : result
         })
     } catch (error) {
@@ -63,7 +77,7 @@ const findLaporanPklSiswaFilter = async (req, res, next) => {
         query.id_guru_pembimbing = req.guruPembimbing.id
         const result = await adminService.findLaporanPklSiswaFilter(query)
         res.status(200).json({
-            msg : "succes",
+            msg : "Success",
             data : result
         })
     } catch (error) {
@@ -75,7 +89,7 @@ const findLaporanPklSiswaById = async (req, res, next) => {
         const id = parseInt(req.params.id)
         const result = await adminService.findLaporanPklSiswaById(id)
         res.status(200).json({
-            msg : "succes",
+            msg : "Success",
             data : result
         })
     } catch (error) {
@@ -90,7 +104,7 @@ const findLaporanPklFilter = async (req, res, next) => {
         query.id_guru_pembimbing = req.guruPembimbing.id
         const result = await adminService.findLaporanPklFilter(query)
         res.status(200).json({
-            msg : "succes",
+            msg : "Success",
             data : result
         })
     } catch (error) {
@@ -102,7 +116,7 @@ const findLaporanPklById = async (req, res, next) => {
         const id = parseInt(req.params.id)
         const result = await adminService.findLaporanPklById(id)
         res.status(200).json({
-            msg : "succes",
+            msg : "Success",
             data : result
         })
     } catch (error) {
@@ -114,7 +128,7 @@ const getLaporanPklSiswa = async (req, res, next) => {
         const id = parseInt(req.params.id_guru_pembimbing)
         const result = await guruPembimbingService.getLaporanPklSiswa(id)
         res.status(200).json({
-            msg : "succes",
+            msg : "Success",
             data : result
         })
     } catch (error) {
@@ -126,7 +140,7 @@ const getAllLaporanPklSiswa = async (req, res, next) => {
         const id = parseInt(req.params.id_guru_pembimbing)
         const result = await guruPembimbingService.getAllLaporanPklSiswa(id)
         res.status(200).json({
-            msg : "succes",
+            msg : "Success",
             data : result
         })
     } catch (error) {
@@ -148,6 +162,7 @@ const cetakAbsen = async (req, res, next) => {
       }
 export default {
     guruPembimbingLogin,
+    updatePassword,
     getGuruPembimbing,
     getSiswa,
     getAllSiswaGuruPembimbing,

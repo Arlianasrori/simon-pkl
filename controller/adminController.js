@@ -21,6 +21,20 @@ const adminLogin = async (req,res,next) => {
     }
   }
 
+  const updatePassword = async (req, res, next) => {
+    try {
+        const id = req.params.id
+        const body = req.body.password
+        const result = await adminService.updatePassword(id, body)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+            })
+    } catch (error) {
+        next(error)
+    }
+  }
+
 // admin controller 
 const addAdmin = async (req, res, next) => {
     try {
@@ -852,6 +866,7 @@ export default {
 
     // adminLogin
     adminLogin,
+    updatePassword,
     
     // adminLogout 
     adminLogout,

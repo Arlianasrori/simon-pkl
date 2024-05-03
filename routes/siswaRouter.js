@@ -10,6 +10,9 @@ siswaRouter.post("/login",siswaController.siswaLogin)
 // middlewarew
 siswaRouter.use(siswaMiddleware)
 
+// updatePasswordSiswa
+siswaRouter.put("/updatePassword/:id",siswaController.updatePassword)
+
 siswaRouter.get('/getSiswa', siswaController.getSiswaById)
 
 // dudi
@@ -39,7 +42,4 @@ siswaRouter.delete("/deleteLaporanSiswaPkl/:id",siswaController.deleteLaporanSis
 siswaRouter.get("/findAllLaporanSiswaPkl",siswaController.findAllLaporanSiswaPkl)
 siswaRouter.get("/findLaporanSiswaPklById/:id",siswaController.findLaporanSiswaPklById)
 siswaRouter.get("/findLaporanSiswaPklFilter",siswaController.findLaporanSiswaPklFilter)
-
-// updatePasswordSiswa
-siswaRouter.put("/updatePasswordSiswa/:id",siswaController.updatePasswordSiswa)
 
