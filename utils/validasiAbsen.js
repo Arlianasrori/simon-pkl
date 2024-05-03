@@ -27,7 +27,8 @@ export const validasiAbsen = async (body) => {
     })
 
     if(!cekWaktu.absen) {
-        throw new responseError(400,"")
+        throw new responseError(400,"something wrong")
+    }
     if(cekWaktu.absen[0].status_absen_pulang) {
         throw new responseError(400,"anda telah melakukan absen pulang")
     }
