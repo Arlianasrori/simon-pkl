@@ -219,15 +219,8 @@ const addPengajuanPkl = async (body) => {
 
   if (findSiswa.pengajuan_pkl.length >= 1) {
     const pengajuanPklLastIndex = findSiswa.pengajuan_pkl.length - 1;
-    if (
-      !statusPengajuan.includes(
-        findSiswa.pengajuan_pkl[pengajuanPklLastIndex].status
-      )
-    ) {
-      throw new responseError(
-        400,
-        "siswa hanya dapat mengajukan satu pengajuan,jika ingin mengajukan pengajuan harap membatalkan pengajuan sebelumnya"
-      );
+    if (!statusPengajuan.includes(findSiswa.pengajuan_pkl[pengajuanPklLastIndex].status)) {
+      throw new responseError(400,"siswa hanya dapat mengajukan satu pengajuan,jika ingin mengajukan pengajuan harap membatalkan pengajuan sebelumnya")
     }
   }
 
@@ -238,6 +231,11 @@ const addPengajuanPkl = async (body) => {
     select : {
       tersedia : true,
       kouta : true,
+      siswa : {
+        where : {
+          jenis_kelamin : findSiswa.jenis_kelamin
+        }
+      },
       _count : {
         select : {
           siswa : true,

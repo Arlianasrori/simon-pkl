@@ -566,7 +566,7 @@ const addKuotaSiswa = async (body) => {
   })
 
   if(findKouta) {
-    throw new responseError (400, "Kuota untuk dudi ini sudah ditambahkan")
+    throw new responseError (400, "Kuota untuk dudi ini sudah ditambahkan,jika ingin merubah silahkan melakukan update")
   }
   return db.$transaction(async tx => {
     const addkouta = await tx.kouta_siswa.create ({
@@ -591,7 +591,6 @@ const addKuotaSiswa = async (body) => {
 }
 
 const updateKuotaSiswa = async (id,body) => {
-
   id = await validate(adminValidation.idValidation,id)
   const findKuotaSiswa = await db.kouta_siswa.findUnique ({
     where: {
@@ -632,17 +631,36 @@ const deleteKuotaSiswa = async (id) => {
   const findkuotaSiswa = await db.kouta_siswa.findUnique({
     where : {
       id: id
-    }
+    },
   })
 
   if(!findkuotaSiswa) {
     throw new responseError(404, "Kuota siswa di dudi ini telah dihapus")
   }
 
-  return db.kouta_siswa.delete ({
-    where: {
-      id: id
-    }
+  return db.$transaction(async tx => {
+    const deleteKouta = await tx.kouta_siswa.delete({
+      where: {
+        id: id
+      },
+      select : {
+        id : true,
+        dudi : true,
+        jumlah_pria : true,
+        jumlah_wanita : true
+      }
+    })
+
+    await tx.dudi.update({
+      where : {
+        id : deleteKouta.dudi.id
+      },
+      data : {
+        tersedia : false
+      }
+    })
+
+    return {kouta : deleteKouta}
   })
 }
 

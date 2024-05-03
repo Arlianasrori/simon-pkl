@@ -259,7 +259,7 @@ const cetakAbsen= async (req, res, next) => {
   }
 }
 
-// Kuota SIswa 
+// Kuota Siswa 
 const addKuotaSiswa = async (req,res,next) => {
   try {
     const result = await pembimbingDudiService.addKuotaSiswa(req.body)
