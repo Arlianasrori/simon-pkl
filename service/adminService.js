@@ -1236,6 +1236,7 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
             id : PembimbingDudi.id_dudi
         }
     })
+    console.log(findDudi);
 
     PembimbingDudi.password = await bcrypt.hash(PembimbingDudi.password, 10)
 
@@ -1244,6 +1245,7 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
     }
     return db.$transaction(async (tx) => {
         PembimbingDudi.password = await bcrypt.hash(PembimbingDudi.password,10)
+        console.log(PembimbingDudi);
         const addPembimbingDudi = await tx.pembimbing_dudi.create({
             data : PembimbingDudi,
             select : selectPebimbingDudiObject

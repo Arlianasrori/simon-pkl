@@ -8,6 +8,7 @@ export const selectDudiObject = {
     alamat : true,
     siswa : true,
     deksripsi : true,
+    tersedia : true,
     alamat : true,
     siswa : {
         select : selectSiswaObject
@@ -17,5 +18,6 @@ export const selectDudiObject = {
             id : true,
             nama : true
         }
-    }
+    },
+    kouta : true
 }

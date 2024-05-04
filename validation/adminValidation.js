@@ -185,7 +185,7 @@ const searchDudiValidation = joi.object({
 // pembimbing dudi validation
 const addPembimbingDudiValidation = joi.object({
   id : joi.number().required(),
-  id_sekolah : joi.number().required(),
+  add_by : joi.number().required(),
   id_dudi : joi.number().required(),
   nama : joi.string().max(255).required(),
   username : joi.string().max(255).required(),
