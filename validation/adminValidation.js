@@ -8,7 +8,7 @@ const adminLogin = joi.object ({
 // siswa Validation 
 const addSiswaValidation = joi.object({
   id : joi.number().required(),
-  nis : joi.number().required(),
+  nis : joi.string().required(),
   nama : joi.string().max(255).required(),
   id_kelas : joi.number().required(),
   id_jurusan : joi.number().required(),
@@ -96,7 +96,7 @@ const searchKelasValidation = joi.object({
 // guruPembimbing validation
 const addGuruPembimbingValidation = joi.object({
     id : joi.number().required(),
-    nip : joi.number().required(),
+    nip : joi.string().required(),
     nama : joi.string().max(255).required(),
     no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).required(),
     jenis_kelamin : joi.valid("laki","perempuan").required(),

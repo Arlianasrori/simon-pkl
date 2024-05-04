@@ -12,6 +12,7 @@ siswaRouter.use(siswaMiddleware)
 
 
 siswaRouter.get('/getSiswa', siswaController.getSiswaById)
+siswaRouter.get('/getProfile', siswaController.getProfile)
 
 // dudi
 siswaRouter.get('/getDudi', siswaController.getDudi)

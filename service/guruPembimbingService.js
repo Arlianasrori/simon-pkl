@@ -52,6 +52,7 @@ const getGuruPembimbing = async (id) => {
       tempat_lahir: true,
       tanggal_lahir: true,
       agama: true,
+      alamat : true
     },
   });
 

@@ -11,6 +11,7 @@ export const auth = async (req,res,next) => {
                     nis : textBody
                 }
             })
+            console.log(findSiswa);
         
             if(findSiswa) {
                 const isPassowrd = await bcrypt.compare(password, findSiswa.password)
@@ -26,8 +27,8 @@ export const auth = async (req,res,next) => {
                     const refresh_token_siswa = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_SISWA,{expiresIn : "60d"})
                     return res.status(200).json({
                         msg : "succes",
-                        acces_token_siswa : acces_token_siswa,
-                        refresh_token_siswa : refresh_token_siswa,
+                        acces_token : acces_token_siswa,
+                        refresh_token : refresh_token_siswa,
                         auth : "siswa"
                     })
                 }
@@ -39,6 +40,7 @@ export const auth = async (req,res,next) => {
                 }
             })
         
+            console.log(findGuruPembimbing);
             if(findGuruPembimbing) {
                 const isPassowrd = await bcrypt.compare(password, findGuruPembimbing.password)
           
@@ -53,8 +55,8 @@ export const auth = async (req,res,next) => {
                     const refresh_token_guru_pembimbing = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_GURU_PEMBIMBING,{expiresIn : "60d"})
                     return res.status(200).json({
                         msg : "succes",
-                        acces_token_guru_pembimbing : acces_token_guru_pembimbing,
-                        refresh_token_guru_pembimbing : refresh_token_guru_pembimbing,
+                        acces_token : acces_token_guru_pembimbing,
+                        refresh_token : refresh_token_guru_pembimbing,
                         auth : "guru pembimbing"
                     })
                 }
@@ -80,8 +82,8 @@ export const auth = async (req,res,next) => {
                     const refresh_token_pembimbing_dudi = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_PEMBIMBING_DUDI,{expiresIn : "60d"})
                     return res.status(200).json({
                         msg : "succes",
-                        acces_token_pembimbing_dudi : acces_token_pembimbing_dudi,
-                        refresh_token_pembimbing_dudi : refresh_token_pembimbing_dudi,
+                        acces_token : acces_token_pembimbing_dudi,
+                        refresh_token : refresh_token_pembimbing_dudi,
                         auth : "pembimbing dudi"
                     })
                 }

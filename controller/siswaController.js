@@ -31,6 +31,17 @@ const getSiswaById = async (req, res, next) => {
     next(error);
   }
 };
+const getProfile = async (req, res, next) => {
+  try {
+    const result = await siswaService.getProfile(req.siswa.id);
+    res.status(200).json({
+      msg: "succes",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 const getDudi = async (req, res, next) => {
   try {
@@ -281,6 +292,9 @@ export default {
 
   // siswa login 
   siswaLogin,
+
+
+  getProfile,
 
   // get siswa & dudi 
   getSiswaById,

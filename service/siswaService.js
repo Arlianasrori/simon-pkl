@@ -51,6 +51,29 @@ const getSiswaById = async (id) => {
     where: {
       id: id,
     },
+    select: {
+      id : true,
+      nama : true,
+      nis : true,
+      no_telepon : true,
+      jurusan : true,
+      kelas : true,
+      alamat : true
+    },
+  });
+
+  if (!findSiswa) {
+    throw new responseError(404, "siswa tidak ditemukan");
+  }
+  return findSiswa;
+};
+const getProfile = async (id) => {
+  id = await validate(adminValidation.idValidation, id);
+
+  const findSiswa = await db.siswa.findUnique({
+    where: {
+      id: id,
+    },
     select: selectSiswaObject,
   });
 
@@ -512,6 +535,8 @@ export default {
   getDudiByName,
   getDudiByAlamat,
   getDudiById,
+
+  getProfile,
 
   // pengajuan pkl
   addPengajuanPkl,
