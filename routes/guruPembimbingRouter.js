@@ -7,11 +7,8 @@ export const guruPembimbingRouter = express.Router()
 // middleware
 guruPembimbingRouter.use(guruPembimbingMiddleware)
 
-// guru pembimbing login 
-guruPembimbingRouter.post("/login",guruPembimbingController.guruPembimbingLogin)
+guruPembimbingRouter.put("/updatePassword/:id", guruPembimbingController.updatePassword)
 
-// middleware
-guruPembimbingRouter.use(guruPembimbingMiddleware)
 
 guruPembimbingRouter.get("/getGuruPembimbing", guruPembimbingController.getGuruPembimbing)
 guruPembimbingRouter.get("/getSiswa/:id_siswa", guruPembimbingController.getSiswa)
@@ -29,5 +26,5 @@ guruPembimbingRouter.get("/findLaporanPkl/:id", guruPembimbingController.findLap
 // get laporan pkl siswa
 guruPembimbingRouter.get("/getLaporanPklSiswa/:id_guru_pembimbing", guruPembimbingController.getLaporanPklSiswa)
 guruPembimbingRouter.get("/getAllLaporanPklSiswa/:id_guru_pembimbing", guruPembimbingController.getAllLaporanPklSiswa)
+guruPembimbingRouter.get("/cetakAbsen",guruPembimbingController.cetakAbsen)
 
-// get absen siswa yang dia bimbing,datanya jadiin pdf

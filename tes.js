@@ -38,6 +38,10 @@ import { db } from "./config/prismaClient.js";
 // INNER JOIN siswa ON absen.id_siswa = siswa.id
 // WHERE? absen.id_siswa = 1616 AND absen.id = 2222
 // GROUP BY id_siswa,nama`);
+console.log(await db.$queryRaw`SELECT COUNT(siswa.id) as total_siswa,id
+FROM dudi
+INNER JOIN siswa ON siswa.id_dudi = dudi.id
+GROUP BY id`);
 
 // siswa.forEach(e => {
 //     db.absen.count({

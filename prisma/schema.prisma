@@ -18,6 +18,7 @@ model sekolah {
   npsn Int @unique
   nama String @db.VarChar(255)
 
+  alamat alamat_sekolah?
   admin admin[]
   siswa siswa[]
   jurusan jurusan[]
@@ -25,10 +26,22 @@ model sekolah {
   pembimbing_dudi Pembimbing_dudi[]
   dudi dudi[]
 }
+
+model alamat_sekolah {
+  id_sekolah Int @id
+  detail_tempat String @db.VarChar(255)
+  desa String @db.VarChar(255)
+  kecamatan String @db.VarChar(255)
+  kabupaten String @db.VarChar(255)
+  provinsi String @db.VarChar(255)
+  negara String @db.VarChar(255)
+
+  sekolah sekolah @relation(fields: [id_sekolah],references: [id])
+}
 model admin {
   id Int @id
   id_sekolah Int
-  username String @db.VarChar(255)
+  username String @db.VarChar(255) @unique
   password String @db.VarChar(255)
 
   sekolah sekolah @relation(fields: [id_sekolah],references: [id])
@@ -165,8 +178,10 @@ model dudi {
   bidang String @db.VarChar(255)
   deksripsi String @db.VarChar(1500)
   add_by Int
+  tersedia Boolean @default(false)
 
   alamat alamat_dudi?
+  kouta kouta_siswa?
   siswa siswa[]
   pengajuan_pkl pengajuan_pkl[]
   absen_jadwal absen_jadwal[]
@@ -178,6 +193,15 @@ model dudi {
   kordinat_absen kordinat_absen[]
 
   sekolah sekolah @relation(fields: [add_by],references: [id])
+}
+model kouta_siswa {
+  id Int @id
+  id_dudi Int @unique
+  jumlah_pria Int
+  jumlah_wanita Int
+  total Int
+
+  dudi dudi @relation(fields: [id_dudi],references: [id])
 }
 model alamat_pembimbing_dudi {
   id_pembimbing_dudi Int @id

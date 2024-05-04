@@ -10,6 +10,9 @@ adminRouter.post('/adminLogin',adminController.adminLogin)
 // middleware
 adminRouter.use(adminMiddleware)
 
+// update password Admin 
+adminRouter.put('/updatePassword/:id',adminController.updatePassword)
+
 // admin logout 
 adminRouter.delete('/adminLogout',adminController.adminLogout)
 
@@ -90,3 +93,6 @@ adminRouter.get('/findLaporanPklSiswaFilter',adminController.findLaporanPklSiswa
 adminRouter.get('/findAllAbsen',adminController.findAllAbsen)
 adminRouter.get('/findAbsenById/:id',adminController.findAbsenById)
 adminRouter.get('/findAbsenFilter',adminController.findAbsenFilter)
+
+// cekToken 
+adminRouter.get('/cekToken', adminController.cekToken)

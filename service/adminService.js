@@ -14,7 +14,10 @@ import { selectAbsenObject } from "../utils/absenSelect.js"
 import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js"
 import { selectKelasObject } from "../utils/kelasSelect.js"
 import jwt from "jsonwebtoken"
+import pembimbingDudiValidation from "../validation/pembimbingDudiValidation.js"
+import siswaValidation from "../validation/siswaValidation.js"
 
+// admin login
 const adminLogin = async (body) => {
     body = await validate(adminValidation.adminLogin, body)
   
@@ -28,10 +31,10 @@ const adminLogin = async (body) => {
       throw new responseError (400, "username atau password salah")
     }
   
-    // const isPassowrd = bcrypt.compare(body.password, findAdmin.password)
-    // if(!isPassowrd) {
-    //     throw new responseError(400,"username atau password salah")
-    // }
+    const isPassowrd = bcrypt.compare(body.password, findAdmin.password)
+    if(!isPassowrd) {
+        throw new responseError(400,"username atau password salah")
+    }
   
     const payload = {
         username : body.username,
@@ -42,8 +45,37 @@ const adminLogin = async (body) => {
     const refresh_token_admin = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_ADMIN,{expiresIn : "60d"})
   
     return {acces_token_admin,refresh_token_admin}
-}
+  }
 
+const updatePassword = async (id, password) => {
+    id = await validate(adminValidation.idValidation, id)
+    password = await validate(pembimbingDudiValidation.updatePassword, password)
+  
+    const findAdmin = await db.admin.findUnique({
+      where: {
+        id: id
+      }
+    })
+  
+    if (!findAdmin) {
+      throw new responseError (404, "Admin tidak ditemukan")
+    }
+  
+    password = await bcrypt.hash(password,10)
+  
+    return db.admin.update ({
+      where: {
+        id: id
+      },
+      data: {
+        password : password
+      },
+        select: {
+            id: true,
+            username: true
+      },
+    })
+  }
 // siswa service
 const addSiswa = async (siswa,alamat) => {
     siswa.id = generateId()
@@ -99,7 +131,7 @@ const addSiswa = async (siswa,alamat) => {
     if(!findKelas) {
         throw new responseError(404,"data kelas tidak ditemukan")
     }
-    siswa.id_sekolah = 1234
+
     return db.$transaction(async (tx) => {
         const addSiswa = await tx.siswa.create({
             data : siswa,
@@ -113,12 +145,19 @@ const addSiswa = async (siswa,alamat) => {
     })
 }
 
-const findSiswaById = async (id) => {
+const findSiswaById = async (id,admin) => {
     id = await validate(adminValidation.idValidation, id)
 
     const findSiswa = await db.siswa.findUnique ({
         where: {
-            id: id
+            AND : [
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    id: id
+                }
+            ]
         }
     })
     if (!findSiswa) {
@@ -127,102 +166,136 @@ const findSiswaById = async (id) => {
     return findSiswa
 }
 
-const findAllSiswa = async () => {
-    return db.siswa.findMany({
+const findAllSiswa = async (page,admin) => {
+    page = await validate(siswaValidation.pageValidation,page)
+
+    const findSiswa = await db.siswa.findMany({
+        where : {
+            id : admin.id_sekolah
+        },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectSiswaObject
     })
+
+    return {siswa : findSiswa,page : page,count : findSiswa.length}
 }
-const findSiswaHaventPkl = async () => {
+const findSiswaHaventPkl = async (admin) => {
     return db.siswa.findMany({
         where : {
-            status : "belum_pkl"
-           
+            AND : [
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    status : "belum_pkl"
+
+                }
+            ]       
         },
         select : selectSiswaObject
     })
 }
-const findSiswaFilter = async (query) => {
+const findSiswaFilter = async (query,admin,page) => {
     query = await validate(adminValidation.searchSiswaValidation,query)
+    page = await validate(siswaValidation.pageValidation,page)
 
     const findSiswa = await db.siswa.findMany({
         where : {
             AND : [
                 {
-                    nama : {
-                        contains : query.nama,
-                        mode : 'insensitive'
-                    }
+                    id : admin.id_sekolah
                 },
                 {
-                    id_jurusan : query.id_jurusan
-                },
-                {
-                    id_kelas : query.id_kelas
-                },
-                {
-                    jenis_kelamin : query.jenis_kelamin
-                },
-                {
-                    alamat : {
-                        AND : [
-                            {
-                                negara : {
-                                    contains : query.negara,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                provinsi : {
-                                    contains : query.provinsi,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                kabupaten : {
-                                    contains : query.kabupaten,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                kecamatan : {
-                                    contains : query.kecamatan,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                desa : {
-                                    contains : query.desa,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                detail_tempat : {
-                                    contains : query.detail_tempat,
-                                    mode : "insensitive"
-                                }
-                            },
-                        ]
-                    }
+                    AND : [
+                        {
+                            nama : {
+                                contains : query.nama,
+                                mode : 'insensitive'
+                            }
+                        },
+                        {
+                            id_jurusan : query.id_jurusan
+                        },
+                        {
+                            id_kelas : query.id_kelas
+                        },
+                        {
+                            jenis_kelamin : query.jenis_kelamin
+                        },
+                        {
+                            alamat : {
+                                AND : [
+                                    {
+                                        negara : {
+                                            contains : query.negara,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        provinsi : {
+                                            contains : query.provinsi,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        kabupaten : {
+                                            contains : query.kabupaten,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        kecamatan : {
+                                            contains : query.kecamatan,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        desa : {
+                                            contains : query.desa,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        detail_tempat : {
+                                            contains : query.detail_tempat,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                ]
+                            }
+                        }
+                    ]
+
                 }
             ]
         },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectSiswaObject
     })
 
     return {count : findSiswa.length,data : findSiswa}
 }
 
-const updateSiswa = async (data,identify) => {
+const updateSiswa = async (data,identify,admin) => {
     data = await validate(adminValidation.updateSiswaValidation,data)
 
     const findSiswa = await db.siswa.findFirst({
         where : {
-            OR : [
+            AND : [
                 {
-                    id : identify
+                    id : admin.id_sekolah
                 },
                 {
-                    nis : identify
+                    OR : [
+                        {
+                            id : identify
+                        },
+                        {
+                            nis : identify
+                        }
+                    ]
                 }
             ]
         }
@@ -239,12 +312,19 @@ const updateSiswa = async (data,identify) => {
         select : selectSiswaObject
     })
 }
-const deleteSiswa = async (id) => {
+const deleteSiswa = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
 
     const findSiswa = await db.siswa.findUnique({
         where : {
-           id : id
+            AND : [
+                {
+                    id : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
         }
     })
 
@@ -258,13 +338,20 @@ const deleteSiswa = async (id) => {
         select : selectSiswaObject
     })
 }
-const updateAlamatSiswa = async (data,id) => {
+const updateAlamatSiswa = async (data,id,admin) => {
     data = await validate(adminValidation.updateAlamatValidation,data)
     id = await validate(adminValidation.idValidation,id)
 
     const findSiswa = await db.siswa.findUnique({
         where : {
-           id : id
+            AND : [
+                {
+                    id : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
         }
     })
 
@@ -296,7 +383,6 @@ const addJurusan = async (body) => {
     body.id = generateId()
     console.log(body);
     body = await validate(adminValidation.addJurusanValidation,body)
-    body.id_sekolah = 1234
     return db.jurusan.create({
         data : body
     })
@@ -306,7 +392,14 @@ const deleteJurusan = async (id) => {
 
     const findJurusan = await db.jurusan.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
         }
     })
 
@@ -320,15 +413,32 @@ const deleteJurusan = async (id) => {
         }
     })
 }
-const findAllJurusan = async () => {
-    return db.jurusan.findMany()
+const findAllJurusan = async (page,admin) => {
+    page = await validate(siswaValidation.pageValidation,page)
+
+    const findJurusan = await db.jurusan.findMany({
+        where : {
+            id_sekolah : admin.id_sekolah
+        },
+        skip : 10 * (page - 1),
+        take : 10
+    })
+
+    return {jurusan : findJurusan,page : page,count : findJurusan.length}
 } 
-const findJurusanById = async (id) => {
+const findJurusanById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
 
     const findJurusan = await db.jurusan.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
         }
     })
 
@@ -338,15 +448,22 @@ const findJurusanById = async (id) => {
 
     return findJurusan
 } 
-const findJurusanByName = async (nama) => {
+const findJurusanByName = async (nama,admin) => {
     nama = await validate(adminValidation.namaValidation,nama)
 
     const findJurusan = await db.jurusan.findFirst({
         where : {
-            nama : {
-                contains : nama,
-                mode : "insensitive"
-            }
+            AND : [
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    nama : {
+                        contains : nama,
+                        mode : "insensitive"
+                    }
+                }
+            ]
         }
     })
 
@@ -356,12 +473,19 @@ const findJurusanByName = async (nama) => {
 
     return findJurusan
 } 
-const updateJurusan = async (id,nama) => {
+const updateJurusan = async (id,nama,admin) => {
     id = await validate(adminValidation.idValidation,id)
     nama = await validate(adminValidation.namaValidation,nama)
     const findJurusan = await db.jurusan.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
         }
     })
 
@@ -400,12 +524,21 @@ const addKelas = async (body) => {
         select : selectKelasObject
     })
 }
-const deleteKelas = async (id) => {
+const deleteKelas = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
 
     const findKelas = await db.kelas.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    jurusan : {
+                        id_sekolah : admin.id_sekolah
+                    }
+                },
+                {
+                    id : id
+                }
+            ]
         }
     })
 
@@ -420,17 +553,37 @@ const deleteKelas = async (id) => {
         select : selectKelasObject
     })
 }
-const findAllkelas = async () => {
-    return db.kelas.findMany({
+const findAllkelas = async (page,admin) => {
+    page = await validate(siswaValidation.pageValidation,page)
+
+    const findKelas = await db.kelas.findMany({
+        where : {
+            jurusan : {
+                id_sekolah : admin.id_sekolah
+            }
+        },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectKelasObject
     })
+
+    return {kelas : findKelas,page : page,count : findKelas.length}
 } 
-const findKelasById = async (id) => {
+const findKelasById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
 
     const findkelas = await db.kelas.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    jurusan : {
+                        id_sekolah : admin.id_sekolah
+                    }
+                },
+                {
+                    id : id
+                }
+            ]
         },
         select : selectKelasObject
     })
@@ -441,22 +594,31 @@ const findKelasById = async (id) => {
 
     return findkelas
 } 
-const findKelasFilter = async (query) => {
+const findKelasFilter = async (query,admin) => {
     query = await validate(adminValidation.searchKelasValidation,query)
 
     const findKelas = await db.kelas.findMany({
         where : {
             AND : [
                 {
-                    nama : {
-                        contains : query.nama,
-                        mode : "insensitive"
-                    },
-                    tahun : {
-                        contains : query.tahun,
-                        mode : "insensitive"
-                    },
-                    id_jurusan : query.id_jurusan
+                    jurusan : {
+                        id_sekolah : admin.id
+                    }
+                },
+                {
+                    AND : [
+                        {
+                            nama : {
+                                contains : query.nama,
+                                mode : "insensitive"
+                            },
+                            tahun : {
+                                contains : query.tahun,
+                                mode : "insensitive"
+                            },
+                            id_jurusan : query.id_jurusan
+                        }
+                    ]
                 }
             ]
         },
@@ -465,13 +627,22 @@ const findKelasFilter = async (query) => {
 
     return findKelas
 } 
-const updateKelas = async (id,body) => {
+const updateKelas = async (id,body,admin) => {
     id = await validate(adminValidation.idValidation,id)
     body = await validate(adminValidation.updateKelasValidation,body)
 
     const findkelas = await db.kelas.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    jurusan : {
+                        id_sekolah : admin.id
+                    }
+                },
+                {
+                    id : id
+                }
+            ]
         }
     })
 
@@ -499,6 +670,8 @@ const addGuruPembimbing = async (guru,alamat) => {
 
     guru.password = await bcrypt.hash(guru.password,10)
 
+    console.log(guru);
+
     const findGuruPembimbing = await db.guru_pembimbing.findFirst({
        where : {
         OR : [
@@ -515,7 +688,8 @@ const addGuruPembimbing = async (guru,alamat) => {
     if(findGuruPembimbing) {
         throw new responseError(400,"guru pemimbing sudah terdaftar")
     }
-    guru.id_sekolah = 1234
+    console.log(guru);
+
     return db.$transaction(async (tx) => {
         const addGuruPembimbimg = await tx.guru_pembimbing.create({
             data : guru,
@@ -537,17 +711,24 @@ const addGuruPembimbing = async (guru,alamat) => {
     })
 }
 
-const updateGuruPembimbing = async (identify,data) => {
+const updateGuruPembimbing = async (identify,data,admin) => {
     data = await validate(adminValidation.updateGuruPembimbingValidation,data)
 
     const findGuruPembimbing = await db.guru_pembimbing.findFirst({
         where : {
-            OR : [
+            AND : [
                 {
-                    id : identify
+                    OR : [
+                        {
+                            id : identify
+                        },
+                        {
+                            nip : identify
+                        }
+                    ]
                 },
                 {
-                    nip : identify
+                    id_sekolah : admin.id_sekolah
                 }
             ]
         }
@@ -564,13 +745,20 @@ const updateGuruPembimbing = async (identify,data) => {
         select : selectGuruPembimbingPbject
     })
 }
-const updateAlamatGuruPembimbing= async (data,id) => {
+const updateAlamatGuruPembimbing= async (data,id,admin) => {
     data = await validate(adminValidation.updateAlamatValidation,data)
     id = await validate(adminValidation.idValidation,id)
 
     const findGuruPembimbing = await db.guru_pembimbing.findUnique({
         where : {
-           id : id
+            AND :[
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
         }
     })
 
@@ -578,7 +766,7 @@ const updateAlamatGuruPembimbing= async (data,id) => {
         throw new responseError(404,"guru pembimbing tidak ditemukan")
     }
 
-    const findAlamatGuruPembimbing= await db.alamat_guru_Pembimbing.findUnique({
+    const findAlamatGuruPembimbing = await db.alamat_guru_Pembimbing.findUnique({
         where : {
             id_guru_Pembimbing : id
         }
@@ -594,12 +782,19 @@ const updateAlamatGuruPembimbing= async (data,id) => {
         data : data
     })
 }
-const deleteGuruPembimbing = async (identify) => {
+const deleteGuruPembimbing = async (identify,admin) => {
     identify = await validate(adminValidation.idValidation,identify)
 
     const findGuruPembimbing = await db.guru_pembimbing.findUnique({
         where : {
-            id : identify
+            AND : [
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    id : identify
+                }
+            ]
         },
         select : {
             id : true,
@@ -622,17 +817,32 @@ const deleteGuruPembimbing = async (identify) => {
     })
 }
 
-const findAllGuruPembimbing = async () => {
-    return db.guru_pembimbing.findMany({
+const findAllGuruPembimbing = async (page,admin) => {
+    page = await validate(siswaValidation.pageValidation,page)
+    const findGuruPembimbing = await db.guru_pembimbing.findMany({
+        where : {
+            id_sekolah : admin.id_sekolah
+        },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectGuruPembimbingPbject
     })
+
+    return {guruPembimbing : findGuruPembimbing,page : page,count : findGuruPembimbing.length}
 }
-const findGuruPembimbingById = async (id) => {
+const findGuruPembimbingById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
 
     const findGuruPembimbing = await db.guru_pembimbing.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
         },
         select : selectGuruPembimbingPbject
     })
@@ -642,75 +852,82 @@ const findGuruPembimbingById = async (id) => {
     }
     return findGuruPembimbing
 }
-const findGuruPembimbingfilter = async (query) => {
+const findGuruPembimbingfilter = async (query,admin) => {
     query = await validate(adminValidation.searchGuruPembimbingValidation,query)
 
     const findGuruPembimbing = await db.guru_pembimbing.findMany({
         where : {
             AND : [
                 {
-                    nama : {
-                        contains : query.nama,
-                        mode : 'insensitive'
-                    }
+                    id_sekolah : admin.id_sekolah
                 },
                 {
-                    agama : {
-                        contains : query.agama,
-                        mode : 'insensitive'
-                    }
-                },
-                {
-                    jenis_kelamin : {
-                        contains : query.jenis_kelamin
-                    }
-                },
-                {
-                    nip : {
-                        contains : query.nip
-                    }
-                },
-                {
-                    alamat : {
-                        AND : [
-                            {
-                                negara : {
-                                    contains : query.negara,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                provinsi : {
-                                    contains : query.provinsi,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                kabupaten : {
-                                    contains : query.kabupaten,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                kecamatan : {
-                                    contains : query.kecamatan,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                desa : {
-                                    contains : query.desa,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                detail_tempat : {
-                                    contains : query.detail_tempat,
-                                    mode : "insensitive"
-                                }
-                            },
-                        ]
-                    }
+                    AND : [
+                        {
+                            nama : {
+                                contains : query.nama,
+                                mode : 'insensitive'
+                            }
+                        },
+                        {
+                            agama : {
+                                contains : query.agama,
+                                mode : 'insensitive'
+                            }
+                        },
+                        {
+                            jenis_kelamin : {
+                                contains : query.jenis_kelamin
+                            }
+                        },
+                        {
+                            nip : {
+                                contains : query.nip
+                            }
+                        },
+                        {
+                            alamat : {
+                                AND : [
+                                    {
+                                        negara : {
+                                            contains : query.negara,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        provinsi : {
+                                            contains : query.provinsi,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        kabupaten : {
+                                            contains : query.kabupaten,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        kecamatan : {
+                                            contains : query.kecamatan,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        desa : {
+                                            contains : query.desa,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        detail_tempat : {
+                                            contains : query.detail_tempat,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                ]
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -747,8 +964,6 @@ const addDudi = async (dudi,alamat) => {
     }
 
     return db.$transaction(async (tx) => {
-        dudi.add_by = 1234
-        console.log(dudi);
         const addDudi = await tx.dudi.create({
             data : dudi,
             select : {
@@ -767,18 +982,34 @@ const addDudi = async (dudi,alamat) => {
     })
 }
 
-const findAllDudi = async () => {
-    return db.dudi.findMany({
+const findAllDudi = async (page,admin) => {
+    page = await validate(siswaValidation.pageValidation,page)
+
+    const findDudi = await db.dudi.findMany({
+        where : {
+            add_by : admin.id_sekolah
+        },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectDudiObject
     })
+
+    return {dudi: findDudi,page : page,count : findDudi.length}
 }
 
-const findDudiById = async (id) => {
+const findDudiById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
 
     const findDudi = await db.dudi.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    add_by : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
         },
         select : selectDudiObject
     })
@@ -789,13 +1020,20 @@ const findDudiById = async (id) => {
 
     return findDudi
 }
-const updateDudi = async (data,id) => {
+const updateDudi = async (data,id,admin) => {
     id = await validate(adminValidation.idValidation,id)
     data = await validate(adminValidation.updateDudiValidation,data)
 
     const findDudi = await db.dudi.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    add_by : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
         },
         select : selectDudiObject
     })
@@ -812,13 +1050,20 @@ const updateDudi = async (data,id) => {
         select : selectDudiObject
     })
 }
-const updateAlamatDudi = async (data,id) => {
+const updateAlamatDudi = async (data,id,admin) => {
     data = await validate(adminValidation.updateAlamatValidation,data)
     id = await validate(adminValidation.idValidation,id)
 
     const findDudi = await db.dudi.findUnique({
         where : {
-           id : id
+            AND : [
+                {
+                    add_by : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
         }
     })
 
@@ -842,12 +1087,19 @@ const updateAlamatDudi = async (data,id) => {
         data : data
     })
 }
-const deleteDudi = async (id) => {
+const deleteDudi = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
 
     const findDudi = await db.dudi.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    add_by : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
         },
         select : {
             siswa : true,
@@ -874,72 +1126,82 @@ const deleteDudi = async (id) => {
     })
 }
 
-const findDudiFilter = async (query) => {
+const findDudiFilter = async (query,admin,page) => {
     query = await validate(adminValidation.searchDudiValidation,query)
+    page = await validate(siswaValidation.pageValidation,page)
 
     const findDudi = await db.dudi.findMany({
         where : {
             AND : [
                 {
-                    nama_instansi_perusahaan : {
-                        contains : query.nama_instansi_perusahaan,
-                        mode : 'insensitive'
-                    }
+                    add_by : admin.id_sekolah
                 },
                 {
-                    bidang : {
-                        contains : query.bidang,
-                        mode : 'insensitive'
-                    }
-                },
-                {
-                    alamat : {
-                        AND : [
-                            {
-                                negara : {
-                                    contains : query.negara,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                provinsi : {
-                                    contains : query.provinsi,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                kabupaten : {
-                                    contains : query.kabupaten,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                kecamatan : {
-                                    contains : query.kecamatan,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                desa : {
-                                    contains : query.desa,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                detail_tempat : {
-                                    contains : query.detail_tempat,
-                                    mode : "insensitive"
-                                }
-                            },
-                        ]
-                    }
+                    AND : [
+                        {
+                            nama_instansi_perusahaan : {
+                                contains : query.nama_instansi_perusahaan,
+                                mode : 'insensitive'
+                            }
+                        },
+                        {
+                            bidang : {
+                                contains : query.bidang,
+                                mode : 'insensitive'
+                            }
+                        },
+                        {
+                            alamat : {
+                                AND : [
+                                    {
+                                        negara : {
+                                            contains : query.negara,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        provinsi : {
+                                            contains : query.provinsi,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        kabupaten : {
+                                            contains : query.kabupaten,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        kecamatan : {
+                                            contains : query.kecamatan,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        desa : {
+                                            contains : query.desa,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        detail_tempat : {
+                                            contains : query.detail_tempat,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                ]
+                            }
+                        }
+                    ]
                 }
             ]
         },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectDudiObject
     })
 
-    return {count : findDudi.length,data : findDudi}
+    return {dudi : findDudi,page : page,count : findDudi.length}
 }
 
 
@@ -956,7 +1218,7 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
             id : PembimbingDudi.id
         }
     })
-    console.log(findPembimbingDudi);
+
     if(findPembimbingDudi) {
         throw new responseError(400,"data pembimbing dudi telah ditambahkan")
     }
@@ -965,18 +1227,22 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
             no_telepon : PembimbingDudi.no_telepon
         }
     })
+
+    if(checkNoHp) {
+        throw new responseError(400,"no handphone telah digunakan")
+    }
     const findDudi = await db.dudi.findUnique({
         where : {
             id : PembimbingDudi.id_dudi
         }
     })
 
+    PembimbingDudi.password = await bcrypt.hash(PembimbingDudi.password, 10)
+
     if(!findDudi) {
         throw new responseError(404,"data dudi tidak ditemukan")
     }
     return db.$transaction(async (tx) => {
-        PembimbingDudi.add_by = 1234
-        console.log(PembimbingDudi);
         PembimbingDudi.password = await bcrypt.hash(PembimbingDudi.password,10)
         const addPembimbingDudi = await tx.pembimbing_dudi.create({
             data : PembimbingDudi,
@@ -989,17 +1255,31 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
         return {pembimbingDudi : addPembimbingDudi,alamat : addAlamatDudi}
     })
 }
-const findAllPembimbingDudi = async () => {
+const findAllPembimbingDudi = async (admin,page) => {
+    page = await validate(siswaValidation.pageValidation,page)
+
     return db.pembimbing_dudi.findMany({
+        where : {
+            add_by : admin.id_sekolah
+        },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectPebimbingDudiObject
     })
 }
-const findPembimbingDudiById = async (id) => {
+const findPembimbingDudiById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
 
     const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    add_by : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
         },
         select : selectPebimbingDudiObject
     })
@@ -1009,70 +1289,77 @@ const findPembimbingDudiById = async (id) => {
     }
     return findPembimbingDudi
 }
-const findPembimbingDudifilter = async (query) => {
+const findPembimbingDudifilter = async (query,admin) => {
     query = await validate(adminValidation.searchPembimbingDudiValidation,query)
 
     const findPembimbingDudi = await db.pembimbing_dudi.findMany({
         where : {
             AND : [
                 {
-                    nama : {
-                        contains : query.nama,
-                        mode : 'insensitive'
-                    }
+                    add_by : admin.id_sekolah
                 },
                 {
-                    agama : {
-                        contains : query.agama,
-                        mode : 'insensitive'
-                    }
-                },
-                {
-                    jenis_kelamin : {
-                        contains : query.jenis_kelamin
-                    }
-                },
-                {
-                    alamat : {
-                        AND : [
-                            {
-                                negara : {
-                                    contains : query.negara,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                provinsi : {
-                                    contains : query.provinsi,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                kabupaten : {
-                                    contains : query.kabupaten,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                kecamatan : {
-                                    contains : query.kecamatan,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                desa : {
-                                    contains : query.desa,
-                                    mode : "insensitive"
-                                }
-                            },
-                            {
-                                detail_tempat : {
-                                    contains : query.detail_tempat,
-                                    mode : "insensitive"
-                                }
-                            },
-                        ]
-                    }
+                    AND : [
+                        {
+                            nama : {
+                                contains : query.nama,
+                                mode : 'insensitive'
+                            }
+                        },
+                        {
+                            agama : {
+                                contains : query.agama,
+                                mode : 'insensitive'
+                            }
+                        },
+                        {
+                            jenis_kelamin : {
+                                contains : query.jenis_kelamin
+                            }
+                        },
+                        {
+                            alamat : {
+                                AND : [
+                                    {
+                                        negara : {
+                                            contains : query.negara,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        provinsi : {
+                                            contains : query.provinsi,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        kabupaten : {
+                                            contains : query.kabupaten,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        kecamatan : {
+                                            contains : query.kecamatan,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        desa : {
+                                            contains : query.desa,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        detail_tempat : {
+                                            contains : query.detail_tempat,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                ]
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -1081,13 +1368,20 @@ const findPembimbingDudifilter = async (query) => {
 
     return {count : findPembimbingDudi.length,data : findPembimbingDudi}
 }
-const updatePembimbingDudi = async (data,id) => {
+const updatePembimbingDudi = async (data,id,admin) => {
     id = await validate(adminValidation.idValidation,id)
     data = await validate(adminValidation.updatePembimbingDudiValidation,data)
 
     const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    add_by : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
         },
         select : selectPebimbingDudiObject
     })
@@ -1103,13 +1397,20 @@ const updatePembimbingDudi = async (data,id) => {
         select : selectPebimbingDudiObject
     })
 }
-const updateAlamatPembimbiDudi = async (data,id) => {
+const updateAlamatPembimbiDudi = async (data,id,admin) => {
     data = await validate(adminValidation.updateAlamatValidation,data)
     id = await validate(adminValidation.idValidation,id)
 
     const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
         where : {
-           id : id
+            AND : [
+                {
+                    add_by : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
         }
     })
 
@@ -1133,12 +1434,19 @@ const updateAlamatPembimbiDudi = async (data,id) => {
         data : data
     })
 }
-const deletePembimbingDudi = async (id) => {
+const deletePembimbingDudi = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
 
     const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    add_by : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
         },
         select : {
             siswa : true,
@@ -1166,26 +1474,53 @@ const deletePembimbingDudi = async (id) => {
 
 // pengajuan PKL
 
-const findAllPengajuanPkl = async () => {
-    return db.pengajuan_pkl.findMany({
+const findAllPengajuanPkl = async (page,admin) => {
+    page = await validate(siswaValidation.pageValidation,page)
+
+    const findPengajuan = await db.pengajuan_pkl.findMany({
+        where : {
+            siswa : {
+                id_sekolah : admin.id_sekolah
+            }
+        },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectPengajuanPklObject
     })
+
+    return {pengajuan : findPengajuan,page : page,count : findPengajuan.length}
 }
-const findAllPengajuanPklFilter = async (query) => {
+const findAllPengajuanPklFilter = async (query,admin) => {
     query = await validate(adminValidation.PengajuanPklfilterValidation,query)
     return db.pengajuan_pkl.findMany({
         where : {
+            AND : [
+                {
+                    siswa : {
+                        id_sekolah : admin.id_sekolah
+                    }
+                }
+            ],
             status : query
         },
         select : selectPengajuanPklObject
     })
 }
-const findPengajuanPklById = async (id) => {
+const findPengajuanPklById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
 
     const findPengajuanPkl = await db.pengajuan_pkl.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    siswa : {
+                        id_sekolah : admin.id_sekolah
+                    }
+                },
+                {
+                    id : id
+                }
+            ]
         },
         select : selectPengajuanPklObject
     })
@@ -1199,17 +1534,35 @@ const findPengajuanPklById = async (id) => {
 
 // laporan pembimbing dudi pkl
 
-const findAllLaporanPkl = async () => {
-    return db.laporan_pkl.findMany({
+const findAllLaporanPkl = async (page,admin) => {
+    page = await validate(siswaValidation.pageValidation,page)
+    const findLaporan = await db.laporan_pkl.findMany({
+        where : {
+            siswa : {
+                id_sekolah : admin.id_sekolah
+            }
+        },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectLaporanpklObject
     })
+
+    return {laporan : findLaporan,page : page,count : findLaporan.length}
 }
 const findLaporanPklById = async (id) => {
     id = await validate(adminValidation.idValidation,id)
 
     const findLaporan = await db.laporan_pkl.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    siswa : {
+                        id_sekolah : admin.id_sekolah
+                    }
+                },{
+                    id : id
+                }
+            ]
         },
         select : selectLaporanpklObject
     })
@@ -1219,56 +1572,65 @@ const findLaporanPklById = async (id) => {
     }
     return findLaporan
 }
-const findLaporanPklFilter = async (query) => {
+const findLaporanPklFilter = async (query,admin) => {
     query = await validate(adminValidation.searchLaporanPkl,query)
 
     const findLaporan = await db.laporan_pkl.findMany({
         where : {
             AND : [
                 {
-                    id_dudi : query.id_dudi 
-                },
-                {
-                    id_siswa :  query.id_siswa
-                },
-                {
                     siswa : {
-                        id_guru_pembimbing : query.id_guru_Pembimbing
+                        id_sekolah : admin.id_sekolah
                     }
-                },
-                {
-                    id_pembimbing_dudi : query.id_pembimbing_dudi
                 },
                 {
                     AND : [
-                    {
-                      keterangan : query.keterangan
-                    },
-                    {
-                        OR : [
+                        {
+                            id_dudi : query.id_dudi 
+                        },
+                        {
+                            id_siswa :  query.id_siswa
+                        },
+                        {
+                            siswa : {
+                                id_guru_pembimbing : query.id_guru_Pembimbing
+                            }
+                        },
+                        {
+                            id_pembimbing_dudi : query.id_pembimbing_dudi
+                        },
+                        {
+                            AND : [
                             {
-                                tanggal : query.tanggal
+                              keterangan : query.keterangan
                             },
                             {
-                                AND : [
+                                OR : [
                                     {
-                                        tanggal : {
-                                            gte : query.tanggal_start
-                                        }
+                                        tanggal : query.tanggal
                                     },
                                     {
-                                        tanggal : {
-                                            lte : query.tanggal_end
-                                        }
-                                    },
+                                        AND : [
+                                            {
+                                                tanggal : {
+                                                    gte : query.tanggal_start
+                                                }
+                                            },
+                                            {
+                                                tanggal : {
+                                                    lte : query.tanggal_end
+                                                }
+                                            },
+                                        ]
+                                    }
                                 ]
+                            },
+                            {
+                                tanggal : query.month_ago
                             }
                         ]
-                    },
-                    {
-                        tanggal : query.month_ago
-                    }
-                ]
+                        }
+                    ]
                 }
             ]
         },
@@ -1283,17 +1645,36 @@ const findLaporanPklFilter = async (query) => {
 
 
 // laporan siswa pkl
-const findAllLaporanSiswaPkl = async () => {
-    return db.laporan_siswa_pkl.findMany({
+const findAllLaporanSiswaPkl = async (page,admin) => {
+    page = await validate(siswaValidation.pageValidation,page)
+    const findLaporan = await db.laporan_siswa_pkl.findMany({
+        where : {
+            siswa : {
+                id_sekolah : admin.id_sekolah
+            }
+        },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectLaporanpklSiswaObject
     })
+
+    return {laporan : findLaporan,page : page,count : findLaporan.length}
 }
-const findLaporanPklSiswaById = async (id) => {
+const findLaporanPklSiswaById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
 
     const findLaporan = await db.laporan_siswa_pkl.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    siswa : {
+                        id_sekolah : admin.id_sekolah
+                    }
+                },
+                {
+                    id : id
+                }
+            ]
         },
         select : selectLaporanpklSiswaObject
     })
@@ -1303,63 +1684,74 @@ const findLaporanPklSiswaById = async (id) => {
     }
     return findLaporan
 }
-const findLaporanPklSiswaFilter = async (query) => {
-    console.log(query);
+const findLaporanPklSiswaFilter = async (query,admin,page) => {
     query = await validate(adminValidation.searchLaporanPklSiswa,query)
+    page = await validate(siswaValidation.pageValidation,page)
 
     const findLaporan = await db.laporan_siswa_pkl.findMany({
         where : {
             AND : [
                 {
-                    id_dudi : query.id_dudi
-                },
-                {
-                    id_siswa : query.id_siswa
-                },
-                {
-                    id_pembimbing_dudi : query.id_pembimbing_dudi
-                },
-                   {
                     siswa : {
-                        id_guru_pembimbing : query.id_guru_Pembimbing
+                        id_sekolah : admin.id_sekolah
                     }
                 },
                 {
                     AND : [
-                      {
-                        rujukan_kompetensi_dasar : query.rujukan_kompetensi_dasar
-                      },
-                      {
-                        topik_pekerjaan : query.topik_pekerjaan
-                      },
-                      {
-                          OR : [
+                        {
+                            id_dudi : query.id_dudi
+                        },
+                        {
+                            id_siswa : query.id_siswa
+                        },
+                        {
+                            id_pembimbing_dudi : query.id_pembimbing_dudi
+                        },
+                           {
+                            siswa : {
+                                id_guru_pembimbing : query.id_guru_Pembimbing
+                            }
+                        },
+                        {
+                            AND : [
                               {
-                                  tanggal : query.tanggal
+                                rujukan_kompetensi_dasar : query.rujukan_kompetensi_dasar
                               },
                               {
-                                  AND : [
+                                topik_pekerjaan : query.topik_pekerjaan
+                              },
+                              {
+                                  OR : [
                                       {
-                                          tanggal : {
-                                              gte : query.tanggal_start
-                                          }
+                                          tanggal : query.tanggal
                                       },
                                       {
-                                          tanggal : {
-                                              lte : query.tanggal_end
-                                          }
-                                      },
+                                          AND : [
+                                              {
+                                                  tanggal : {
+                                                      gte : query.tanggal_start
+                                                  }
+                                              },
+                                              {
+                                                  tanggal : {
+                                                      lte : query.tanggal_end
+                                                  }
+                                              },
+                                          ]
+                                      }
                                   ]
+                              },
+                              {
+                                  tanggal : query.month_ago
                               }
-                          ]
-                      },
-                      {
-                          tanggal : query.month_ago
-                      }
+                            ]
+                          }
                     ]
-                  }
+                }
             ]
         },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectLaporanpklSiswaObject
     })
 
@@ -1368,17 +1760,31 @@ const findLaporanPklSiswaFilter = async (query) => {
 
 
 // absen
-const findAllAbsen = async () => {
+const findAllAbsen = async (admin) => {
     return db.absen.findMany({
+        where : {
+            siswa : {
+                id_sekolah : admin.id_sekolah
+            }
+        },
         select : selectAbsenObject
     })
 }
-const findAbsenById = async (id) => {
+const findAbsenById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
 
     const findAbsen = await db.absen.findUnique({
         where : {
-            id : id
+            AND : [
+                {
+                    siswa : {
+                        id_sekolah : admin.id_sekolah
+                    }
+                },
+                {
+                    id : id
+                }
+            ]
         },
         select : selectAbsenObject
     })
@@ -1388,21 +1794,30 @@ const findAbsenById = async (id) => {
     }
     return findAbsen
 }
-const findAbsenFilter = async (query) => {
+const findAbsenFilter = async (query,admin) => {
     query = await validate(adminValidation.searchAbsen,query)
 
     const findAbsen = await db.absen.findMany({
         where : {
             AND : [
                 {
-                    id_dudi : query.id_dudi
+                    siswa : {
+                        id_sekolah : admin.id_sekolah
+                    }
                 },
                 {
-                    id_siswa : query.id_siswa
+                    AND : [
+                        {
+                            id_dudi : query.id_dudi
+                        },
+                        {
+                            id_siswa : query.id_siswa
+                        },
+                        {
+                            id_pembimbing_dudi : query.id_pembimbing_dudi
+                        }
+                    ]
                 },
-                {
-                    id_pembimbing_dudi : query.id_pembimbing_dudi
-                }
             ]
         },
         select : selectAbsenObject
@@ -1411,10 +1826,9 @@ const findAbsenFilter = async (query) => {
     return {count : findAbsen.length,data : findAbsen}
 }
 export default {
-
-    // admin login 
+    // admin login
     adminLogin,
-
+    updatePassword,
 
     // siswa
     addSiswa,

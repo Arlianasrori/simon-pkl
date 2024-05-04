@@ -1,7 +1,7 @@
 import joi from "joi";
 
 const siswaLogin = joi.object ({
-  nis : joi.number().required(),
+  nis : joi.string().required(),
   password : joi.string().max(255).required()
 })
 
@@ -40,7 +40,7 @@ const UpdateLaporanSiswaPkl = joi.object ({
   rujukan_kompetensi_dasar : joi.string().max(255).optional(),
   dokumentasi : joi.string().max(1500).optional()
 })
-
+const pageValidation = joi.number().required()
 export default {
   siswaLogin,
   getDudiByAlamat,
@@ -49,4 +49,5 @@ export default {
   findPengajuanByStatus,
   addLaporanSiswaPkl,
   UpdateLaporanSiswaPkl,
+  pageValidation
 };

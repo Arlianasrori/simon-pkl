@@ -24,6 +24,12 @@ export const siswaMiddleware = async (req,res,next) => {
     const findSiswa = await db.siswa.findFirst({
         where : {
             id : siswa.id
+        },
+        select : {
+            id : true,
+            nama : true,
+            nis : true,
+            id_sekolah : true
         }
     })
 

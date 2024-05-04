@@ -9,41 +9,37 @@ import { selectPengajuanPklObject } from "../utils/pengjuanPklSelect.js";
 import generateId from "../utils/generateIdUtils.js";
 import { fileLaporaPkl } from "../utils/imageSaveUtilsLaporanPkl.js";
 import { selectLaporanPkl } from "../utils/LaporanSiswaPklUtil.js";
-import jwt from "jsonwebtoken"
-import bcrypt from "bcryptjs"
 import fs from "fs"
 import absenValidation from "../validation/absenValidation.js";
 import puppeteer from "puppeteer"
 import ejs from 'ejs'
+import { selectPebimbingDudiObject } from "../utils/pembimbingDudiSelect.js";
 
-const pembimbingDudiLogin = async (body) => {
-  body = await validate(pembimbingDudiValidation.pembimbingDudiLogin, body)
+const updatePassword = async (id, password) => {
+  id = await validate(adminValidation.idValidation, id)
+  password = await validate(pembimbingDudiValidation.updatePassword, password)
 
-  const findPembimbingDudi = await db.pembimbing_dudi.findFirst({
+  const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
     where: {
-      username : body.username
+      id: id
     }
   })
-  
+
   if (!findPembimbingDudi) {
-    throw new responseError (404, "username atau password salah")
+    throw new responseError (404, "Pembimbing dudi tidak ditemukan")
   }
 
-  const isPassowrd = bcrypt.compare(body.password, findPembimbingDudi.password)
-  if(!isPassowrd) {
-      throw new responseError(400,"username atau password salah")
-  }
+  password = await bcrypt.hash(password,10)
 
-  const payload = {
-      id : findPembimbingDudi.id,
-      username : body.username,
-      password : body.password,
-  }
-   
-  const acces_token_pembimbing_dudi = jwt.sign(payload,process.env.TOKEN_SECRET_PEMBIMBING_DUDI,{expiresIn : "2d"})
-  const refresh_token_pembimbing_dudi = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_PEMBIMBING_DUDI,{expiresIn : "60d"})
-
-  return {acces_token_pembimbing_dudi,refresh_token_pembimbing_dudi}
+  return db.pembimbing_dudi.update ({
+    where: {
+      id: id
+    },
+    data: {
+      password : password
+    },
+    select: selectPebimbingDudiObject
+  })
 }
 
 const getPembimbingDudiById = async (id) => {
@@ -53,14 +49,7 @@ const getPembimbingDudiById = async (id) => {
     where: {
       id: id,
     },
-    select: {
-      id_dudi: true,
-      nama: true,
-      username: true,
-      no_telepon: true,
-      jenis_kelamin: true,
-      agama: true,
-    },
+    select: selectPebimbingDudiObject
   });
 
   if (!findPembimbingDudi) {
@@ -133,7 +122,7 @@ const getPengajuanPklById = async (id) => {
   });
 
   if (!findPengajuanPkl) {
-    throw new responseError(404, "Pengajuan PKL tidak ditemukan");
+    throw new responseError(404,"Pengajuan PKL tidak ditemukan");
   }
 
   return findPengajuanPkl;
@@ -161,7 +150,6 @@ const AccDcnPengajuanPkl = async (body,id_pengajuan) => {
     }
   })
 
-  console.log(findPengajuan.dudi.pembimbing_dudi[0]);
 
   if(!findPengajuan) {
     throw new responseError(404,"pengajuan tidak ditemukan")
@@ -435,7 +423,7 @@ const findLaporanPklById = async (id) => {
 // absen
 const cetakAbsen = async (query) => {
   query = await validate(absenValidation.findAbsenFilterValidation,query)
-
+console.log(query);
   if(query.month_ago) {
     query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago + 1)
   }
@@ -505,23 +493,148 @@ const cetakAbsen = async (query) => {
     }
   })
 
+  const findPembimbingDudi = await db.pembimbing_dudi.findFirst({
+  where: {
+    id : query.id_pembimbing_dudi
+  },
+  })
+
   const html = fs.readFileSync("index.ejs",{encoding : "utf-8"})
 
   const browser = await puppeteer.launch({ headless: true});
   const page = await browser.newPage();
-  await page.setContent(ejs.render(html,{data : data}))
+  await page.setContent(ejs.render(html,{data : data,nama : findPembimbingDudi.nama, tanggal_start: query.tanggal_start, tanggal_end: query.tanggal_end}))
   const pdf = await page.pdf({ format : "a4",path : "pdf.pdf"});
 
   await browser.close();
 
   return data
 }
+
+// Kuota SISWA 
+const addKuotaSiswa = async (body) => {
+  body.id = generateId()
+  body.total = body.jumlah_pria + body.jumlah_wanita
+  body = await validate(pembimbingDudiValidation.addKuotaSiswaValidation, body)
+
+  const findDudi = await db.dudi.findUnique ({
+    where: {
+      id: body.id_dudi
+    }
+  })
+
+  if(!findDudi) {
+    throw new responseError(404, "Dudi tidak ditemukan")
+  }
+
+  const findKouta = await db.kouta_siswa.findFirst({
+    where : { 
+      id_dudi : body.id_dudi
+    }
+  })
+
+  if(findKouta) {
+    throw new responseError (400, "Kuota untuk dudi ini sudah ditambahkan,jika ingin merubah silahkan melakukan update")
+  }
+  return db.$transaction(async tx => {
+    const addkouta = await tx.kouta_siswa.create ({
+      data: body,
+      select : {
+        jumlah_pria: true,
+        jumlah_wanita: true,
+        total: true
+      }
+    })
+    await tx.dudi.update({
+      where: {
+        id: body.id_dudi
+      },
+      data : {
+        tersedia : true
+      }
+    })
+
+    return {kouta : addkouta,tersedia : true}
+  })
+}
+
+const updateKuotaSiswa = async (id,body) => {
+  id = await validate(adminValidation.idValidation,id)
+  const findKuotaSiswa = await db.kouta_siswa.findUnique ({
+    where: {
+      id: id
+    }
+  })
+
+  if(!findKuotaSiswa) {
+    throw new responseError (404, "Kuota siswa di dudi ini tidak ditemukan")
+  }
+
+  if(body.jumlah_pria && body.jumlah_wanita) {
+    body.total = body.jumlah_pria + body.jumlah_wanita
+  }else if(body.jumlah_pria) {
+    body.total = body.jumlah_pria + findKuotaSiswa.jumlah_wanita
+  }else if(body.jumlah_wanita) {
+    body.total = body.jumlah_wanita + findKuotaSiswa.jumlah_pria
+  }
+
+  body = await validate(pembimbingDudiValidation.updateKuotaSiswaValidation, body)
+
+  return db.kouta_siswa.update({
+    where: {
+      id: id
+    },
+    data: body,
+    select: {
+      jumlah_pria: true,
+      jumlah_wanita: true,
+      total: true
+    }
+  })
+}
+
+const deleteKuotaSiswa = async (id) => {
+  id = await validate(adminValidation.idValidation, id) 
+
+  const findkuotaSiswa = await db.kouta_siswa.findUnique({
+    where : {
+      id: id
+    },
+  })
+
+  if(!findkuotaSiswa) {
+    throw new responseError(404, "Kuota siswa di dudi ini telah dihapus")
+  }
+
+  return db.$transaction(async tx => {
+    const deleteKouta = await tx.kouta_siswa.delete({
+      where: {
+        id: id
+      },
+      select : {
+        id : true,
+        dudi : true,
+        jumlah_pria : true,
+        jumlah_wanita : true
+      }
+    })
+
+    await tx.dudi.update({
+      where : {
+        id : deleteKouta.dudi.id
+      },
+      data : {
+        tersedia : false
+      }
+    })
+
+    return {kouta : deleteKouta}
+  })
+}
+
 export default {
-
-  // pembimbing dudi login 
-  pembimbingDudiLogin,
+  updatePassword,
    
-
   getPembimbingDudiById,
   getSiswaPembimbingDudi,
   getAllSiswaPembimbingDudi,
@@ -548,6 +661,11 @@ export default {
 
 
   // absen
-  cetakAbsen
+  cetakAbsen,
+
+  // Kuota Siswa 
+  addKuotaSiswa,
+  updateKuotaSiswa,
+  deleteKuotaSiswa
 };
 

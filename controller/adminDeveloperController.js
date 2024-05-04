@@ -1,11 +1,29 @@
 import adminDeveloperService from "../service/adminDeveloperService.js"
 
+// sekolah
+const addSekolah = async (req,res,next) => {
+    try {
+        const sekolah = req.body.sekolah
+        const alamat = req.body.alamat
+
+        const result = await adminDeveloperService.addSekolah(sekolah,alamat)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+// admin
 const addAdmin = async (req, res, next) => {
     try {
         const result = await adminDeveloperService.addAdmin(req.body)
+
         res.status(200).json({
-        msg : "succes",
-        data : result
+            msg : "succes",
+            data : result
         })
     } catch (error) {
         next(error)
@@ -63,6 +81,9 @@ const getAllAdmin = async (req,res,next) => {
 }
 
 export default {
+    // sekolah
+    addSekolah,
+    // admin
     addAdmin,
     updateAdmin,
     deleteAdmin,

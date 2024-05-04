@@ -1,25 +1,6 @@
 import adminService from "../service/adminService.js"
 import pembimbingDudiService from "../service/pembimbingDudiService.js"
 
-const pembimbingDudiLogin = async (req,res,next) => {
-  try {
-      const body = req.body
-      const result = await pembimbingDudiService.pembimbingDudiLogin(body)
-      res.status(201).cookie("acces_token",result.acces_token_pembimbing_dudi,{
-          maxAge : 24 * 60 * 60 * 60,
-          httpOnly: true,
-      }).cookie("refresh_token",result.refresh_token_pembimbing_dudi,{
-          maxAge : 24 * 60 * 60 * 60,
-          httpOnly: true,
-      }).json({
-          msg : "succes",
-          data : result
-      })
-  } catch (error) {
-      next(error)
-  }
-}
-
 const getPembimbingDudiById = async (req, res, next) => {
   try {
     const result = await pembimbingDudiService.getPembimbingDudiById(req.pembimbingDudi.id);
@@ -62,7 +43,6 @@ const getAllSiswaPembimbingDudi = async (req, res, next) => {
 // pengajuan pkl
 const getAllPengajuanPkl = async (req, res, next) => {
   try {
-    console.log(req.pembimbingDudi);
     const id_pembimbing_dudi = req.pembimbingDudi.id
     const result = await pembimbingDudiService.getAllPengajuanPkl(id_pembimbing_dudi);
     res.status(200).json({
@@ -231,23 +211,61 @@ const findLaporanPklFilter= async (req, res, next) => {
 }
 
   // absen
-  const cetakAbsen= async (req, res, next) => {
-    try {
-      const query = req.query
-      query.id_pembimbing_dudi = req.pembimbingDudi.id
-      const result = await pembimbingDudiService.cetakAbsen(query)
-      res.status(200).json({
-        msg: "Success",
-        data: result,
-      })
-    } catch (error) {
-      next(error)
-    }
+const cetakAbsen= async (req, res, next) => {
+  try {
+    const query = req.query
+    query.id_pembimbing_dudi = req.pembimbingDudi.id
+    const result = await pembimbingDudiService.cetakAbsen(query)
+     res.status(200).json({
+      msg: "Success",
+      data: result,
+     })
+  } catch (error) {
+    next(error)
   }
-export default {
+}
 
-  // pembimbing dudi login 
-  pembimbingDudiLogin,
+// Kuota Siswa 
+const addKuotaSiswa = async (req,res,next) => {
+  try {
+    const result = await pembimbingDudiService.addKuotaSiswa(req.body)
+    res.status(200).json({
+    msg: "Success",
+    data: result,
+    })
+  } catch (error) {                 
+  next(error)
+  }
+}
+
+const updateKuotaSiswa = async (req, res, next) => {
+  try {
+    const id = req.params.id
+    const body = req.body
+    const result = await pembimbingDudiService.updateKuotaSiswa(id,body)
+    res.status(200).json({
+    msg: "Success",
+    data: result,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const deleteKuotaSiswa = async (req, res, next) => {
+  try {
+    const id = req.params.id
+    const result = await pembimbingDudiService.deleteKuotaSiswa(id)
+    res.status(200).json({
+      msg: "Success",
+      data: result,
+      })
+  } catch (error) {
+    next(error)
+  }
+}
+export default {
+  // updatePassword,
 
   getPembimbingDudiById,
   getSiswaPembimbingDudi,
@@ -275,5 +293,10 @@ export default {
 
 
   // absen
-  cetakAbsen
+  cetakAbsen,
+
+  // Kuota SISWA 
+  addKuotaSiswa,
+  updateKuotaSiswa,
+  deleteKuotaSiswa
 };
