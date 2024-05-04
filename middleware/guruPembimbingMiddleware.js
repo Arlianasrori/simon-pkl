@@ -16,13 +16,19 @@ export const guruPembimbingMiddleware = async (req,res,next) => {
                 msg : err.message
             }
         }
-        req.guruPembimbing = guruPembimbing
         return guruPembimbing
     })
 
     const findGuruPembimbing = await db.guru_pembimbing.findFirst({
         where : {
             id : guruPembimbing.id
+        },
+        select : {
+            id : true,
+            id_sekolah : true,
+            jenis_kelamin : true,
+            nip : true,
+            nama : true
         }
     })
 
@@ -37,6 +43,6 @@ export const guruPembimbingMiddleware = async (req,res,next) => {
             msg : guruPembimbing.msg
         })
     }
-    
+    req.guruPembimbing = guruPembimbing
      next()
 }

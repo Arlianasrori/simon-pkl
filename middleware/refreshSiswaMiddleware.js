@@ -1,16 +1,14 @@
 import jwt from "jsonwebtoken"
 import { db } from "../config/prismaClient.js"
 
-export const siswaMiddleware = async (req,res,next) => {
-    const tokenHeader = req.get("Authorization")
-    
-    const token = tokenHeader && tokenHeader.split(" ")[1]
+export const refreshSiswaMiddleware = async (req,res,next) => {
+    const token = req.get("Authorization")
 
     if(!token){
         return res.status(401).json({msg : "unauthorized"})
     }
     
-    const siswa = await jwt.verify(token,process.env.TOKEN_SECRET_SISWA,(err,siswa) => {
+    const siswa = await jwt.verify(token,process.env.REFRESH_TOKEN_SECRET_SISWA,(err,siswa) => {
         if(err){
             return {
                 status : 401,
@@ -44,6 +42,8 @@ export const siswaMiddleware = async (req,res,next) => {
             msg : siswa.msg
         })
     }
+
     req.siswa = findSiswa
+    
      next()
 }

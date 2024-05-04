@@ -1,9 +1,12 @@
 import express from "express"
 import pembimbingDudiController from "../controller/pembimbingDudiController.js"
 import { pembimbingDudiMiddleware } from "../middleware/pembimbingDudiMiddleware.js"
+import { refreshPembimbingDudiMiddleware } from "../middleware/refreshPembimbingDudiMiddleware.js"
 
 export const pembimbingDudiRouter = express.Router()
 
+// token
+pembimbingDudiRouter.get("/refreshToken",refreshPembimbingDudiMiddleware,pembimbingDudiController.refreshToken)
 
 // middleware
 pembimbingDudiRouter.use(pembimbingDudiMiddleware)

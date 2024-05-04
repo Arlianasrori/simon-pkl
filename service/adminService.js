@@ -38,7 +38,6 @@ const adminLogin = async (body) => {
   
     const payload = {
         username : body.username,
-        password : body.password,
     }
      
     const acces_token_admin = jwt.sign(payload,process.env.TOKEN_SECRET_ADMIN,{expiresIn : "2d"})
@@ -1236,7 +1235,6 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
             id : PembimbingDudi.id_dudi
         }
     })
-    console.log(findDudi);
 
     PembimbingDudi.password = await bcrypt.hash(PembimbingDudi.password, 10)
 
@@ -1244,8 +1242,6 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
         throw new responseError(404,"data dudi tidak ditemukan")
     }
     return db.$transaction(async (tx) => {
-        PembimbingDudi.password = await bcrypt.hash(PembimbingDudi.password,10)
-        console.log(PembimbingDudi);
         const addPembimbingDudi = await tx.pembimbing_dudi.create({
             data : PembimbingDudi,
             select : selectPebimbingDudiObject

@@ -65,9 +65,12 @@ export const auth = async (req,res,next) => {
                     username : textBody
                 }
             })
+            console.log(findPembimbingDudi);
         
             if(findPembimbingDudi) {
+                console.log(password);
                 const isPassowrd = await bcrypt.compare(password, findPembimbingDudi.password)
+                console.log(isPassowrd);
             
                 if(isPassowrd) {
                     const payload = {

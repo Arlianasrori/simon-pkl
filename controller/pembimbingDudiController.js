@@ -13,6 +13,27 @@ const getPembimbingDudiById = async (req, res, next) => {
   }
 };
 
+const refreshToken = async (req, res, next) => {
+  try {
+    const pembimbingDudi = req.pembimbingDudi
+
+    const payload = {
+      id : pembimbingDudi.id,
+      username : pembimbingDudi.username
+    }
+    const acces_token_pembimbing_dudi = jwt.sign(payload,process.env.TOKEN_SECRET_PEMBIMBING_DUDI,{expiresIn : "120d"})
+    const refresh_token_pembimbing_dudi = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_PEMBIMBING_DUDI,{expiresIn : "60d"})
+
+    return res.status(200).json({
+      msg : "succes",
+      acces_token : acces_token_pembimbing_dudi,
+      refresh_token : refresh_token_pembimbing_dudi
+  })
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getSiswaPembimbingDudi = async (req, res, next) => {
   try {
     const result = await pembimbingDudiService.getSiswaPembimbingDudi(parseInt(req.params.id));
@@ -228,6 +249,8 @@ const cetakAbsen= async (req, res, next) => {
 // Kuota Siswa 
 const addKuotaSiswa = async (req,res,next) => {
   try {
+    const body = req.body
+    body.id_dudi = req.pembimbingDudi.id_dudi
     const result = await pembimbingDudiService.addKuotaSiswa(req.body)
     res.status(200).json({
     msg: "Success",
@@ -265,6 +288,8 @@ const deleteKuotaSiswa = async (req, res, next) => {
   }
 }
 export default {
+  // token
+  refreshToken,
   // updatePassword,
 
   getPembimbingDudiById,

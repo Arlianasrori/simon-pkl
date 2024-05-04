@@ -14,6 +14,26 @@ import guruPembimbingService from "../service/guruPembimbingService.js"
         next(error)
     }
   }
+  const refreshToken = async (req, res, next) => {
+    try {
+        const guruPembimbing = req.guruPembimbing
+        const payload = {
+            id : guruPembimbing.id,
+            nip : guruPembimbing.nip,
+        }
+
+        const acces_token_guru_pembimbing = jwt.sign(payload,process.env.TOKEN_SECRET_GURU_PEMBIMBING,{expiresIn : "60d"})
+        const refresh_token_guru_pembimbing = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_GURU_PEMBIMBING,{expiresIn : "120d"})
+
+        return res.status(200).json({
+            msg : "succes",
+            acces_token : acces_token_guru_pembimbing,
+            refresh_token : refresh_token_guru_pembimbing,
+        })
+    } catch (error) {
+        next(error)
+    }
+  }
 
 const getGuruPembimbing = async (req, res, next) => {
     try {
@@ -142,6 +162,7 @@ const cetakAbsen = async (req, res, next) => {
         }
       }
 export default {
+    refreshToken,
     updatePassword,
     getGuruPembimbing,
     getSiswa,

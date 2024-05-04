@@ -540,6 +540,8 @@ const addKuotaSiswa = async (body) => {
     const addkouta = await tx.kouta_siswa.create ({
       data: body,
       select : {
+        id : true,
+        id_dudi : true,
         jumlah_pria: true,
         jumlah_wanita: true,
         total: true
@@ -586,6 +588,8 @@ const updateKuotaSiswa = async (id,body) => {
     },
     data: body,
     select: {
+      id : true,
+      id_dudi : true,
       jumlah_pria: true,
       jumlah_wanita: true,
       total: true

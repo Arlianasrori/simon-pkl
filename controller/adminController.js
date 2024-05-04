@@ -1,6 +1,7 @@
 import { db } from "../config/prismaClient.js"
 import responseError from "../error/responseError.js"
 import adminService from "../service/adminService.js"
+import jwt from "jsonwebtoken"
 
 const adminLogin = async (req,res,next) => {
     try {
@@ -19,9 +20,37 @@ const adminLogin = async (req,res,next) => {
     } catch (error) {
         next(error)
     }
-  }
+}
 
-  const updatePassword = async (req, res, next) => {
+const refreshToken = async (req,res,next) => {
+    try {
+        const admin = req.admin
+        const payload = {
+            username : admin.username,
+        }
+         
+        const acces_token_admin = jwt.sign(payload,process.env.TOKEN_SECRET_ADMIN,{expiresIn : "60d"})
+        const refresh_token_admin = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_ADMIN,{expiresIn : "120d"})
+
+        res.status(201).cookie("acces_token",acces_token_admin,{
+            maxAge : 24 * 60 * 60 * 60 * 60 * 60 * 60,
+            httpOnly: true,
+        }).cookie("refresh_token",refresh_token_admin,{
+            maxAge : 24 * 60 * 60 * 60 * 60 * 60,
+            httpOnly: true,
+        }).json({
+            msg : "succes",
+            data : {
+                acces_token : acces_token_admin,
+                refresh_token : refresh_token_admin
+            }
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const updatePassword = async (req, res, next) => {
     try {
         const id = req.params.id
         const body = req.body.password
@@ -825,7 +854,8 @@ export default {
     // adminLogout 
     adminLogout,
 
-
+    // token
+    refreshToken,
     // siswa
     addSiswa,
     findSiswaById,

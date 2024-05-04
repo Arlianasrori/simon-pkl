@@ -1,10 +1,14 @@
 import express from "express"
 import siswaController from "../controller/siswaController.js"
 import { siswaMiddleware } from "../middleware/siswaMiddleware.js"
+import { refreshSiswaMiddleware } from "../middleware/refreshSiswaMiddleware.js"
 
 export const siswaRouter = express.Router()
 
-// middlewarew
+// token
+siswaRouter.get("/refreshToken",refreshSiswaMiddleware,siswaController.refreshToken)
+
+// middleware
 siswaRouter.use(siswaMiddleware)
 
 // updatePasswordSiswa

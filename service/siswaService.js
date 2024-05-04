@@ -81,7 +81,7 @@ const getDudiById = async (id,siswa) => {
   if (!dudi) {
     throw new responseError(404, "data dudi tidak ditemukan");
   }
-
+   console.log(siswa);
   if(!dudi.total_kouta) {
     dudi.enabled = false
     return dudi;

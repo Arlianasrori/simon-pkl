@@ -13,6 +13,30 @@ const getSiswaById = async (req, res, next) => {
   }
 };
 
+const refreshToken = async (req, res, next) => {
+  try {
+    const siswa = req.siswa
+    const payload = {
+      id : siswa.id,
+      nis : siswa.nis,
+      jenis_kelamin : siswa.jenis_kelamin,
+      id_sekolah : siswa.id_sekolah
+    }
+
+  const acces_token_siswa = jwt.sign(payload,process.env.TOKEN_SECRET_SISWA,{expiresIn : "60d"})
+  const refresh_token_siswa = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_SISWA,{expiresIn : "120d"})
+
+  res.status(200).json({
+    msg : "succes",
+    acces_token : acces_token_siswa,
+    refresh_token : refresh_token_siswa,
+    auth : "siswa"
+  })
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getDudi = async (req, res, next) => {
   try {
     const result = await siswaService.getDudi(req.siswa);
@@ -66,7 +90,8 @@ const getDudiByAlamat = async (req, res, next) => {
 };
 const getDudiById = async (req, res, next) => {
   try {
-    const result = await siswaService.getDudiById(req.params.id);
+    const siswa = req.siswa
+    const result = await siswaService.getDudiById(req.params.id,siswa);
     res.status(200).json({
       msg: "succes",
       data: result,
@@ -292,6 +317,9 @@ const updatePassword = async (req, res, next) => {
 
 export default {
   updatePassword,
+
+  // token
+  refreshToken,
 
   // get siswa & dudi 
   getSiswaById,

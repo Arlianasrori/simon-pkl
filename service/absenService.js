@@ -912,7 +912,7 @@ async function cekRadiusKoordinat (body,siswa) {
     }
 
     if(!findSiswa.id_dudi) {
-        throw new responseError(400,"siswa belum memiliki tampat pkl")
+        throw new responseError(400,"siswa belum memiliki tempat pkl")
     }
 
     const findKordinat = await db.kordinat_absen.findMany({

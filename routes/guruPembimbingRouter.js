@@ -1,9 +1,11 @@
 import express from "express"
 import guruPembimbingController from "../controller/guruPembimbingController.js"
 import { guruPembimbingMiddleware } from "../middleware/guruPembimbingMiddleware.js"
+import { refreshGuruPembimbingMiddleware } from "../middleware/refreshGuruPembimbingMiddleware.js"
 
 export const guruPembimbingRouter = express.Router()
-
+// token
+guruPembimbingRouter.get("/refreshToken",refreshGuruPembimbingMiddleware,guruPembimbingController.refreshToken)
 // middleware
 guruPembimbingRouter.use(guruPembimbingMiddleware)
 
