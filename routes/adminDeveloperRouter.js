@@ -5,6 +5,10 @@ export const adminDeveloperRouter = express.Router()
 
 // sekolah
 adminDeveloperRouter.post("/addSekolah",adminDeveloperController.addSekolah)
+adminDeveloperRouter.put("/updateSekolah/:id",adminDeveloperController.updateSekolah)
+adminDeveloperRouter.delete("/deleteSekolah/:id",adminDeveloperController.deleteSekolah)
+adminDeveloperRouter.delete("/getAllSekolah",adminDeveloperController.getAllSekolah)
+adminDeveloperRouter.delete("/getSekolah/:id",adminDeveloperController.getAllSekolah)
 
 
 // admin

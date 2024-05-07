@@ -7,13 +7,20 @@ import adminDeveloperValidation from "../validation/adminDeveloperValidation.js"
 import adminValidation from "../validation/adminValidation.js"
 import { adminDeveloperSelect } from "../utils/adminSelect.js"
 
+const sekolahSelect = {
+    id : true,
+    nama : true,
+    alamat : true,
+    kepala_sekolah : true
+}
 // sekolah
-const addSekolah = async (sekolah,alamat) => {
-    console.log(sekolah);
+const addSekolah = async (sekolah,alamat,kepalaSekolah) => {
     sekolah.id = generateId()
     sekolah = await validate(adminDeveloperValidation.addSekolahValidation,sekolah)
     alamat.id_sekolah = sekolah.id
     alamat = await validate(adminDeveloperValidation.addAlamatValidation,alamat)
+    kepalaSekolah.id_sekolah = sekolah.id
+    kepalaSekolah = await validate(adminDeveloperValidation.addKepalaSekolahValidation,kepalaSekolah)
 
     const findSekolah = await db.sekolah.findFirst({
         where : {
@@ -34,8 +41,94 @@ const addSekolah = async (sekolah,alamat) => {
             data : alamat
         })
 
-        return {sekolah : addSekolah,alamat : addAlamat}
+        const addKepalaSekolah = await tx.sekolah.create({
+            data : kepalaSekolah
+        })
+
+        return {sekolah : addSekolah,alamat : addAlamat,sekolah : kepalaSekolah}
     })
+}
+
+const updateSekolah = async (id,sekolah,alamat,kepala_sekolah) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    return db.$transaction(async tx => {
+        if(sekolah) {
+            sekolah = await validate(adminDeveloperValidation.updateSekolahValidation,sekolah)
+            await tx.sekolah.update({
+                where : {
+                    id : id
+                },
+                data : sekolah
+            })
+        }
+        if(alamat) {
+            alamat = await validate(adminDeveloperValidation.updateSekolahValidation)
+            await tx.alamat_sekolah.update({
+                where : {
+                    id_sekolah : id
+                },
+                data : alamat
+            })
+        }
+        if(kepala_sekolah) {
+            kepala_sekolah = await validate(adminDeveloperValidation.updateAlamatSekolahValidation)
+            await tx.kepala_sekolah.update({
+                where : {
+                    id_sekolah : id
+                },
+                data : kepala_sekolah
+            })
+        }
+
+        return "success"
+    })
+}
+const deleteSekolah = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findSekolah = await db.sekolah.findUnique({
+        where : {
+            id : id
+        }
+    })
+
+    if(!findSekolah) {
+        throw new responseError(404,"data sekolah tidak ditemukan")
+    }
+
+    return db.sekolah.delete({
+        where : {
+            id : id
+        }
+    })
+}
+const getAllSekolah = async (page) => {
+    page = await validate(adminValidation.idValidation,page)
+
+    const findAllSekolah = await db.sekolah.findMany({
+        skip : 10 * (page - 1),
+        take : 10,
+        select : sekolahSelect
+    })
+
+    return {sekolah : findAllSekolah,page : page,count : findAllSekolah.length}
+}
+const getSekolahById = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findSekolah = await db.sekolah.findUnique({
+        where : {
+            id : id
+        },
+        select : sekolahSelect
+    })
+
+    if(!findSekolah) {
+        throw new responseError(404,"data sekolah tidak ditemukan")
+    }
+
+    return findSekolah
 }
 
 
@@ -143,6 +236,10 @@ const getAllAdmin = async () => {
 export default {
     // sekolah
     addSekolah,
+    updateSekolah,
+    deleteSekolah,
+    getAllSekolah,
+    getSekolahById,
 
 
     // admin

@@ -17,14 +17,23 @@ model sekolah {
   id Int @id
   npsn Int @unique
   nama String @db.VarChar(255)
+  logo String
 
   alamat alamat_sekolah?
+  kepala_sekolah kepala_sekolah?
   admin admin[]
   siswa siswa[]
   jurusan jurusan[]
   guru_pembimbing guru_pembimbing[]
   pembimbing_dudi Pembimbing_dudi[]
   dudi dudi[]
+}
+model kepala_sekolah {
+  id_sekolah Int @id
+  nama String
+  nip String
+
+  sekolah sekolah @relation(fields: [id_sekolah],references: [id],onDelete: Cascade)
 }
 
 model alamat_sekolah {
@@ -36,7 +45,7 @@ model alamat_sekolah {
   provinsi String @db.VarChar(255)
   negara String @db.VarChar(255)
 
-  sekolah sekolah @relation(fields: [id_sekolah],references: [id])
+  sekolah sekolah @relation(fields: [id_sekolah],references: [id],onDelete: Cascade)
 }
 model admin {
   id Int @id
@@ -104,7 +113,7 @@ model kelas {
   id_jurusan Int
 
   siswa siswa[]
-  jurusan jurusan @relation(fields: [id_jurusan],references: [id])
+  jurusan jurusan @relation(fields: [id_jurusan],references: [id],onDelete: Cascade)
 }
 model alamat_siswa {
   id_siswa Int @id
@@ -201,7 +210,7 @@ model kouta_siswa {
   jumlah_wanita Int
   total Int
 
-  dudi dudi @relation(fields: [id_dudi],references: [id])
+  dudi dudi @relation(fields: [id_dudi],references: [id],onDelete: Cascade)
 }
 model alamat_pembimbing_dudi {
   id_pembimbing_dudi Int @id
@@ -298,7 +307,7 @@ model izin_absen_masuk {
   note String @db.VarChar(30000)
   status_izin status_other_absen
 
-  absen absen @relation(fields: [id_absen],references: [id])
+  absen absen @relation(fields: [id_absen],references: [id],onDelete: Cascade)
 }
 model izin_absen_keluar {
   id Int @id
@@ -306,7 +315,7 @@ model izin_absen_keluar {
   note String @db.VarChar(30000)
   status_izin status_other_absen
 
-  absen absen @relation(fields: [id_absen],references: [id])
+  absen absen @relation(fields: [id_absen],references: [id],onDelete: Cascade)
 }
 model kordinat_absen {
   id Int @id
@@ -317,8 +326,8 @@ model kordinat_absen {
   longtitude Float
   radius_absen_meter Float
 
-  dudi dudi @relation(fields: [id_dudi],references: [id])
-  pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id])
+  dudi dudi @relation(fields: [id_dudi],references: [id],onDelete: Cascade)
+  pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id],onDelete: Cascade)
 }
 model laporan_pkl {
   id Int @id

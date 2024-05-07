@@ -5,8 +5,64 @@ const addSekolah = async (req,res,next) => {
     try {
         const sekolah = req.body.sekolah
         const alamat = req.body.alamat
+        const kepala_sekolah = req.body.kepala_sekolah
 
-        const result = await adminDeveloperService.addSekolah(sekolah,alamat)
+        const result = await adminDeveloperService.addSekolah(sekolah,alamat,kepala_sekolah)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const updateSekolah = async (req,res,next) => {
+    try {
+        const id = req.params.id
+        const sekolah = req.body.sekolah
+        const alamat = req.body.alamat
+        const kepala_sekolah = req.body.kepala_sekolah
+
+        const result = await adminDeveloperService.addSekolah(id,sekolah,alamat,kepala_sekolah)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const deleteSekolah = async (req,res,next) => {
+    try {
+        const id = req.params.id
+
+        const result = await adminDeveloperService.deleteSekolah(id)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const getAllSekolah = async (req,res,next) => {
+    try {
+        const page = req.query.page
+
+        const result = await adminDeveloperService.getAllSekolah(page)
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const getSekolahById = async (req,res,next) => {
+    try {
+        const id = req.params.id
+
+        const result = await adminDeveloperService.getSekolahById(id)
         res.status(200).json({
             msg : "succes",
             data : result
@@ -83,6 +139,10 @@ const getAllAdmin = async (req,res,next) => {
 export default {
     // sekolah
     addSekolah,
+    updateSekolah,
+    deleteSekolah,
+    getAllSekolah,
+    getSekolahById,
     // admin
     addAdmin,
     updateAdmin,

@@ -17,6 +17,8 @@
 // console.log(selisih);
 
 import { db } from "./config/prismaClient.js";
+import adminValidation from "./validation/adminValidation.js";
+import { validate } from "./validation/validate.js";
 
 
 // const siswa = await db.$queryRaw`SELECT COUNT(judul) filter (where judul = '3') as judul_3,COUNT(judul) filter (where judul = '1') as judul_1,COUNT(judul) filter (where judul = '5') as judul_5,siswa.nama, id_siswa
@@ -48,13 +50,13 @@ import { db } from "./config/prismaClient.js";
 // GROUP BY d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,s.nama,ad.negara LIMIT 1 OFFSET 0`);
 
 
-console.log(await db.$queryRaw`SELECT COUNT(s)::int as total_siswa,COUNT(s.jenis_kelamin)filter (where s.jenis_kelamin = 'laki')::int  as total_siswa_laki,COUNT(s.jenis_kelamin) filter (where s.jenis_kelamin = 'perempuan')::int as total_siswa_perempuan,
-d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara
-FROM dudi as d
-LEFT JOIN siswa as s ON d.id = s.id_dudi
-LEFT JOIN alamat_dudi as ad ON d.id = ad.id_dudi
-WHERE d.id = 93
-GROUP BY d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara`);
+// console.log(await db.$queryRaw`SELECT COUNT(s)::int as total_siswa,COUNT(s.jenis_kelamin)filter (where s.jenis_kelamin = 'laki')::int  as total_siswa_laki,COUNT(s.jenis_kelamin) filter (where s.jenis_kelamin = 'perempuan')::int as total_siswa_perempuan,
+// d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara
+// FROM dudi as d
+// LEFT JOIN siswa as s ON d.id = s.id_dudi
+// LEFT JOIN alamat_dudi as ad ON d.id = ad.id_dudi
+// WHERE d.id = 93
+// GROUP BY d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara`);
 // siswa.forEach(e => {
 //     db.absen.count({
 //        select : {
@@ -72,3 +74,48 @@ GROUP BY d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.de
 //     GROUP BY id_siswa,nama`
 
 //     console.log(j);
+let query = {
+    nama : "xl",
+    id_jurusan : 2345
+}
+
+query = await validate(adminValidation.searchSiswaValidation,query)
+
+const findSiswa = await db.siswa.findMany({
+    where : {
+        AND : [
+            {
+                AND : [
+                    {
+                        nama : {
+                            contains : query.nama,
+                            mode : 'insensitive'
+                        }
+                    },
+                    {
+                        id_jurusan : query.id_jurusan
+                    },
+                    {
+                        id_kelas : query.id_kelas
+                    },
+                    {
+                        jenis_kelamin : query.jenis_kelamin
+                    },
+                    {
+                        alamat : {
+                            AND : [
+                                {
+                                    negara : {
+                                        contains : query.negara,
+                                        mode : "insensitive"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+
+            }
+        ]
+    }
+})
