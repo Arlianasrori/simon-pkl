@@ -6,6 +6,7 @@ import { db } from "../config/prismaClient.js"
 import adminDeveloperValidation from "../validation/adminDeveloperValidation.js"
 import adminValidation from "../validation/adminValidation.js"
 import { adminDeveloperSelect } from "../utils/adminSelect.js"
+import { file } from "../utils/saveImagesLogo.js"
 
 const sekolahSelect = {
     id : true,
@@ -14,13 +15,8 @@ const sekolahSelect = {
     kepala_sekolah : true
 }
 // sekolah
-const addSekolah = async (sekolah,alamat,kepalaSekolah) => {
+const addSekolah = async (sekolah,alamat,kepalaSekolah,image,url) => {
     sekolah.id = generateId()
-    sekolah = await validate(adminDeveloperValidation.addSekolahValidation,sekolah)
-    alamat.id_sekolah = sekolah.id
-    alamat = await validate(adminDeveloperValidation.addAlamatValidation,alamat)
-    kepalaSekolah.id_sekolah = sekolah.id
-    kepalaSekolah = await validate(adminDeveloperValidation.addKepalaSekolahValidation,kepalaSekolah)
 
     const findSekolah = await db.sekolah.findFirst({
         where : {
@@ -32,7 +28,26 @@ const addSekolah = async (sekolah,alamat,kepalaSekolah) => {
         throw new responseError(400,"something wrong")
     }
 
+    if(image) {
+        console.log(image);
+        const { pathSaveFile, fullPath } = await file(image, url);
+    
+        await image.mv(pathSaveFile, async (err) => {
+            if (err) {
+              throw new responseError(500, err.message);
+            }
+        });
+    
+        sekolah.logo = fullPath
+    }
+    sekolah = await validate(adminDeveloperValidation.addSekolahValidation,sekolah)
+    alamat.id_sekolah = sekolah.id
+    alamat = await validate(adminDeveloperValidation.addAlamatValidation,alamat)
+    kepalaSekolah.id_sekolah = sekolah.id
+    kepalaSekolah = await validate(adminDeveloperValidation.addKepalaSekolahValidation,kepalaSekolah)
+
     return db.$transaction(async tx => {
+        console.log(sekolah);
         const addSekolah = await tx.sekolah.create({
             data : sekolah
         })
@@ -41,16 +56,28 @@ const addSekolah = async (sekolah,alamat,kepalaSekolah) => {
             data : alamat
         })
 
-        const addKepalaSekolah = await tx.sekolah.create({
+        const addKepalaSekolah = await tx.kepala_sekolah.create({
             data : kepalaSekolah
         })
 
-        return {sekolah : addSekolah,alamat : addAlamat,sekolah : kepalaSekolah}
+        return {sekolah : addSekolah,alamat : addAlamat,sekolah : addKepalaSekolah}
     })
 }
 
-const updateSekolah = async (id,sekolah,alamat,kepala_sekolah) => {
+const updateSekolah = async (id,sekolah,alamat,kepala_sekolah,image,url) => {
     id = await validate(adminValidation.idValidation,id)
+
+    if(image) {
+        const { pathSaveFile, fullPath } = await file(image, url);
+    
+        await image.mv(pathSaveFile, async (err) => {
+            if (err) {
+              throw new responseError(500, err.message);
+            }
+        });
+    
+        sekolah.logo = fullPath
+    }
 
     return db.$transaction(async tx => {
         if(sekolah) {

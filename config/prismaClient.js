@@ -1,27 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 
-export const db = new PrismaClient({
-    log: [
-        {
-          emit: 'event',
-          level: 'query',
-        },
-        {
-          emit: 'stdout',
-          level: 'error',
-        },
-        {
-          emit: 'stdout',
-          level: 'info',
-        },
-        {
-          emit: 'stdout',
-          level: 'warn',
-        },
-      ],
-})
+export const db = new PrismaClient()
 
-db.$on('query', (e) => {
-    console.log({query : e.query})
-    console.log('Params: ' + e.params)
-  })
+// db.$on('query', (e) => {
+//     console.log({query : e.query})
+//     console.log('Params: ' + e.params)
+//   })

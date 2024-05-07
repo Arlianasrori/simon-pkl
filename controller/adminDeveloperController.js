@@ -3,12 +3,28 @@ import adminDeveloperService from "../service/adminDeveloperService.js"
 // sekolah
 const addSekolah = async (req,res,next) => {
     try {
-        const sekolah = req.body.sekolah
-        const alamat = req.body.alamat
-        const kepala_sekolah = req.body.kepala_sekolah
+        const body = req.body
+        const sekolah = {
+            nama : body.nama,
+            npsn : body.npsn
+        }
+        const alamat = {
+            detail_tempat : body.detail_tempat,
+            desa : body.desa,
+            kecamatan : body.kecamatan,
+            kabupaten : body.kabupaten,
+            provinsi : body.provinsi,
+            negara : body.negara
+        }
+        const kepala_sekolah = {
+            nama : body.nama,
+            nip : body.nip
+        }
+        const files = req.files.logo
+        const url = `http://${req.hostname}:2008/logo`;
 
-        const result = await adminDeveloperService.addSekolah(sekolah,alamat,kepala_sekolah)
-        res.status(200).json({
+        const result = await adminDeveloperService.addSekolah(sekolah,alamat,kepala_sekolah,files,url)
+        res.status(201).json({
             msg : "succes",
             data : result
         })
@@ -19,11 +35,28 @@ const addSekolah = async (req,res,next) => {
 const updateSekolah = async (req,res,next) => {
     try {
         const id = req.params.id
-        const sekolah = req.body.sekolah
-        const alamat = req.body.alamat
-        const kepala_sekolah = req.body.kepala_sekolah
+        const body = req.body
 
-        const result = await adminDeveloperService.addSekolah(id,sekolah,alamat,kepala_sekolah)
+        const sekolah = {
+            nama : body.nama,
+            npsn : body.npsn
+        }
+        const alamat = {
+            detail_tempat : body.detail_tempat,
+            desa : body.desa,
+            kecamatan : body.kecamatan,
+            kabupaten : body.kabupaten,
+            provinsi : body.provinsi,
+            negara : body.negara
+        }
+        const kepala_sekolah = {
+            nama : body.nama_kepala,
+            nip : body.nip
+        }
+        const files = req.files && req.files.logo
+        const url = `http://${req.hostname}:2008/logo`;
+
+        const result = await adminDeveloperService.addSekolah(id,sekolah,alamat,kepala_sekolah,files,url)
         res.status(200).json({
             msg : "succes",
             data : result

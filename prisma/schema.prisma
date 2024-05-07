@@ -15,9 +15,9 @@ datasource db {
 
 model sekolah {
   id Int @id
-  npsn Int @unique
+  npsn String @unique
   nama String @db.VarChar(255)
-  logo String
+  logo String?
 
   alamat alamat_sekolah?
   kepala_sekolah kepala_sekolah?

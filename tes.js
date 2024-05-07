@@ -74,48 +74,59 @@ import { validate } from "./validation/validate.js";
 //     GROUP BY id_siswa,nama`
 
 //     console.log(j);
-let query = {
-    nama : "xl",
-    id_jurusan : 2345
-}
+// let query = {
+//     nama : "xl",
+//     id_jurusan : 2345
+// }
 
-query = await validate(adminValidation.searchSiswaValidation,query)
+// query = await validate(adminValidation.searchSiswaValidation,query)
 
-const findSiswa = await db.siswa.findMany({
-    where : {
-        AND : [
-            {
-                AND : [
-                    {
-                        nama : {
-                            contains : query.nama,
-                            mode : 'insensitive'
-                        }
-                    },
-                    {
-                        id_jurusan : query.id_jurusan
-                    },
-                    {
-                        id_kelas : query.id_kelas
-                    },
-                    {
-                        jenis_kelamin : query.jenis_kelamin
-                    },
-                    {
-                        alamat : {
-                            AND : [
-                                {
-                                    negara : {
-                                        contains : query.negara,
-                                        mode : "insensitive"
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                ]
+// const findSiswa = await db.siswa.findMany({
+//     where : {
+//         AND : [
+//             {
+//                 AND : [
+//                     {
+//                         nama : {
+//                             contains : query.nama,
+//                             mode : 'insensitive'
+//                         }
+//                     },
+//                     {
+//                         id_jurusan : query.id_jurusan
+//                     },
+//                     {
+//                         id_kelas : query.id_kelas
+//                     },
+//                     {
+//                         jenis_kelamin : query.jenis_kelamin
+//                     },
+//                     {
+//                         alamat : {
+//                             AND : [
+//                                 {
+//                                     negara : {
+//                                         contains : query.negara,
+//                                         mode : "insensitive"
+//                                     }
+//                                 }
+//                             ]
+//                         }
+//                     }
+//                 ]
 
-            }
-        ]
-    }
-})
+//             }
+//         ]
+//     }
+// })
+
+const j = await db.$queryRaw`SELECT COUNT(s)::int as total_siswa,COUNT(s.jenis_kelamin)filter (where s.jenis_kelamin = 'laki')::int  as total_siswa_laki,COUNT(s.jenis_kelamin) filter (where s.jenis_kelamin = 'perempuan')::int as total_siswa_perempuan,
+  d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara,ks.total as total_kouta,ks.jumlah_wanita as kouta_wanita,ks.jumlah_pria as kouta_pria
+  FROM dudi as d
+  LEFT JOIN siswa as s ON d.id = s.id_dudi
+  LEFT JOIN alamat_dudi as ad ON d.id = ad.id_dudi
+  LEFT JOIN kouta_siswa as ks ON d.id = ks.id_dudi
+  GROUP BY d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara,ks.total,ks.jumlah_wanita,ks.jumlah_pria
+  LIMIT 10 OFFSET ${10 * (1 - 1)}`
+
+  console.log(j);

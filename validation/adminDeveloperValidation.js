@@ -16,7 +16,8 @@ const addAdminValidation = joi.object ({
   const addSekolahValidation = joi.object({
     id : joi.number().required(),
     nama : joi.string().required(),
-    npsn : joi.number().required()
+    npsn : joi.string().required(),
+    logo : joi.string().optional()
   })
 
   const addAlamatValidation = joi.object({
@@ -32,11 +33,12 @@ const addAdminValidation = joi.object ({
   const addKepalaSekolahValidation = joi.object({
     id_sekolah : joi.number().required(),
     nama : joi.string().required(),
-    nip : joi.number().required()
+    nip : joi.string().required()
   })
   const updateSekolahValidation = joi.object({
     nama : joi.string().optional(),
-    npsn : joi.string().optional()
+    npsn : joi.string().optional(),
+    logo : joi.string().optional()
   })
 
   const updateAlamatSekolahValidation = joi.object({
