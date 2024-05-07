@@ -20,7 +20,7 @@ const addSekolah = async (req,res,next) => {
             nama : body.nama,
             nip : body.nip
         }
-        const files = req.files.logo
+        const files = req.files && req.files.logo
         const url = `http://${req.hostname}:2008/logo`;
 
         const result = await adminDeveloperService.addSekolah(sekolah,alamat,kepala_sekolah,files,url)
@@ -56,7 +56,7 @@ const updateSekolah = async (req,res,next) => {
         const files = req.files && req.files.logo
         const url = `http://${req.hostname}:2008/logo`;
 
-        const result = await adminDeveloperService.addSekolah(id,sekolah,alamat,kepala_sekolah,files,url)
+        const result = await adminDeveloperService.updateSekolah(id,sekolah,alamat,kepala_sekolah,files,url)
         res.status(200).json({
             msg : "succes",
             data : result

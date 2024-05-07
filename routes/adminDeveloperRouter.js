@@ -7,8 +7,8 @@ export const adminDeveloperRouter = express.Router()
 adminDeveloperRouter.post("/addSekolah",adminDeveloperController.addSekolah)
 adminDeveloperRouter.put("/updateSekolah/:id",adminDeveloperController.updateSekolah)
 adminDeveloperRouter.delete("/deleteSekolah/:id",adminDeveloperController.deleteSekolah)
-adminDeveloperRouter.delete("/getAllSekolah",adminDeveloperController.getAllSekolah)
-adminDeveloperRouter.delete("/getSekolah/:id",adminDeveloperController.getAllSekolah)
+adminDeveloperRouter.get("/getAllSekolah",adminDeveloperController.getAllSekolah)
+adminDeveloperRouter.get("/getSekolah/:id",adminDeveloperController.getSekolahById)
 
 
 // admin

@@ -7,6 +7,7 @@ import adminDeveloperValidation from "../validation/adminDeveloperValidation.js"
 import adminValidation from "../validation/adminValidation.js"
 import { adminDeveloperSelect } from "../utils/adminSelect.js"
 import { file } from "../utils/saveImagesLogo.js"
+import fs from "fs"
 
 const sekolahSelect = {
     id : true,
@@ -29,7 +30,6 @@ const addSekolah = async (sekolah,alamat,kepalaSekolah,image,url) => {
     }
 
     if(image) {
-        console.log(image);
         const { pathSaveFile, fullPath } = await file(image, url);
     
         await image.mv(pathSaveFile, async (err) => {
@@ -47,7 +47,6 @@ const addSekolah = async (sekolah,alamat,kepalaSekolah,image,url) => {
     kepalaSekolah = await validate(adminDeveloperValidation.addKepalaSekolahValidation,kepalaSekolah)
 
     return db.$transaction(async tx => {
-        console.log(sekolah);
         const addSekolah = await tx.sekolah.create({
             data : sekolah
         })
@@ -90,7 +89,7 @@ const updateSekolah = async (id,sekolah,alamat,kepala_sekolah,image,url) => {
             })
         }
         if(alamat) {
-            alamat = await validate(adminDeveloperValidation.updateSekolahValidation)
+            alamat = await validate(adminDeveloperValidation.updateAlamatSekolahValidation,alamat)
             await tx.alamat_sekolah.update({
                 where : {
                     id_sekolah : id
@@ -99,7 +98,7 @@ const updateSekolah = async (id,sekolah,alamat,kepala_sekolah,image,url) => {
             })
         }
         if(kepala_sekolah) {
-            kepala_sekolah = await validate(adminDeveloperValidation.updateAlamatSekolahValidation)
+            kepala_sekolah = await validate(adminDeveloperValidation.updateKepalaSekolahValidation,kepala_sekolah)
             await tx.kepala_sekolah.update({
                 where : {
                     id_sekolah : id
@@ -123,7 +122,10 @@ const deleteSekolah = async (id) => {
     if(!findSekolah) {
         throw new responseError(404,"data sekolah tidak ditemukan")
     }
-
+    const fileName = findSekolah.logo.split("/")[4]
+    fs.unlinkSync(`./public/logo/${fileName}`,(err) => {
+        console.log(err);
+    })
     return db.sekolah.delete({
         where : {
             id : id
