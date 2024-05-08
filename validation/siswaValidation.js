@@ -40,6 +40,7 @@ const UpdateLaporanSiswaPkl = joi.object ({
   rujukan_kompetensi_dasar : joi.string().max(255).optional(),
   dokumentasi : joi.string().max(1500).optional()
 })
+const stringValidation = joi.string().required()
 const pageValidation = joi.number().required()
 export default {
   siswaLogin,
@@ -49,5 +50,6 @@ export default {
   findPengajuanByStatus,
   addLaporanSiswaPkl,
   UpdateLaporanSiswaPkl,
-  pageValidation
+  pageValidation,
+  stringValidation
 };

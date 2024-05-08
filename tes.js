@@ -75,11 +75,11 @@ import { validate } from "./validation/validate.js";
 
 //     console.log(j);
 // let query = {
-//     nama : "xl",
-//     id_jurusan : 2345
+//     nama : "Xl"
 // }
 
 // query = await validate(adminValidation.searchSiswaValidation,query)
+// console.log(query);
 
 // const findSiswa = await db.siswa.findMany({
 //     where : {
@@ -120,14 +120,45 @@ import { validate } from "./validation/validate.js";
 //     }
 // })
 
+// console.log(await db.siswa.findMany({
+//     where : {
+//         id : undefined
+//     }
+// }))
 
-const haha = await db.$queryRawUnsafe(`SELECT COUNT(s)::int as total_siswa,COUNT(s.jenis_kelamin)filter (where s.jenis_kelamin = 'laki')::int  as total_siswa_laki,COUNT(s.jenis_kelamin) filter (where s.jenis_kelamin = 'perempuan')::int as total_siswa_perempuan,
-d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara,ks.total as total_kouta,ks.jumlah_wanita as kouta_wanita,ks.jumlah_pria as kouta_pria
-FROM dudi as d
-LEFT JOIN siswa as s ON d.id = s.id_dudi
-LEFT JOIN alamat_dudi as ad ON d.id = ad.id_dudi
-LEFT JOIN kouta_siswa as ks ON d.id = ks.id_dudi
-WHERE (s.nama ILIKE $1 AND s.id_jurusan =? $2)
-GROUP BY d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara,ks.total,ks.jumlah_wanita,ks.jumlah_pria`,"xl")
 
-console.log(haha);
+// const haha = await db.$queryRawUnsafe(`SELECT COUNT(s)::int as total_siswa,COUNT(s.jenis_kelamin)filter (where s.jenis_kelamin = 'laki')::int  as total_siswa_laki,COUNT(s.jenis_kelamin) filter (where s.jenis_kelamin = 'perempuan')::int as total_siswa_perempuan,
+// d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara,ks.total as total_kouta,ks.jumlah_wanita as kouta_wanita,ks.jumlah_pria as kouta_pria
+// FROM dudi as d
+// LEFT JOIN siswa as s ON d.id = s.id_dudi
+// LEFT JOIN alamat_dudi as ad ON d.id = ad.id_dudi
+// LEFT JOIN kouta_siswa as ks ON d.id = ks.id_dudi
+// WHERE (s.nama ILIKE $1 AND s.id_jurusan = $2 AND (1=1 AND (s.id IS NOT NULL)))
+// GROUP BY d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara,ks.total,ks.jumlah_wanita,ks.jumlah_pria`,undefined,54656)
+
+// console.log(haha);
+
+
+
+
+
+
+
+
+// const whereQuery = "1 = 1"
+
+// const siswa = await db.$queryRawUnsafe(`select * from siswa as s
+// where ${whereQuery}`)
+
+// console.log(siswa);
+
+
+console.log(await db.$queryRaw`SELECT COUNT(status_absen_masuk) filter (where status_absen_masuk = 'hadir') as absen_masuk_hadir,COUNT(status_absen_masuk) filter (where absen_masuk = 'tidak_hadir') as absen_masuk_tidak_hadir,COUNT(absen_masuk) filter (where status_absen_masuk = 'telat') as absen_masuk_telat,COUNT(status_absen_masuk) filter (where status_absen_masuk = 'izin') as absen_masuk_izin,
+COUNT(status_absen_pulang) filter (where status_absen_pulang = 'hadir') as absen_keluar_hadir,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'tidak_hadir') as absen_keluar_tidak_hadir,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'telat') as absen_keluar_telat,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'izin') as absen_keluar_izin,
+id_siswa,siswa.nama
+FROM absen
+INNER JOIN siswa ON absen.id_siswa = siswa.id
+GROUP BY id_siswa,nama`)
+
+
+// absen.id_siswa = ${query.id_siswa} AND siswa.id_pembimbing_dudi = ${query.id_pembimbing_dudi} AND siswa.id_guru_pembimbing = ${query.id_guru_pembimbing} AND siswa.id_dudi = ${query.id_dudi} AND (absen.tanggal = ${query.tanggal} OR (absen.tanggal >= ${query.tanggal_start} AND absen.tanggal <= ${query.tanggal_end})) AND absen.tanggal = ?${query.month_ago}

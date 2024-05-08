@@ -13,6 +13,7 @@ import { file } from "../utils/imageSaveUtilsLaporanPklSiswa.js";
 import { selectLaporanSiswaPkl } from "../utils/LaporanSiswaPklUtil.js";
 import bcrypt from "bcryptjs"
 import pembimbingDudiValidation from "../validation/pembimbingDudiValidation.js";
+import { getQuery } from "../utils/getQueryDudi.js";
 
 const updatePassword = async (id, password) => {
   id = await validate (adminValidation.idValidation,id)
@@ -109,17 +110,10 @@ const getDudiById = async (id,siswa) => {
 const getDudiFilter = async (query,page,siswa) => {
   query = await validate(adminValidation.searchDudiValidation,query)
   page = await validate(siswaValidation.pageValidation,page)
-  console.log(siswa);
+  const whereQuery = getQuery(query,page)
 
-  const findDudi = await db.$queryRaw`SELECT COUNT(s)::int as total_siswa,COUNT(s.jenis_kelamin)filter (where s.jenis_kelamin = 'laki')::int  as total_siswa_laki,COUNT(s.jenis_kelamin) filter (where s.jenis_kelamin = 'perempuan')::int as total_siswa_perempuan,
-  d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara,ks.total as total_kouta,ks.jumlah_wanita as kouta_wanita,ks.jumlah_pria as kouta_pria
-  FROM dudi as d
-  LEFT JOIN siswa as s ON d.id = s.id_dudi
-  LEFT JOIN alamat_dudi as ad ON d.id = ad.id_dudi
-  LEFT JOIN kouta_siswa as ks ON d.id = ks.id_dudi
-  GROUP BY d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara,ks.total,ks.jumlah_wanita,ks.jumlah_pria
-  LIMIT 10 OFFSET ${10 * (page - 1)}`
-  console.log(findDudi);
+  const findDudi = await db.$queryRawUnsafe(whereQuery)
+
   for (let index = 0; index < findDudi.length; index++) {
     findDudi[index].enabled = true
     if(!findDudi[index].total_kouta) {
@@ -141,7 +135,7 @@ const getDudiFilter = async (query,page,siswa) => {
 }
 
 const getDudiByName = async (nama,siswa) => {
-  nama = await validate(siswaValidation.NameValidation, nama);
+  nama = await validate(siswaValidation.stringValidation, nama);
 
   return db.dudi.findMany({
     where: {
