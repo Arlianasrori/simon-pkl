@@ -245,6 +245,19 @@ const cetakAbsen= async (req, res, next) => {
     next(error)
   }
 }
+const cetakAnalisisAbsen= async (req, res, next) => {
+  try {
+    const query = req.query
+    // query.id_pembimbing_dudi = req.pembimbingDudi.id
+    const result = await pembimbingDudiService.cetakAnalisisAbsen(query)
+     res.status(200).json({
+      msg: "Success",
+      data: result,
+     })
+  } catch (error) {
+    next(error)
+  }
+}
 
 // Kuota Siswa 
 const addKuotaSiswa = async (req,res,next) => {
@@ -319,6 +332,7 @@ export default {
 
   // absen
   cetakAbsen,
+  cetakAnalisisAbsen,
 
   // Kuota SISWA 
   addKuotaSiswa,

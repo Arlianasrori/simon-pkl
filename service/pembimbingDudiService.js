@@ -14,6 +14,7 @@ import absenValidation from "../validation/absenValidation.js";
 import puppeteer from "puppeteer"
 import ejs from 'ejs'
 import { selectPebimbingDudiObject } from "../utils/pembimbingDudiSelect.js";
+import { getQueryAbsen } from "../utils/getQueryAbsen.js";
 
 const updatePassword = async (id, password) => {
   id = await validate(adminValidation.idValidation, id)
@@ -422,11 +423,23 @@ const findLaporanPklById = async (id) => {
 
 // absen
 const cetakAbsen = async (query) => {
+  const Now = new Date()
+  const dateNow = `${Now.getFullYear()}-${("0" + (Now.getMonth() + 1)).slice(-2)}-${("0" + (Now.getDay())).slice(-2)}`
+
   query = await validate(absenValidation.findAbsenFilterValidation,query)
-console.log(query);
-  if(query.month_ago) {
-    query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago + 1)
+
+  let monthStart;
+  let monthEnd;
+
+  if(query.month) {
+    if(!query.years) {
+      query.years = dateNow.split("-")[0]
+    }
+     monthStart = `${query.years}-0${query.month}-01`
+     monthEnd = `${query.years}-0${query.month}-31`
   }
+
+  const bulan = ["januari","februari","maret","april","mei","juni","juli","agustus","september","oktober","november","desember"]
 
   const data = await db.absen.findMany({
     where : {
@@ -434,15 +447,29 @@ console.log(query);
             {
                 id_siswa : query.id_siswa
             },
-            {
-                siswa : {
-                    id_pembimbing_dudi : query.id_pembimbing_dudi
-                }
-            },
+            // {
+            //     siswa : {
+            //         id_pembimbing_dudi : query.id_pembimbing_dudi
+            //     }
+            // },
             {
                 siswa : {
                     id_dudi : query.id_dudi
                 }
+            },
+            {
+              AND : [
+                {
+                  tanggal : {
+                    gte : monthStart
+                  }
+                },
+                {
+                  tanggal : {
+                    lte : monthEnd
+                  }
+                }
+              ]
             },
             {
                 OR : [
@@ -478,7 +505,8 @@ console.log(query);
         absen_masuk : true,
         absen_pulang : true,
         status_absen_masuk : true,
-        status_absen_keluar : true,
+        status_absen_pulang : true,
+        status : true,
         siswa : {
             select : {
                 nama : true,
@@ -492,6 +520,7 @@ console.log(query);
         }
     }
   })
+  console.log(data);
 
   const findPembimbingDudi = await db.pembimbing_dudi.findFirst({
   where: {
@@ -499,15 +528,40 @@ console.log(query);
   },
   })
 
-  const html = fs.readFileSync("index.ejs",{encoding : "utf-8"})
+  const html = fs.readFileSync("pdf-sample/absenDudi.ejs",{encoding : "utf-8"})
 
   const browser = await puppeteer.launch({ headless: true});
   const page = await browser.newPage();
-  await page.setContent(ejs.render(html,{data : data,nama : findPembimbingDudi.nama, tanggal_start: query.tanggal_start, tanggal_end: query.tanggal_end}))
-  const pdf = await page.pdf({ format : "a4",path : "pdf.pdf"});
+  await page.setContent(ejs.render(html,{data : data,nama : findPembimbingDudi.nama, bulan : bulan[query.month - 1]}))
+  const pdf = await page.pdf({ format : "a4",path : `public/absen_pdf/${generateId()}.pdf`});
 
   await browser.close();
 
+  return data
+}
+
+const cetakAnalisisAbsen = async (query) => {
+  query = await validate(absenValidation.findAbsenFilterValidation,query)
+
+  const dbQuery = getQueryAbsen(query)
+  const data = await db.$queryRawUnsafe(dbQuery)
+
+  const bulan = ["januari","februari","maret","april","mei","juni","juli","agustus","september","oktober","november","desember"]
+
+  const findPembimbingDudi = await db.pembimbing_dudi.findFirst({
+    where: {
+      id : query.id_pembimbing_dudi
+    },
+  })
+
+  const html = fs.readFileSync("pdf-sample/analisisAbsendudi.ejs",{encoding : "utf-8"})
+
+  const browser = await puppeteer.launch({ headless: true});
+  const page = await browser.newPage();
+  await page.setContent(ejs.render(html,{data : data,nama : findPembimbingDudi.nama, bulan : bulan[query.month - 1]}))
+  const pdf = await page.pdf({ format : "a4",path : `public/absen_pdf/analisis/${generateId()}.pdf`});
+
+  await browser.close();
   return data
 }
 
@@ -666,6 +720,7 @@ export default {
 
   // absen
   cetakAbsen,
+  cetakAnalisisAbsen,
 
   // Kuota Siswa 
   addKuotaSiswa,

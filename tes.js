@@ -158,6 +158,7 @@ COUNT(status_absen_pulang) filter (where status_absen_pulang = 'hadir') as absen
 id_siswa,siswa.nama
 FROM absen
 INNER JOIN siswa ON absen.id_siswa = siswa.id
+WHERE 1 = 1 AND (tanggal >= '2024-04-01' AND tanggal <= '2024-04-31')
 GROUP BY id_siswa,nama`)
 
 

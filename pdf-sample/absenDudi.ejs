@@ -46,11 +46,11 @@
         <div style="line-height: 6px; width: 94%;">
           <div style="width: 94%;">
               <p><span style="font-weight: 1000;">
-                <%= nama %>
-               </span></p>
+                Nama dudi :
+               </span><%= nama %></p>
           </div>
           <div style="width: 94%;" >
-              <p> <span style="font-weight: 600;">Tanggal</span> : <%= tanggal_start %> - <%= tanggal_end %></p>
+              <p> <span style="font-weight: 600;">Bulan</span> : <%= bulan %></p>
           </div>
         </div>
         <div class="table" style="width: 94%;display: flex;justify-content: center;">
@@ -58,7 +58,6 @@
                 <tr>
                   <th rowspan="2">No</th>
                   <th rowspan="2">Nama</th>
-                  <th rowspan="2">Nama Dudi</th>
                   <th rowspan="2">Jurusan</th>
                   <th rowspan="2" style="width: 100px;">Tanggal</th>
                   <th colspan="2">Absen Masuk</th>
@@ -75,30 +74,29 @@
                   <tr>
                     <td><%= index + 1 %></td>
                     <td><%= data.siswa.nama %></td>
-                    <td><%= data.siswa.dudi.nama_instansi_perusahaan %></td>
                     <td><%= data.siswa.jurusan.nama %></td>
                     <td><%= data.tanggal%></td>
                     <!-- <td><%= data.absen_masuk%></td> -->
                     <td><% if (data.absen_masuk == null) { %>
-                      belum absen
+                      -
                     <% } else { %>
                       <%= data.absen_masuk%>
                     <%} %></td>
 
                     <td><%= data.status_absen_masuk%></td>
-                    <td><% if (data.absen_keluar == null) { %>
-                      belum absen
+                    <td><% if (data.absen_pulang == null) { %>
+                      -
                       <%} else { %>
-                        <%= data.absen_keluar%>
+                        <%= data.absen_pulang%>
                       <% } %></td>
 
-                    <td><% if (data.status_absen_keluar == null) { %>
-                      silahkan absen pulang
+                    <td><% if (data.status_absen_pulang == null) { %>
+                      -
                     <% } else { %>
-                      <%= data.status_absen_keluar%>
+                      <%= data.status_absen_pulang%>
                     <%} %></td>
                     <td><% if (data.status == null) { %>
-                      -
+                      tidak hadir
                     <% } else { %>
                       <%= data.status%>
                     <%} %></td>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        .header {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+        }
+        .body {
+            display:  flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        table {
+        border-collapse: collapse;
+        }
+
+        th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo" style="display: flex;justify-content: center;">
+        <img src="http://localhost:2008/pdfLogo.png" alt="" style="width: 120px; position: absolute; left: 0;margin-left: 20px;">
+    </div>
+    <div class="header" style="margin-top: 20px;border-bottom: 2px solid black;width: 94%;margin: auto;">
+        <h2 style="font-size: 17px;line-height: 1px;font-weight: 600;">PEMERINTAH KOTA MATARAM</h2>
+        <h2 style="font-size: 17px;line-height: 1px;font-weight: 600;">DINAS PENDIDIKAN</h2>
+        <h2 style="font-size: 23px;line-height: 1px;">SMKN 2 MATARAM</h2>
+        <div class="" style="display: flex; gap: 10px;font-size: 14px;margin-top: -10px; margin-bottom: -5px;">
+            <p>Tlp: 087865728448</p>
+            <p>E-mail: smkn2mataram@gmail.com</p>
+            <p>Website: smeda.com</p>
+        </div>
+    </div>
+    <div class="body">
+        <h2 style="font-weight: bold; text-decoration: underline;">DAFTAR HADIR PKL</h2>
+        <div style="line-height: 6px; width: 94%;">
+          <div style="width: 94%;">
+              <p><span style="font-weight: 1000;">
+                Nama dudi : <%= nama %>
+               </span></p>
+          </div>
+          <div style="width: 94%;" >
+              <p> <span style="font-weight: 600;">Bulan</span> : <%= bulan %></p>
+          </div>
+        </div>
+        <div class="table" style="width: 94%;display: flex;justify-content: center;">
+            <table class="my_table" style="width: 100%;font-size: 12px;">
+                <tr>
+                  <th rowspan="2">No</th>
+                  <th rowspan="2">Nama</th>
+                  <th rowspan="2">Jurusan</th>
+                  <th colspan="5">Absen Masuk</th>
+                  <th colspan="5">Absen pulang</th>
+                  <th colspan="2">Status</th>
+                </tr>
+                <tr>
+                  <td style="font-weight: bold;width: 50px;">hadir</td>
+                  <td style="font-weight: bold;width: 50px;">tidak hadir</td>
+                  <td style="font-weight: bold;width: 50px;">telat</td>
+                  <td style="font-weight: bold;width: 50px;">izin</td>
+                  <td style="font-weight: bold;width: 50px;">diluar radius</td>
+                  <td style="font-weight: bold;width: 50px;">hadir</td>
+                  <td style="font-weight: bold;width: 50px;">tidak hadir</td>
+                  <td style="font-weight: bold;width: 50px;">telat</td>
+                  <td style="font-weight: bold;width: 50px;">izin</td>
+                  <td style="font-weight: bold;width: 50px;">diluar radius</td>
+                  <td style="font-weight: bold;width: 50px;">hadir</td>
+                  <td style="font-weight: bold;width: 50px;">tidak hadir</td>
+                </tr>             
+                  <tr>
+                    <% data.forEach((data,index) => { %>
+                        <td style="width: 10px;"><%= index + 1 %></td>
+                        <td style="width: 310px;"><%= data.nama + 1 %></td>
+                        <td style="width: 90px;background-color: blue;"><%= data.jurusan %></td>
+                        <td><%= data.absen_masuk_hadir %></td>
+                        <td><%= data.absen_masuk_tidak_hadir %></td>
+                        <td><%= data.absen_masuk_telat %></td>
+                        <td><%= data.absen_masuk_izin %></td>
+                        <td><%= data.absen_masuk_diluar_radius %></td>
+                        <td><%= data.absen_keluar_hadir %></td>
+                        <td><%= data.absen_keluar_tidak_hadir %></td>
+                        <td><%= data.absen_keluar_telat %></td>
+                        <td><%= data.absen_keluar_izin %></td>
+                        <td><%= data.absen_keluar_diluar_radius %></td>
+                        <td><%= data.status_absen_hadir %></td>
+                        <td><%= data.status_absen_hadir %></td>                    
+                    <% }) %>
+                  </tr>    
+              </table>
+        </div>
+    </div>
+</body>
+</html>
