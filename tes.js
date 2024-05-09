@@ -153,13 +153,48 @@ import { validate } from "./validation/validate.js";
 // console.log(siswa);
 
 
-console.log(await db.$queryRaw`SELECT COUNT(status_absen_masuk) filter (where status_absen_masuk = 'hadir') as absen_masuk_hadir,COUNT(status_absen_masuk) filter (where absen_masuk = 'tidak_hadir') as absen_masuk_tidak_hadir,COUNT(absen_masuk) filter (where status_absen_masuk = 'telat') as absen_masuk_telat,COUNT(status_absen_masuk) filter (where status_absen_masuk = 'izin') as absen_masuk_izin,
-COUNT(status_absen_pulang) filter (where status_absen_pulang = 'hadir') as absen_keluar_hadir,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'tidak_hadir') as absen_keluar_tidak_hadir,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'telat') as absen_keluar_telat,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'izin') as absen_keluar_izin,
-id_siswa,siswa.nama
-FROM absen
-INNER JOIN siswa ON absen.id_siswa = siswa.id
-WHERE 1 = 1 AND (tanggal >= '2024-04-01' AND tanggal <= '2024-04-31')
-GROUP BY id_siswa,nama`)
+// console.log(await db.$queryRaw`SELECT COUNT(status_absen_masuk) filter (where status_absen_masuk = 'hadir') as absen_masuk_hadir,COUNT(status_absen_masuk) filter (where absen_masuk = 'tidak_hadir') as absen_masuk_tidak_hadir,COUNT(absen_masuk) filter (where status_absen_masuk = 'telat') as absen_masuk_telat,COUNT(status_absen_masuk) filter (where status_absen_masuk = 'izin') as absen_masuk_izin,
+// COUNT(status_absen_pulang) filter (where status_absen_pulang = 'hadir') as absen_keluar_hadir,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'tidak_hadir') as absen_keluar_tidak_hadir,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'telat') as absen_keluar_telat,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'izin') as absen_keluar_izin,
+// id_siswa,siswa.nama
+// FROM absen
+// INNER JOIN siswa ON absen.id_siswa = siswa.id
+// WHERE 1 = 1 AND (tanggal >= '2024-04-01' AND tanggal <= '2024-04-31')
+// GROUP BY id_siswa,nama`)
 
 
 // absen.id_siswa = ${query.id_siswa} AND siswa.id_pembimbing_dudi = ${query.id_pembimbing_dudi} AND siswa.id_guru_pembimbing = ${query.id_guru_pembimbing} AND siswa.id_dudi = ${query.id_dudi} AND (absen.tanggal = ${query.tanggal} OR (absen.tanggal >= ${query.tanggal_start} AND absen.tanggal <= ${query.tanggal_end})) AND absen.tanggal = ?${query.month_ago}
+
+
+// console.log(await db.$queryRaw`SELECT COUNT(status_absen_masuk) filter (where status_absen_masuk = 'hadir')::int as absen_masuk_hadir,COUNT(status_absen_masuk) filter (where absen_masuk = 'tidak_hadir')::int as absen_masuk_tidak_hadir,COUNT(absen_masuk) filter (where status_absen_masuk = 'telat')::int as absen_masuk_telat,COUNT(status_absen_masuk) filter (where status_absen_masuk = 'izin')::int as absen_masuk_izin,COUNT(status_absen_masuk) filter (where status_absen_masuk = 'diluar_radius')::int as absen_masuk_diluar_radius,
+
+// COUNT(status_absen_pulang) filter (where status_absen_pulang = 'hadir')::int as absen_keluar_hadir,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'tidak_hadir')::int as absen_keluar_tidak_hadir,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'telat')::int as absen_keluar_telat,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'izin')::int as absen_keluar_izin,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'diluar_radius')::int as absen_keluar_diluar_radius,COUNT(absen.status) filter (where absen.status = 'hadir')::int as status_hadir,COUNT(absen.status) filter (where absen.status = 'tidak_hadir')::int as status_tidak_hadir,
+// id_siswa,siswa.nama as nama,jurusan.nama as jurusan
+// FROM absen
+// INNER JOIN siswa ON absen.id_siswa = siswa.id
+// INNER JOIN jurusan ON jurusan.id = siswa.id_jurusan
+// GROUP BY id_siswa,siswa.nama,jurusan.nama`)
+
+console.log(await db.$queryRawUnsafe(`SELECT a.id,a.tanggal,a.absen_masuk,a.status_absen_masuk,a.absen_pulang,a.status_absen_pulang,a.foto,a.status
+FROM absen as a
+WHERE a.id_siswa IN ($1,$2,$3,$4)`,5774,1234,3454,7985))
+
+
+const j = await db.siswa.findMany({
+    select : {
+        nama : true,
+        absen : {
+            select : {
+                absen_masuk : true,
+                status_absen_masuk : true,
+                keterangan_absen_masuk : true,
+                absen_pulang : true,
+                status_absen_pulang : true,
+                keterangan_absen_keluar : true,
+                foto : true,
+                status : true,
+                tanggal : true,
+            }
+        }
+    }
+})
+console.log(j[3].absen);

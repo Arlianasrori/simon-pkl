@@ -3,7 +3,7 @@ import guruPembimbingService from "../service/guruPembimbingService.js"
 
   const updatePassword = async (req, res, next) => {
     try {
-        const id = req.params.id
+        const id = req.guruPembimbing.id
         const body = req.body.password
         const result = await guruPembimbingService.updatePassword(id, body)
         res.status(200).json({
@@ -76,7 +76,8 @@ const findLaporanPklSiswaFilter = async (req, res, next) => {
     try {
         const query = req.query
         query.id_guru_pembimbing = req.guruPembimbing.id
-        const result = await adminService.findLaporanPklSiswaFilter(query)
+        const page = parseInt(req.query.page)
+        const result = await adminService.findLaporanPklSiswaFilter(query,page,req.guruPembimbing)
         res.status(200).json({
             msg : "Success",
             data : result
@@ -88,7 +89,7 @@ const findLaporanPklSiswaFilter = async (req, res, next) => {
 const findLaporanPklSiswaById = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id)
-        const result = await adminService.findLaporanPklSiswaById(id)
+        const result = await adminService.findLaporanPklSiswaById(id,req.guruPembimbing)
         res.status(200).json({
             msg : "Success",
             data : result
@@ -103,7 +104,8 @@ const findLaporanPklFilter = async (req, res, next) => {
     try {
         const query = req.query
         query.id_guru_pembimbing = req.guruPembimbing.id
-        const result = await adminService.findLaporanPklFilter(query)
+        const page = parseInt(req.query.page)
+        const result = await adminService.findLaporanPklFilter(query,page,req.guruPembimbing)
         res.status(200).json({
             msg : "Success",
             data : result
@@ -115,7 +117,7 @@ const findLaporanPklFilter = async (req, res, next) => {
 const findLaporanPklById = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id)
-        const result = await adminService.findLaporanPklById(id)
+        const result = await adminService.findLaporanPklById(id,req.guruPembimbing)
         res.status(200).json({
             msg : "Success",
             data : result
@@ -160,18 +162,36 @@ const cetakAbsen = async (req, res, next) => {
         } catch (error) {
           next(error)
         }
-      }
+}
+const cetakAnalisAbsen = async (req, res, next) => {
+        try {
+          const query = req.query
+          query.id_guru_pembimbing = req.guruPembimbing.id
+          const result = await guruPembimbingService.cetakAnalisisAbsen(query)
+          res.status(200).json({
+            msg: "Success",
+            data: result,
+          })
+        } catch (error) {
+          next(error)
+        }
+}
 export default {
     refreshToken,
     updatePassword,
     getGuruPembimbing,
     getSiswa,
     getAllSiswaGuruPembimbing,
+
     findLaporanPklSiswaFilter,
     findLaporanPklSiswaById,
+
     findLaporanPklFilter,
     findLaporanPklById,
+
     getLaporanPklSiswa,
     getAllLaporanPklSiswa,
-    cetakAbsen
+
+    cetakAbsen,
+    cetakAnalisAbsen
 }

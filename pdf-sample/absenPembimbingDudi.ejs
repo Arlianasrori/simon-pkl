@@ -46,15 +46,15 @@
         <div style="line-height: 6px; width: 94%;">
           <div style="width: 94%;">
               <p style="text-transform: capitalize;"><span style="font-weight: 1000;">
-                Nama Dudi : 
+                Nama Guru Pembimbing :
                </span><%= nama %></p>
           </div>
           <div style="width: 94%;" >
               <p style="text-transform: capitalize;"> <span style="font-weight: 600;">Bulan</span> : <%= bulan %></p>
           </div>
           <div style="width: 94%;" >
-              <p style="text-transform: capitalize;"> <span style="font-weight: 600;">Tahun</span> : <%= years %></p>
-          </div>
+            <p style="text-transform: capitalize;"> <span style="font-weight: 600;">Tahun</span> : <%= years %></p>
+        </div>
         </div>
         <div class="table" style="width: 94%;display: flex;justify-content: center;">
             <table class="my_table" style="width: 100%;font-size: 12px;">
@@ -62,43 +62,49 @@
                   <th rowspan="2">No</th>
                   <th rowspan="2">Nama</th>
                   <th rowspan="2">Jurusan</th>
-                  <th colspan="5">Absen Masuk</th>
-                  <th colspan="5">Absen pulang</th>
-                  <th colspan="2">Status</th>
+                  <th rowspan="2" style="width: 100px;">Tanggal</th>
+                  <th colspan="2">Absen Masuk</th>
+                  <th colspan="2">Absen pulang</th>
+                  <th rowspan="2">Status</th>
                 </tr>
                 <tr>
-                  <td style="font-weight: bold;width: 50px;">hadir</td>
-                  <td style="font-weight: bold;width: 50px;">tidak hadir</td>
-                  <td style="font-weight: bold;width: 50px;">telat</td>
-                  <td style="font-weight: bold;width: 50px;">izin</td>
-                  <td style="font-weight: bold;width: 50px;">diluar radius</td>
-                  <td style="font-weight: bold;width: 50px;">hadir</td>
-                  <td style="font-weight: bold;width: 50px;">tidak hadir</td>
-                  <td style="font-weight: bold;width: 50px;">telat</td>
-                  <td style="font-weight: bold;width: 50px;">izin</td>
-                  <td style="font-weight: bold;width: 50px;">diluar radius</td>
-                  <td style="font-weight: bold;width: 50px;">hadir</td>
-                  <td style="font-weight: bold;width: 50px;">tidak hadir</td>
-                </tr>             
+                  <td style="font-weight: bold;width: 50px;">jam</td>
+                  <td style="font-weight: bold;width: 60px;">status</td>
+                  <td style="font-weight: bold;width: 50px;">jam</td>
+                  <td style="font-weight: bold;width: 60px;">status</td>
+                </tr>
+                <% data.forEach(function(data,index){ %>
                   <tr>
-                    <% data.forEach((data,index) => { %>
-                        <td style="width: 10px;"><%= index + 1 %></td>
-                        <td style="width: 310px;text-transform: capitalize;"><%= data.nama + 1 %></td>
-                        <td style="width: 140px;text-transform: capitalize;"><%= data.jurusan %></td>
-                        <td><%= data.absen_masuk_hadir %></td>
-                        <td><%= data.absen_masuk_tidak_hadir %></td>
-                        <td><%= data.absen_masuk_telat %></td>
-                        <td><%= data.absen_masuk_izin %></td>
-                        <td><%= data.absen_masuk_diluar_radius %></td>
-                        <td><%= data.absen_keluar_hadir %></td>
-                        <td><%= data.absen_keluar_tidak_hadir %></td>
-                        <td><%= data.absen_keluar_telat %></td>
-                        <td><%= data.absen_keluar_izin %></td>
-                        <td><%= data.absen_keluar_diluar_radius %></td>
-                        <td><%= data.status_hadir %></td>
-                        <td><%= data.status_tidak_hadir %></td>                    
-                    <% }) %>
-                  </tr>    
+                    <td><%= index + 1 %></td>
+                    <td><%= data.siswa.nama %></td>
+                    <td style="text-transform: capitalize;"><%= data.siswa.jurusan.nama %></td>
+                    <td><%= data.tanggal%></td>
+                    <!-- <td><%= data.absen_masuk%></td> -->
+                    <td><% if (data.absen_masuk == null) { %>
+                      -
+                    <% } else { %>
+                      <%= data.absen_masuk%>
+                    <%} %></td>
+
+                    <td><%= data.status_absen_masuk%></td>
+                    <td><% if (data.absen_pulang == null) { %>
+                      -
+                      <%} else { %>
+                        <%= data.absen_pulang%>
+                      <% } %></td>
+
+                    <td><% if (data.status_absen_pulang == null) { %>
+                      -
+                    <% } else { %>
+                      <%= data.status_absen_pulang%>
+                    <%} %></td>
+                    <td><% if (data.status == null) { %>
+                      tidak hadir
+                    <% } else { %>
+                      <%= data.status%>
+                    <%} %></td>
+                  </tr>
+                <% }); %>       
               </table>
         </div>
     </div>

@@ -39,8 +39,14 @@ pembimbingDudiRouter.get("/findAllLaporanPkl",pembimbingDudiController.findAllLa
 pembimbingDudiRouter.get("/findLaporanPklById/:id",pembimbingDudiController.findLaporanPklById)
 pembimbingDudiRouter.get("/findLaporanPklFilter",pembimbingDudiController.findLaporanPklFilter)
 
+// absen jadwal
+pembimbingDudiRouter.post("/addJadwalAbsen",pembimbingDudiController.addJadwalAbsen)
+pembimbingDudiRouter.get("/findAllAbsenjadwal",pembimbingDudiController.findAllJadwalAbsen)
+pembimbingDudiRouter.get("/findJadwalAbsenById/:id",pembimbingDudiController.findJadwalAbsenById)
 
 // absen
+pembimbingDudiRouter.get("/findAllAbsen",pembimbingDudiController.findAllAbsen)
+pembimbingDudiRouter.get("/findAbsenById/:id",pembimbingDudiController.findAbsenById)
 pembimbingDudiRouter.get("/cetakAbsen",pembimbingDudiController.cetakAbsen)
 pembimbingDudiRouter.get("/cetakAlisisAbsen",pembimbingDudiController.cetakAnalisisAbsen)
 

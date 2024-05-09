@@ -1547,10 +1547,10 @@ const findAllLaporanPkl = async (page,admin) => {
 
     return {laporan : findLaporan,page : page,count : findLaporan.length}
 }
-const findLaporanPklById = async (id) => {
+const findLaporanPklById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
 
-    const findLaporan = await db.laporan_pkl.findUnique({
+    const findLaporan = await db.laporan_pkl.findFirst({
         where : {
             AND : [
                 {
@@ -1570,8 +1570,9 @@ const findLaporanPklById = async (id) => {
     }
     return findLaporan
 }
-const findLaporanPklFilter = async (query,admin) => {
+const findLaporanPklFilter = async (query,page,admin) => {
     query = await validate(adminValidation.searchLaporanPkl,query)
+    page = await validate(siswaValidation.pageValidation,page)
 
     const findLaporan = await db.laporan_pkl.findMany({
         where : {
@@ -1635,6 +1636,8 @@ const findLaporanPklFilter = async (query,admin) => {
         orderBy : {
             tanggal : "desc"
         },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectLaporanpklObject
     })
 
@@ -1659,9 +1662,10 @@ const findAllLaporanSiswaPkl = async (page,admin) => {
     return {laporan : findLaporan,page : page,count : findLaporan.length}
 }
 const findLaporanPklSiswaById = async (id,admin) => {
+    console.log(admin);
     id = await validate(adminValidation.idValidation,id)
 
-    const findLaporan = await db.laporan_siswa_pkl.findUnique({
+    const findLaporan = await db.laporan_siswa_pkl.findFirst({
         where : {
             AND : [
                 {
@@ -1682,7 +1686,7 @@ const findLaporanPklSiswaById = async (id,admin) => {
     }
     return findLaporan
 }
-const findLaporanPklSiswaFilter = async (query,admin,page) => {
+const findLaporanPklSiswaFilter = async (query,page,admin) => {
     query = await validate(adminValidation.searchLaporanPklSiswa,query)
     page = await validate(siswaValidation.pageValidation,page)
 

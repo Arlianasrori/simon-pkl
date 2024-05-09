@@ -296,7 +296,7 @@ model absen {
   foto String? @db.VarChar(1500)
   status status_absen?
   keterangan_absen_masuk izin_absen_masuk?
-  keterangan_absen_keluar izin_absen_keluar?
+  keterangan_absen_pulang izin_absen_pulang?
 
   jadwal_absen absen_jadwal @relation(fields: [id_absen_jadwal],references: [id])
   siswa siswa @relation(fields: [id_siswa],references: [id])
@@ -309,7 +309,7 @@ model izin_absen_masuk {
 
   absen absen @relation(fields: [id_absen],references: [id],onDelete: Cascade)
 }
-model izin_absen_keluar {
+model izin_absen_pulang {
   id Int @id
   id_absen Int @unique
   note String @db.VarChar(30000)

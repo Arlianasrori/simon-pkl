@@ -15,6 +15,7 @@ import puppeteer from "puppeteer"
 import ejs from 'ejs'
 import { selectPebimbingDudiObject } from "../utils/pembimbingDudiSelect.js";
 import { getQueryAbsen } from "../utils/getQueryAbsen.js";
+import { generatePdf } from "../utils/generatePdf.js";
 
 const updatePassword = async (id, password) => {
   id = await validate(adminValidation.idValidation, id)
@@ -422,6 +423,91 @@ const findLaporanPklById = async (id) => {
 };
 
 // absen
+const findAllAbsen = async (pembimbingDudi,query) => {
+  const Now = new Date()
+  const dateNow = `${Now.getFullYear()}-${("0" + (Now.getMonth() + 1)).slice(-2)}-${("0" + (Now.getDay())).slice(-2)}`
+
+  query = await validate(absenValidation.findAbsenFilterValidation,query)
+
+  let monthStart;
+  let monthEnd;
+
+  if(query.month) {
+    if(!query.years) {
+      query.years = dateNow.split("-")[0]
+    }
+     monthStart = `${query.years}-0${query.month}-01`
+     monthEnd = `${query.years}-0${query.month}-31`
+  }
+
+  return db.siswa.findMany({
+    where : {
+      AND : [
+        {
+          id_pembimbing_dudi : pembimbingDudi.id
+        }
+      ]
+    },
+    select : {
+      id : true,
+      nama : true,
+      absen : {
+        where : {
+          AND : [
+            {
+              tanggal : {
+                gte : monthStart
+              }
+            },
+            {
+              tanggal : {
+                lte : monthEnd
+              }
+            }
+          ]
+        },
+            select : {
+                absen_masuk : true,
+                status_absen_masuk : true,
+                keterangan_absen_masuk : true,
+                absen_pulang : true,
+                status_absen_pulang : true,
+                keterangan_absen_keluar : true,
+                foto : true,
+                status : true,
+                tanggal : true,
+            },
+            orderBy : {
+              tanggal : "desc"
+            }
+      }
+    }
+}) 
+}
+const findAbsenById = async (pembimbingDudi,id) => {
+  id = await validate(adminValidation.idValidation,id)
+
+  const absen = await db.absen.findFirst({
+    where : {
+      AND : [
+        {
+          id : id
+        },
+        {
+          siswa : {
+            id_pembimbing_dudi : pembimbingDudi.id
+          }
+        }
+      ]
+    }
+  })
+
+  if(!absen) {
+    throw new responseError(404,"data absen tidak ditemukan")
+  }
+
+  return absen
+}
 const cetakAbsen = async (query) => {
   const Now = new Date()
   const dateNow = `${Now.getFullYear()}-${("0" + (Now.getMonth() + 1)).slice(-2)}-${("0" + (Now.getDay())).slice(-2)}`
@@ -447,11 +533,11 @@ const cetakAbsen = async (query) => {
             {
                 id_siswa : query.id_siswa
             },
-            // {
-            //     siswa : {
-            //         id_pembimbing_dudi : query.id_pembimbing_dudi
-            //     }
-            // },
+            {
+                siswa : {
+                    id_pembimbing_dudi : query.id_pembimbing_dudi
+                }
+            },
             {
                 siswa : {
                     id_dudi : query.id_dudi
@@ -491,9 +577,6 @@ const cetakAbsen = async (query) => {
                         ]
                     }
                 ]
-            },
-            {
-                tanggal : query.month_ago
             }
         ]
     },
@@ -520,7 +603,6 @@ const cetakAbsen = async (query) => {
         }
     }
   })
-  console.log(data);
 
   const findPembimbingDudi = await db.pembimbing_dudi.findFirst({
   where: {
@@ -528,16 +610,11 @@ const cetakAbsen = async (query) => {
   },
   })
 
-  const html = fs.readFileSync("pdf-sample/absenDudi.ejs",{encoding : "utf-8"})
+  const content = fs.readFileSync("pdf-sample/absenDudi.ejs",{encoding : "utf-8"})
+  const dataPdf = {data : data,nama : findPembimbingDudi.nama, bulan : query.month && bulan[query.month - 1],years : query.years}
+  await generatePdf(content,dataPdf,"absen-pembimbingDudi")
 
-  const browser = await puppeteer.launch({ headless: true});
-  const page = await browser.newPage();
-  await page.setContent(ejs.render(html,{data : data,nama : findPembimbingDudi.nama, bulan : bulan[query.month - 1]}))
-  const pdf = await page.pdf({ format : "a4",path : `public/absen_pdf/${generateId()}.pdf`});
-
-  await browser.close();
-
-  return data
+  return {data : dataPdf}
 }
 
 const cetakAnalisisAbsen = async (query) => {
@@ -553,16 +630,11 @@ const cetakAnalisisAbsen = async (query) => {
       id : query.id_pembimbing_dudi
     },
   })
+  const dataPdf = {data : data,nama : findPembimbingDudi.nama, bulan : query.month && bulan[query.month - 1],years : query.years}
+  const content = fs.readFileSync("pdf-sample/analisisAbsendudi.ejs",{encoding : "utf-8"})
 
-  const html = fs.readFileSync("pdf-sample/analisisAbsendudi.ejs",{encoding : "utf-8"})
-
-  const browser = await puppeteer.launch({ headless: true});
-  const page = await browser.newPage();
-  await page.setContent(ejs.render(html,{data : data,nama : findPembimbingDudi.nama, bulan : bulan[query.month - 1]}))
-  const pdf = await page.pdf({ format : "a4",path : `public/absen_pdf/analisis/${generateId()}.pdf`});
-
-  await browser.close();
-  return data
+  await generatePdf(content,dataPdf,"analisis-pembimbingDudi")
+  return {data : dataPdf}
 }
 
 // Kuota SISWA 
@@ -719,6 +791,8 @@ export default {
 
 
   // absen
+  findAllAbsen,
+  findAbsenById,
   cetakAbsen,
   cetakAnalisisAbsen,
 

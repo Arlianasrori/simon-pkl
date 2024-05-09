@@ -45,13 +45,16 @@
         <h2 style="font-weight: bold; text-decoration: underline;">DAFTAR HADIR PKL</h2>
         <div style="line-height: 6px; width: 94%;">
           <div style="width: 94%;">
-              <p><span style="font-weight: 1000;">
-                Nama dudi :
+              <p style="text-transform: capitalize;"><span style="font-weight: 1000;">
+                Nama Dudi :
                </span><%= nama %></p>
           </div>
           <div style="width: 94%;" >
-              <p> <span style="font-weight: 600;">Bulan</span> : <%= bulan %></p>
+              <p style="text-transform: capitalize;"> <span style="font-weight: 600;">Bulan</span> : <%= bulan %></p>
           </div>
+          <div style="width: 94%;" >
+            <p style="text-transform: capitalize;"> <span style="font-weight: 600;">Tahun</span> : <%= years %></p>
+        </div>
         </div>
         <div class="table" style="width: 94%;display: flex;justify-content: center;">
             <table class="my_table" style="width: 100%;font-size: 12px;">
@@ -74,7 +77,7 @@
                   <tr>
                     <td><%= index + 1 %></td>
                     <td><%= data.siswa.nama %></td>
-                    <td><%= data.siswa.jurusan.nama %></td>
+                    <td style="text-transform: capitalize;"><%= data.siswa.jurusan.nama %></td>
                     <td><%= data.tanggal%></td>
                     <!-- <td><%= data.absen_masuk%></td> -->
                     <td><% if (data.absen_masuk == null) { %>

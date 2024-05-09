@@ -11,7 +11,19 @@ import { validasiAbsenMasuk } from "../utils/validasiAbsenMasuk.js"
 import axios from "axios"
 import { getQueryAbsen } from "../utils/getQueryAbsen.js"
 
-
+const selectJadwalAbsen = {
+    id : true,
+    tanggal_mulai : true,
+    tanggal_berakhir : true,
+    selisih_tanggal_day : true,
+    hari : {
+        select : {
+            nama : true,
+            batas_absen_masuk : true,
+            batas_absen_pulang : true
+        }
+    }
+}
 
 const addJadwalAbsen = async (body,day) => {
     body.selisih_tanggal_day = getselish(body.tanggal_mulai,body.tanggal_berakhir)
@@ -33,6 +45,10 @@ const addJadwalAbsen = async (body,day) => {
 
     if(findPembimbingDudi.id_dudi != body.id_dudi) {
         throw new responseError(404,"invalid id dudi")
+    }
+
+    if(body.tanggal_mulai > body.tanggal_berakhir) {
+        throw new responseError(400,"kesalahan dalam memasukkan tanggal,harap periksa kembali")
     }
 
     const cekTanggal = await db.absen_jadwal.findFirst({
@@ -93,7 +109,8 @@ const findAllJadwalAbsen = async (id_pembimbing_dudi) => {
     return db.absen_jadwal.findMany({
         where : {
             id_pembimbing_dudi : id_pembimbing_dudi
-        }
+        },
+        select : selectJadwalAbsen
     })
 }
 
@@ -103,7 +120,8 @@ const findJadwalAbsenById = async (id) => {
     const findJadwalAbsen = await db.absen_jadwal.findUnique({
         where : {
                 id : id
-        }
+        },
+        select : selectJadwalAbsen
     })
 
     if(!findJadwalAbsen) {
@@ -247,7 +265,7 @@ const absenTidakMemenuhiJam = async (body) => {
     }
 
     if(findAbsen.absen_pulang) {
-        throw new responseError(400,"anda telah melakukan absen keluar")
+        throw new responseError(400,"anda telah melakukan absen pulang")
     }
 
 
@@ -374,7 +392,7 @@ const absenIzinTelat = async (body) => {
                 },
                 data : data
             })
-            await tx.izin_absen_keluar.create({
+            await tx.izin_absen_pulang.create({
                 data : {
                     id : parseInt(generateId()),
                     note : body.keterangan,
@@ -501,7 +519,7 @@ const absendiluarRadius = async (body) => {
                 },
                 data : data
             })
-            await tx.izin_absen_keluar.create({
+            await tx.izin_absen_pulang.create({
                 data : {
                     id : parseInt(generateId()),
                     note : body.keterangan,
@@ -652,7 +670,7 @@ const findAbsen = async (id_siswa) => {
             status_absen_masuk : true,
             status_absen_pulang : true,
             keterangan_absen_masuk : true,
-            keterangan_absen_keluar : true,
+            keterangan_absen_pulang : true,
             foto : true,
             izin : {
                 select : {
@@ -729,7 +747,7 @@ const findAbsenFilter = async (query) => {
             status_absen_masuk : true,
             status_absen_pulang : true,
             keterangan_absen_masuk : true,
-            keterangan_absen_keluar : true,
+            keterangan_absen_pulang : true,
             foto : true,
             jadwal_absen : true,
             siswa : {

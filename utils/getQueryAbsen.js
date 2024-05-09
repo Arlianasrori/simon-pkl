@@ -28,11 +28,11 @@ export function getQueryAbsen (query) {
 
     return `SELECT COUNT(status_absen_masuk) filter (where status_absen_masuk = 'hadir')::int as absen_masuk_hadir,COUNT(status_absen_masuk) filter (where absen_masuk = 'tidak_hadir')::int as absen_masuk_tidak_hadir,COUNT(absen_masuk) filter (where status_absen_masuk = 'telat')::int as absen_masuk_telat,COUNT(status_absen_masuk) filter (where status_absen_masuk = 'izin')::int as absen_masuk_izin,COUNT(status_absen_masuk) filter (where status_absen_masuk = 'diluar_radius')::int as absen_masuk_diluar_radius,
 
-    COUNT(status_absen_pulang) filter (where status_absen_pulang = 'hadir')::int as absen_keluar_hadir,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'tidak_hadir')::int as absen_keluar_tidak_hadir,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'telat')::int as absen_keluar_telat,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'izin')::int as absen_keluar_izin,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'diluar_radius')::int as absen_keluar_diluar_radius,COUNT(status) filter (where status = 'hadir')::int as status_absen_hadir,COUNT(status) filter (where status = 'tidak_hadir')::int as status_absen_tidak_hadir,
-    id_siswa,siswa.nama
+    COUNT(status_absen_pulang) filter (where status_absen_pulang = 'hadir')::int as absen_keluar_hadir,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'tidak_hadir')::int as absen_keluar_tidak_hadir,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'telat')::int as absen_keluar_telat,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'izin')::int as absen_keluar_izin,COUNT(status_absen_pulang) filter (where status_absen_pulang = 'diluar_radius')::int as absen_keluar_diluar_radius,COUNT(absen.status) filter (where absen.status = 'hadir')::int as status_hadir,COUNT(absen.status) filter (where absen.status = 'tidak_hadir')::int as status_tidak_hadir,
+    id_siswa,siswa.nama as nama,jurusan.nama as jurusan
     FROM absen
     INNER JOIN siswa ON absen.id_siswa = siswa.id
-    // INNER JOIN jurusan ON absen.id_siswa = siswa.id di ini ya bro jurusannya
+    INNER JOIN jurusan ON jurusan.id = siswa.id_jurusan
     WHERE ${whereQuery}
-    GROUP BY id_siswa,nama`
+    GROUP BY id_siswa,siswa.nama,jurusan.nama`
 }

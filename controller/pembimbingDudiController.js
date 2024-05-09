@@ -1,3 +1,4 @@
+import absenService from "../service/absenService.js";
 import adminService from "../service/adminService.js"
 import pembimbingDudiService from "../service/pembimbingDudiService.js"
 
@@ -231,7 +232,73 @@ const findLaporanPklFilter= async (req, res, next) => {
   }
 }
 
+
+// jadwal absen
+const addJadwalAbsen= async (req, res, next) => {
+  try {
+    const body = req.body.jadwal
+    body.id_dudi = req.pembimbingDudi.id_dudi
+    body.id_pembimbing_dudi = req.pembimbingDudi.id
+    const day = req.body.day
+
+    const result = await absenService.addJadwalAbsen(body,day)
+     res.status(201).json({
+      msg: "Success",
+      data: result,
+     })
+  } catch (error) {
+    next(error)
+  }
+}
+const findAllJadwalAbsen= async (req, res, next) => {
+  try {
+    const result = await absenService.findAllJadwalAbsen(req.pembimbingDudi.id)
+     res.status(200).json({
+      msg: "Success",
+      data: result,
+     })
+  } catch (error) {
+    next(error)
+  }
+}
+const findJadwalAbsenById= async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id)
+    const result = await absenService.findJadwalAbsenById(id)
+     res.status(200).json({
+      msg: "Success",
+      data: result,
+     })
+  } catch (error) {
+    next(error)
+  }
+}
+
   // absen
+const findAllAbsen= async (req, res, next) => {
+  try {
+    const query = req.query
+    const result = await pembimbingDudiService.findAllAbsen(req.pembimbingDudi,query)
+     res.status(200).json({
+      msg: "Success",
+      data: result,
+     })
+  } catch (error) {
+    next(error)
+  }
+}
+const findAbsenById= async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id)
+    const result = await pembimbingDudiService.findAbsenById(req.pembimbingDudi,id)
+     res.status(200).json({
+      msg: "Success",
+      data: result,
+     })
+  } catch (error) {
+    next(error)
+  }
+}
 const cetakAbsen= async (req, res, next) => {
   try {
     const query = req.query
@@ -329,8 +396,14 @@ export default {
   findLaporanPklById,
   findLaporanPklFilter,
 
+  // jadwal absen
+  addJadwalAbsen,
+  findAllJadwalAbsen,
+  findJadwalAbsenById,
 
   // absen
+  findAllAbsen,
+  findAbsenById,
   cetakAbsen,
   cetakAnalisisAbsen,
 

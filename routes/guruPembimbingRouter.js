@@ -9,12 +9,12 @@ guruPembimbingRouter.get("/refreshToken",refreshGuruPembimbingMiddleware,guruPem
 // middleware
 guruPembimbingRouter.use(guruPembimbingMiddleware)
 
-guruPembimbingRouter.put("/updatePassword/:id", guruPembimbingController.updatePassword)
+guruPembimbingRouter.put("/updatePassword", guruPembimbingController.updatePassword)
 
 
 guruPembimbingRouter.get("/getGuruPembimbing", guruPembimbingController.getGuruPembimbing)
 guruPembimbingRouter.get("/getSiswa/:id_siswa", guruPembimbingController.getSiswa)
-guruPembimbingRouter.get("/getAllSiswaGuruPembimbing/:id", guruPembimbingController.getAllSiswaGuruPembimbing)
+guruPembimbingRouter.get("/getAllSiswaGuruPembimbing", guruPembimbingController.getAllSiswaGuruPembimbing)
 
 // laporan pkl siswa
 guruPembimbingRouter.get("/findLaporanPklSiswaFilter", guruPembimbingController.findLaporanPklSiswaFilter)
@@ -28,5 +28,8 @@ guruPembimbingRouter.get("/findLaporanPkl/:id", guruPembimbingController.findLap
 // get laporan pkl siswa
 guruPembimbingRouter.get("/getLaporanPklSiswa/:id_guru_pembimbing", guruPembimbingController.getLaporanPklSiswa)
 guruPembimbingRouter.get("/getAllLaporanPklSiswa/:id_guru_pembimbing", guruPembimbingController.getAllLaporanPklSiswa)
+
+// absen
 guruPembimbingRouter.get("/cetakAbsen",guruPembimbingController.cetakAbsen)
+guruPembimbingRouter.get("/cetakAnalisAbsen",guruPembimbingController.cetakAnalisAbsen)
 

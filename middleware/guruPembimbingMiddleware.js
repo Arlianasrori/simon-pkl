@@ -43,6 +43,6 @@ export const guruPembimbingMiddleware = async (req,res,next) => {
             msg : guruPembimbing.msg
         })
     }
-    req.guruPembimbing = guruPembimbing
+    req.guruPembimbing = findGuruPembimbing
      next()
 }
