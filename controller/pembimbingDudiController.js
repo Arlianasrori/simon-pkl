@@ -274,6 +274,63 @@ const findJadwalAbsenById= async (req, res, next) => {
   }
 }
 
+// kordinat
+
+const addKordinat = async (req, res, next) => {
+  try {
+    const body = req.body
+    body.id_pembimbing_dudi = req.pembimbingDudi.id
+    body.id_dudi = req.pembimbingDudi.id_dudi
+
+    const result = await absenService.addKordinatAbsen(body)
+     res.status(200).json({
+      msg: "Success",
+      data: result,
+     })
+  } catch (error) {
+    next(error)
+  }
+}
+const findAllKordinat = async (req, res, next) => {
+  try {
+    const id = req.pembimbingDudi.id
+
+    const result = await absenService.findAllKordinatAbsen(id)
+     res.status(200).json({
+      msg: "Success",
+      data: result,
+     })
+  } catch (error) {
+    next(error)
+  }
+}
+const deleteKoordinat = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id_koordinat)
+
+    const result = await absenService.deleteKoordinatAbsen(id)
+     res.status(200).json({
+      msg: "Success",
+      data: result,
+     })
+  } catch (error) {
+    next(error)
+  }
+}
+const findKoordinatById = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id_koordinat)
+
+    const result = await absenService.findkoordinatById(id)
+     res.status(200).json({
+      msg: "Success",
+      data: result,
+     })
+  } catch (error) {
+    next(error)
+  }
+}
+
   // absen
 const findAllAbsen= async (req, res, next) => {
   try {
@@ -315,7 +372,7 @@ const cetakAbsen= async (req, res, next) => {
 const cetakAnalisisAbsen= async (req, res, next) => {
   try {
     const query = req.query
-    // query.id_pembimbing_dudi = req.pembimbingDudi.id
+    query.id_pembimbing_dudi = req.pembimbingDudi.id
     const result = await pembimbingDudiService.cetakAnalisisAbsen(query)
      res.status(200).json({
       msg: "Success",
@@ -367,6 +424,31 @@ const deleteKuotaSiswa = async (req, res, next) => {
     next(error)
   }
 }
+const findAllKouta = async (req, res, next) => {
+  try {
+    const id_dudi = req.pembimbingDudi.id_dudi
+    const result = await pembimbingDudiService.findAllKouta(id_dudi)
+    res.status(200).json({
+      msg: "Success",
+      data: result,
+      })
+  } catch (error) {
+    next(error)
+  }
+}
+const findKoutaById = async (req, res, next) => {
+  try {
+    const id_dudi = req.pembimbingDudi.id_dudi
+    const id = parseInt(req.params.id)
+    const result = await pembimbingDudiService.findKoutabyid(id,id_dudi)
+    res.status(200).json({
+      msg: "Success",
+      data: result,
+      })
+  } catch (error) {
+    next(error)
+  }
+}
 export default {
   // token
   refreshToken,
@@ -401,6 +483,12 @@ export default {
   findAllJadwalAbsen,
   findJadwalAbsenById,
 
+  // kordinat
+  addKordinat,
+  findAllKordinat,
+  deleteKoordinat,
+  findKoordinatById,
+
   // absen
   findAllAbsen,
   findAbsenById,
@@ -410,5 +498,7 @@ export default {
   // Kuota SISWA 
   addKuotaSiswa,
   updateKuotaSiswa,
-  deleteKuotaSiswa
+  deleteKuotaSiswa,
+  findAllKouta,
+  findKoutaById
 };

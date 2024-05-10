@@ -499,7 +499,18 @@ const findAbsenById = async (pembimbingDudi,id) => {
           }
         }
       ]
-    }
+    },
+    select : {
+      absen_masuk : true,
+      status_absen_masuk : true,
+      keterangan_absen_masuk : true,
+      absen_pulang : true,
+      status_absen_pulang : true,
+      keterangan_absen_keluar : true,
+      foto : true,
+      status : true,
+      tanggal : true,
+  }
   })
 
   if(!absen) {
@@ -761,6 +772,37 @@ const deleteKuotaSiswa = async (id) => {
     return {kouta : deleteKouta}
   })
 }
+const findAllKouta = async (id_dudi) => {
+  id_dudi = await validate(adminValidation.idValidation,id_dudi)
+
+  return db.kouta_siswa.findMany({
+    where : {
+      id_dudi : id_dudi
+    }
+  })
+}
+const findKoutabyid = async (id,id_dudi) => {
+  id_dudi = await validate(adminValidation.idValidation,id_dudi)
+  id = await validate(adminValidation.idValidation,id)
+
+  const findKouta = await db.kouta_siswa.findFirst({
+    where : {
+      AND : [
+        {
+          id_dudi : id_dudi
+        },
+        {
+          id : id
+        }
+      ]
+    }
+  })
+
+  if(!findKouta) {
+    throw new responseError(404,"data kouta tidak ditemukan")
+  }
+  return findKouta
+}
 
 export default {
   updatePassword,
@@ -799,6 +841,8 @@ export default {
   // Kuota Siswa 
   addKuotaSiswa,
   updateKuotaSiswa,
-  deleteKuotaSiswa
+  deleteKuotaSiswa,
+  findAllKouta,
+  findKoutabyid
 };
 

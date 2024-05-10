@@ -14,6 +14,7 @@ import { selectLaporanSiswaPkl } from "../utils/LaporanSiswaPklUtil.js";
 import bcrypt from "bcryptjs"
 import pembimbingDudiValidation from "../validation/pembimbingDudiValidation.js";
 import { getQuery } from "../utils/getQueryDudi.js";
+import notificationService from "./notificationService.js";
 
 const updatePassword = async (id, password) => {
   id = await validate (adminValidation.idValidation,id)
@@ -216,6 +217,7 @@ const addPengajuanPkl = async (body,siswa) => {
       id: body.id_siswa,
     },
     select: {
+      id : true,
       status: true,
       dudi: true,
       pengajuan_pkl: true,
@@ -242,7 +244,7 @@ const addPengajuanPkl = async (body,siswa) => {
     }
   }
 
-  const findDudi = await db.dudi.findUnique({
+  const findDudi = await db.dudi.findFirst({
     where: {
       AND : [
         {
@@ -269,7 +271,6 @@ const addPengajuanPkl = async (body,siswa) => {
       },
     }
   });
-  console.log(findDudi);
 
   if (!findDudi) {
     throw new responseError(404, "data dudi tidak ditemukan");
@@ -294,13 +295,26 @@ const addPengajuanPkl = async (body,siswa) => {
       throw new responseError(400,"kouta untuk pria sudah penuh")
     }
   }
-
-  return db.pengajuan_pkl.create({
-    data: body,
-    select: selectPengajuanPklObject,
-  });
+  return db.$transaction(async tx => {
+    const createpengajuan = await tx.pengajuan_pkl.create({
+      data: body,
+      select: selectPengajuanPklObject,
+    });
+  
+    const payload = {
+      id : generateId(),
+      id_siswa : findSiswa.id,
+      judul : "kabar Baik Untukmu",
+      isi : "Ajuan pklmu sedang diproses,tunggu verifikasi dari dudi yang kamu ajukan"
+    }
+  
+    await tx.notification.create({
+      data : payload
+    })
+  
+    return createpengajuan
+  })
 };
-
 const cancelPengajuanPkl = async (body,siswa) => {
   body = await validate(siswaValidation.cancelPengjuanPklValidation, body);
 
@@ -366,7 +380,7 @@ const findAllPengajuanPkl = async (id,siswa) => {
 const findPengajuanPklById = async (id,siswa) => {
   id = await validate(adminValidation.idValidation, id);
 
-  const findPengajuan = await db.pengajuan_pkl.findUnique({
+  const findPengajuan = await db.pengajuan_pkl.findFirst({
     where: {
       AND : [
         {

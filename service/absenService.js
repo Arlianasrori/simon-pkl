@@ -907,6 +907,22 @@ const deleteKoordinatAbsen = async (id_koordinat) => {
     })
 }
 
+const findkoordinatById = async (id_koordinat) => {
+    id_koordinat = await validate(adminValidation.idValidation,id_koordinat)
+
+    const findKordinat = await db.kordinat_absen.findUnique({
+        where : {
+            id : id_koordinat
+        }
+    })
+
+    if(!findKordinat) {
+        throw new responseError(404,"data kordinat tidak ditemmukan")
+    }
+
+    return findKordinat
+}
+
 export default {
     addJadwalAbsen,
     findAllJadwalAbsen,
@@ -929,5 +945,6 @@ export default {
     addKordinatAbsen,
     findAllKordinatAbsen,
     cekRadiusKoordinat,
-    deleteKoordinatAbsen
+    deleteKoordinatAbsen,
+    findkoordinatById
 }

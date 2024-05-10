@@ -150,6 +150,30 @@ const getAllLaporanPklSiswa = async (req, res, next) => {
         next (error)
     }
 }
+const findAllAbsen = async (req, res, next) => {
+        try {
+          const query = req.query
+          const result = await guruPembimbingService.findAllAbsen(req.guruPembimbing,query)
+          res.status(200).json({
+            msg: "Success",
+            data: result,
+          })
+        } catch (error) {
+          next(error)
+        }
+}
+const findAbsenById = async (req, res, next) => {
+        try {
+          const id = parseInt(req.params.id)
+          const result = await guruPembimbingService.findAbsenById(req.guruPembimbing,id)
+          res.status(200).json({
+            msg: "Success",
+            data: result,
+          })
+        } catch (error) {
+          next(error)
+        }
+}
 const cetakAbsen = async (req, res, next) => {
         try {
           const query = req.query
@@ -193,5 +217,7 @@ export default {
     getAllLaporanPklSiswa,
 
     cetakAbsen,
-    cetakAnalisAbsen
+    cetakAnalisAbsen,
+    findAllAbsen,
+    findAbsenById
 }

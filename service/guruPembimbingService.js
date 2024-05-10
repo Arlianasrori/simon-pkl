@@ -152,6 +152,105 @@ const getAllLaporanPklSiswa = async (id_guru_pembimbing) => {
 }
 
 // absen
+const findAllAbsen = async (guruPembimbing,query) => {
+  const Now = new Date()
+  const dateNow = `${Now.getFullYear()}-${("0" + (Now.getMonth() + 1)).slice(-2)}-${("0" + (Now.getDay())).slice(-2)}`
+
+  query = await validate(absenValidation.findAbsenFilterValidation,query)
+
+  let monthStart;
+  let monthEnd;
+
+  if(query.month) {
+    if(!query.years) {
+      query.years = dateNow.split("-")[0]
+    }
+     monthStart = `${query.years}-0${query.month}-01`
+     monthEnd = `${query.years}-0${query.month}-31`
+  }
+
+  return db.siswa.findMany({
+    where : {
+      AND : [
+        {
+          id_guru_pembimbing : guruPembimbing.id
+        }
+      ]
+    },
+    select : {
+      id : true,
+      nama : true,
+      absen : {
+        where : {
+          AND : [
+            {
+              tanggal : {
+                gte : monthStart
+              }
+            },
+            {
+              tanggal : {
+                lte : monthEnd
+              }
+            }
+          ]
+        },
+            select : {
+                id : true,
+                absen_masuk : true,
+                status_absen_masuk : true,
+                keterangan_absen_masuk : true,
+                absen_pulang : true,
+                status_absen_pulang : true,
+                keterangan_absen_keluar : true,
+                foto : true,
+                status : true,
+                tanggal : true,
+            },
+            orderBy : {
+              tanggal : "desc"
+            }
+      }
+    }
+}) 
+}
+
+const findAbsenById = async (guruPembimbing,id) => {
+  id = await validate(adminValidation.idValidation,id)
+
+  const absen = await db.absen.findFirst({
+    where : {
+      AND : [
+        {
+          id : id
+        },
+        {
+          siswa : {
+            id_guru_pembimbing : guruPembimbing.id
+          }
+        }
+      ]
+    },
+    select : {
+      absen_masuk : true,
+      status_absen_masuk : true,
+      keterangan_absen_masuk : true,
+      absen_pulang : true,
+      status_absen_pulang : true,
+      keterangan_absen_keluar : true,
+      foto : true,
+      status : true,
+      tanggal : true,
+  }
+  })
+
+  if(!absen) {
+    throw new responseError(404,"data absen tidak ditemukan")
+  }
+
+  return absen
+}
+
 const cetakAbsen = async (query) => {
   const Now = new Date()
   const dateNow = `${Now.getFullYear()}-${("0" + (Now.getMonth() + 1)).slice(-2)}-${("0" + (Now.getDay())).slice(-2)}`
@@ -294,6 +393,8 @@ export default {
   getAllLaporanPklSiswa,
 
   // cetakAbsen
+  findAllAbsen,
+  findAbsenById,
   cetakAbsen,
   cetakAnalisisAbsen
 };
