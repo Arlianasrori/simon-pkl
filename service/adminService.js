@@ -1775,7 +1775,7 @@ const findAllAbsen = async (admin) => {
 const findAbsenById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
 
-    const findAbsen = await db.absen.findUnique({
+    const findAbsen = await db.absen.findFirst({
         where : {
             AND : [
                 {

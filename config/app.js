@@ -8,6 +8,7 @@ import { errorMiddleware } from "../middleware/errorMiddleware.js"
 import { absenRouter } from "../routes/absenRouter.js"
 import { adminDeveloperRouter } from "../routes/adminDeveloperRouter.js"
 import { authRouter } from "../routes/authRouter.js"
+import { addAbsen } from "../cron-jobs/addAbsen.js"
 import fileUpload from "express-fileupload"
 import env from "dotenv"
 import cookieParser from "cookie-parser"
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Headers", "Content-Type,ngrok-skip-browser-warning");
     next();
 })
+addAbsen()
 app.use(express.static('public'))
 app.use(fileUpload())
 app.use("/admin",adminRouter)

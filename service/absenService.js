@@ -468,6 +468,10 @@ const absendiluarRadius = async (body) => {
         throw new responseError(404,"siswa tidak ditemukan")
     }
 
+    if(!findSiswa.absen[0]) {
+        throw new responseError(404,"something wrong")
+    }
+
     const hourNow = datelocal[1]
     const selisih_tanggal_on_day = parseInt(getselish(findSiswa.absen[0].jadwal_absen.tanggal_mulai,dateNow))
 
@@ -475,10 +479,6 @@ const absendiluarRadius = async (body) => {
         throw new responseError(400,"tanggal absen tidak sesuai dengan jadwal")
     }else if(selisih_tanggal_on_day > findSiswa.absen[0].jadwal_absen.selisih_tanggal_day) {
         throw new responseError(400,"tanggal absen tidak sesuai dengan jadawal")
-    }
-
-    if(!findSiswa.absen[0]) {
-        throw new responseError(400,"something went wrong")
     }
 
     const findDay = await db.hari_absen.findFirst({
@@ -537,6 +537,7 @@ const absendiluarRadius = async (body) => {
 
         data.absen_masuk = hourNow
         data.status_absen_pulang = "diluar_radius"
+        data.status = "hadir"
     
         return db.$transaction(async tx => {
             const updateAbsen = await tx.absen.update({
@@ -604,16 +605,18 @@ const cekAbsen = async (body) => {
         }
     })
 
-    console.log(dateNow);
 
     if(!findSiswa) {
         throw new responseError(404,"siswa tidak ditemukan")
     }
 
+    if(!findSiswa.dudi) {
+        return {absen : false,jenis_absen : null,msg : "anda belum memiliki tempat pkl,segera cari tempat pkl"}
+    }
+
     if(!findSiswa.absen[0]) {
-        console.log(findSiswa.dudi.absen_jadwal[0]);
         if(!findSiswa.dudi.absen_jadwal[0]) {
-            return {absen : false,msg : "jadawl absen tidak ditemukan hari ini"}
+            return {absen : false,jenis_absen : null,msg : "jadwal absen tidak ditemukan hari ini"}
         }
         const findDay = await db.hari_absen.findFirst({
             where : {
@@ -645,13 +648,13 @@ const cekAbsen = async (body) => {
         }
 
 
-        return {absen : false,msg : "jadawl absen tidak ditemukan hari ini"}
+        return {absen : false,jenis_absen : null,msg : "jadawl absen tidak ditemukan hari ini"}
     }
 
     if(findSiswa.absen[0].status_absen_masuk) {
-        return {absen : true,jenis_absen : "absen masuk",msg : "silahkan melakukan absen masuk"}
-    }else {
         return {absen : true,jenis_absen : "absen pulang",msg : "silahkan melakukan absen pulang"}
+    }else {
+        return {absen : true,jenis_absen : "absen masuk",msg : "silahkan melakukan absen masuk"}
     }
 }
 
@@ -672,12 +675,9 @@ const findAbsen = async (id_siswa) => {
             keterangan_absen_masuk : true,
             keterangan_absen_pulang : true,
             foto : true,
-            izin : {
-                select : {
-                    note : true,
-                    status_izin : true
-                }
-            }
+        },
+        orderBy : {
+            tanggal : "asc"
         }
     })
 }
@@ -863,7 +863,7 @@ async function cekRadiusKoordinat (body,siswa) {
     })
 
     if(!findKordinat[0]) {
-        throw new responseError(404,"kordinat tidak ditemukan")
+        throw new responseError(404,"kordinat tidak ditemukan,pembimbing dudi belum memasukkan kordinat untuk absen")
     }
 
     for (let index = 0; index < findKordinat.length; index++) {
@@ -874,13 +874,12 @@ async function cekRadiusKoordinat (body,siswa) {
             url : `https://api.distancematrix.ai/maps/api/distancematrix/json?origins=${e.latitude},${e.longtitude}&destinations=${body.latitude},${body.longtitude}&key=AE8YE06HZ7XeZEcOsDR4SiShL8zPocpQ7XpgdctgGrECYiA1nLg09ffJxxa1n9M3`,
         })
         
-        if(cekDistance.status !== 200) {
-                throw new responseError(400,"invalid koordinat")
-        }
-        const distance = cekDistance.data.rows[0].elements[0].distance.value
-    
-        if(e.radius_absen_meter > distance) {
-            return {insideRadius : true,msg : "anda berada didalam radius"}
+        if(cekDistance.status == 200) {
+            const distance = cekDistance.data.rows[0].elements[0].distance.value
+        
+            if(e.radius_absen_meter > distance) {
+                return {insideRadius : true,msg : "anda berada didalam radius"}
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 import adminService from "../service/adminService.js"
 import guruPembimbingService from "../service/guruPembimbingService.js"
+import notificationService from "../service/notificationService.js"
 
   const updatePassword = async (req, res, next) => {
     try {
@@ -200,6 +201,22 @@ const cetakAnalisAbsen = async (req, res, next) => {
           next(error)
         }
 }
+
+
+// notification
+const addNotification = async (req,res,next) => {
+    try {
+      const body = req.body
+      body.id_guru_pembimbing = req.guruPembimbing.id
+      const result = await notificationService.addNotification(body)
+      res.status(200).json({
+        msg: "Success",
+        data: result,
+        })
+    } catch (error) {
+      next(error)
+    }
+  }
 export default {
     refreshToken,
     updatePassword,
@@ -219,5 +236,7 @@ export default {
     cetakAbsen,
     cetakAnalisAbsen,
     findAllAbsen,
-    findAbsenById
+    findAbsenById,
+
+    addNotification
 }

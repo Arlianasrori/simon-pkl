@@ -32,7 +32,8 @@ guruPembimbingRouter.get("/findAbsenById/:id",guruPembimbingController.findAbsen
 guruPembimbingRouter.get("/cetakAbsen",guruPembimbingController.cetakAbsen)
 guruPembimbingRouter.get("/cetakAnalisAbsen",guruPembimbingController.cetakAnalisAbsen)
 
-
+// notification
+guruPembimbingRouter.post("/addNotification",guruPembimbingController.addNotification)
 
 
 

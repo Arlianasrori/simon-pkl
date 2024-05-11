@@ -9,6 +9,13 @@ import { cekNotif } from "../utils/ceknotif.js"
 
 const addNotification = async (body) => {
     body.id = generateId()
+
+    const Now = new Date()
+
+    body.tanggal = Now.toISOString().substring(0, 10)
+    const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
+    body.time = datelocal.split(" ")[1]
+
     body = await validate(notificationValidation.addNotificationValidation,body)
 
     if(body.id_siswa)  {
@@ -33,7 +40,20 @@ const getNotification = async (id_siswa) => {
     const selected = await cekNotif(id_siswa)
 
     return db.notification.findMany({
-        where : selected
+        where : selected,
+        select : {
+            id : true,
+            id_siswa : true,
+            id_guru_pembimbing : true,
+            id_pembimbing_dudi : true,
+            judul : true,
+            isi : true,
+            read : {
+                where : {
+                    id_siswa : id_siswa
+                }
+            }
+        }
     })
 }
 

@@ -7,17 +7,13 @@ export const selectAbsenObject = {
             jurusan : true,                   
         }
     },
-    dudi : true,
-    pembimbing_dudi : {
-        select : {
-            id : true,
-            nama : true,
-            agama : true,
-            jenis_kelamin : true
-        }
-    },
-    tanggal : true,
+    id : true,
     absen_masuk : true,
     absen_pulang : true,
-    status : true
+    jadwal_absen : true,
+    status_absen_masuk : true,
+    status_absen_pulang : true,
+    keterangan_absen_masuk : true,
+    keterangan_absen_pulang : true,
+    foto : true,
 }

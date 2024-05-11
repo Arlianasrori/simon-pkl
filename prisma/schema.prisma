@@ -375,6 +375,8 @@ model notification {
   id_siswa Int? 
   id_pembimbing_dudi Int?
   id_guru_pembimbing Int?
+  tanggal String
+  time String
   judul String @db.VarChar(600)
   isi String @db.VarChar(2500)
   

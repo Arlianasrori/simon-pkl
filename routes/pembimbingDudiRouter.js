@@ -43,6 +43,7 @@ pembimbingDudiRouter.get("/findLaporanPklFilter",pembimbingDudiController.findLa
 pembimbingDudiRouter.post("/addJadwalAbsen",pembimbingDudiController.addJadwalAbsen)
 pembimbingDudiRouter.get("/findAllAbsenjadwal",pembimbingDudiController.findAllJadwalAbsen)
 pembimbingDudiRouter.get("/findJadwalAbsenById/:id",pembimbingDudiController.findJadwalAbsenById)
+pembimbingDudiRouter.get("/cekJadwalAbsen",pembimbingDudiController.cekJadwalAbsen)
 
 
 // add kordinat
@@ -50,6 +51,7 @@ pembimbingDudiRouter.post("/addKoordinat",pembimbingDudiController.addKordinat)
 pembimbingDudiRouter.get("/findAllKoordinat",pembimbingDudiController.findAllKordinat)
 pembimbingDudiRouter.get("/findKoordinatById/:id_koordinat",pembimbingDudiController.findKoordinatById)
 pembimbingDudiRouter.delete("/deleteKoordinat/:id_koordinat",pembimbingDudiController.deleteKoordinat)
+pembimbingDudiRouter.get("/cekKoordinat",pembimbingDudiController.cekKoordinat)
 
 // absen
 pembimbingDudiRouter.get("/findAllAbsen",pembimbingDudiController.findAllAbsen)
@@ -63,4 +65,8 @@ pembimbingDudiRouter.put("/updateKuotaSiswa/:id",pembimbingDudiController.update
 pembimbingDudiRouter.delete("/deleteKuotaSiswa/:id",pembimbingDudiController.deleteKuotaSiswa)
 pembimbingDudiRouter.get("/findAllKouta",pembimbingDudiController.findAllKouta)
 pembimbingDudiRouter.get("/findKoutaById/:id",pembimbingDudiController.findKoutaById)
+
+
+// notification
+pembimbingDudiRouter.post("/addNotification",pembimbingDudiController.addNotification)
 

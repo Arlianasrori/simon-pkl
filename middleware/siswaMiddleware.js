@@ -29,7 +29,9 @@ export const siswaMiddleware = async (req,res,next) => {
             nama : true,
             nis : true,
             id_sekolah : true,
-            jenis_kelamin : true
+            jenis_kelamin : true,
+            id_dudi : true,
+            id_pembimbing_dudi : true
         }
     })
 

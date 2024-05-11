@@ -648,6 +648,71 @@ const cetakAnalisisAbsen = async (query) => {
   return {data : dataPdf}
 }
 
+const cekKoordinat = async (id_pembimbing_dudi) => {
+  id_pembimbing_dudi = await validate(adminValidation.idValidation,id_pembimbing_dudi)
+  const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
+    where : {
+      id : id_pembimbing_dudi
+    }
+  })
+
+  if(!findPembimbingDudi) {
+    throw new responseError(404,"pembimbing dudi tidak ditemukan")
+  }
+
+  const findKoordinat = await db.kordinat_absen.findMany({
+    where : {
+      id_dudi : findPembimbingDudi.id_dudi
+    }
+  })
+
+  if(!findKoordinat[0]) {
+    return {koordinat : false}
+  }
+
+  return {koordinat : true}
+}
+const cekJadwalAbsen = async (id_pembimbing_dudi) => {
+  id_pembimbing_dudi = await validate(adminValidation.idValidation,id_pembimbing_dudi)
+
+  const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
+    where : {
+      id : id_pembimbing_dudi
+    }
+  })
+
+  if(!findPembimbingDudi) {
+    throw new responseError(404,"data dudi tidak ditemukan")
+  }
+
+  const Now = new Date()
+
+  const dateNow = Now.toISOString().substring(0, 10)
+
+  const findJadwaAbsen = await db.absen_jadwal.findMany({
+    where : {
+      AND : [
+        {
+          tanggal_mulai : {
+            lte : dateNow
+          }
+        },
+        {
+          tanggal_berakhir : {
+            gte : dateNow
+          }
+        }
+      ]
+    }
+  })
+
+  if(!findJadwaAbsen[0]) {
+    return {jadwalAbsen : false}
+  }
+
+  return {jadwalAbsen : true}
+}
+
 // Kuota SISWA 
 const addKuotaSiswa = async (body) => {
   body.id = generateId()
@@ -837,6 +902,8 @@ export default {
   findAbsenById,
   cetakAbsen,
   cetakAnalisisAbsen,
+  cekKoordinat,
+  cekJadwalAbsen,
 
   // Kuota Siswa 
   addKuotaSiswa,

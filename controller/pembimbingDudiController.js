@@ -1,5 +1,6 @@
 import absenService from "../service/absenService.js";
 import adminService from "../service/adminService.js"
+import notificationService from "../service/notificationService.js";
 import pembimbingDudiService from "../service/pembimbingDudiService.js"
 
 const getPembimbingDudiById = async (req, res, next) => {
@@ -273,6 +274,18 @@ const findJadwalAbsenById= async (req, res, next) => {
     next(error)
   }
 }
+const cekJadwalAbsen = async (req, res, next) => {
+  try {
+    const id = req.pembimbingDudi.id
+    const result = await pembimbingDudiService.cekJadwalAbsen(id)
+     res.status(200).json({
+      msg: "Success",
+      data: result,
+     })
+  } catch (error) {
+    next(error)
+  }
+}
 
 // kordinat
 
@@ -322,6 +335,19 @@ const findKoordinatById = async (req, res, next) => {
     const id = parseInt(req.params.id_koordinat)
 
     const result = await absenService.findkoordinatById(id)
+     res.status(200).json({
+      msg: "Success",
+      data: result,
+     })
+  } catch (error) {
+    next(error)
+  }
+}
+const cekKoordinat = async (req, res, next) => {
+  try {
+    const id = req.pembimbingDudi.id
+
+    const result = await pembimbingDudiService.cekKoordinat(id)
      res.status(200).json({
       msg: "Success",
       data: result,
@@ -449,6 +475,21 @@ const findKoutaById = async (req, res, next) => {
     next(error)
   }
 }
+
+// notification
+const addNotification = async (req,res,next) => {
+  try {
+    const body = req.body
+    body.id_pembimbing_dudi = req.pembimbingDudi.id
+    const result = await notificationService.addNotification(body)
+    res.status(200).json({
+      msg: "Success",
+      data: result,
+      })
+  } catch (error) {
+    next(error)
+  }
+}
 export default {
   // token
   refreshToken,
@@ -482,12 +523,14 @@ export default {
   addJadwalAbsen,
   findAllJadwalAbsen,
   findJadwalAbsenById,
+  cekJadwalAbsen,
 
   // kordinat
   addKordinat,
   findAllKordinat,
   deleteKoordinat,
   findKoordinatById,
+  cekKoordinat,
 
   // absen
   findAllAbsen,
@@ -500,5 +543,8 @@ export default {
   updateKuotaSiswa,
   deleteKuotaSiswa,
   findAllKouta,
-  findKoutaById
+  findKoutaById,
+
+  // notification
+  addNotification
 };
