@@ -91,100 +91,76 @@ const getDudi = (siswa) => {
 const getDudiById = async (id,siswa) => {
   id = await validate(adminValidation.idValidation, id);
 
-  const findDudi = await db.dudi.findUnique({
-    where: {
-      AND : [
-        {
-          add_by : siswa.id_sekolah
-        },
-        {
-          id: id,
-        }
-      ]
-    },
-    select: selectDudiObject,
-  });
+  const findDudi = await db.$queryRaw`SELECT COUNT(s)::int as total_siswa,COUNT(s.jenis_kelamin)filter (where s.jenis_kelamin = 'laki')::int  as total_siswa_laki,COUNT(s.jenis_kelamin) filter (where s.jenis_kelamin = 'perempuan')::int as total_siswa_perempuan,
+  d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara,ks.total as total_kouta,ks.jumlah_wanita as kouta_wanita,ks.jumlah_pria as kouta_pria
+  FROM dudi as d
+  LEFT JOIN siswa as s ON d.id = s.id_dudi
+  LEFT JOIN alamat_dudi as ad ON d.id = ad.id_dudi
+  LEFT JOIN kouta_siswa as ks ON d.id = ks.id_dudi
+  WHERE d.id = ${id}
+  GROUP BY d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara,ks.total,ks.jumlah_wanita,ks.jumlah_pria`
 
-  if (!findDudi) {
+  const dudi = findDudi[0]
+  if (!dudi) {
     throw new responseError(404, "data dudi tidak ditemukan");
   }
-  return findDudi;
+
+  if(!dudi.total_kouta) {
+    dudi.enabled = false
+    return dudi;
+  }
+
+  if(dudi.total_siswa >= dudi.total_kouta) {
+    dudi.enabled = false
+    return dudi;
+  }else if(siswa.jenis_kelamin == "laki") {
+    if(dudi.total_siswa_laki >= dudi.kouta_pria) {
+      dudi.enabled = false
+      return dudi;
+    }
+  }else if(siswa.jenis_kelamin == "perempuan") {
+    if(dudi.total_siswa_perempuan >= dudi.kouta_wanita) {
+      dudi.enabled = false
+      return dudi;
+    }
+  }
+
+  dudi.enabled = true
+  return dudi;
 };
 
 const getDudiFilter = async (query,page,siswa) => {
   query = await validate(adminValidation.searchDudiValidation,query)
-  page = await validate(siswaValidation.pageValidation,page)
+  page = await validate(siswaValidation.pageValidation,parseInt(page))
 
-  const findDudi = await db.dudi.findMany({
-    where : {
-        AND : [
-          {
-            add_by : siswa.id_sekolah
-          },
-            {
-                AND : [
-                    {
-                        nama_instansi_perusahaan : {
-                            contains : query.nama_instansi_perusahaan,
-                            mode : 'insensitive'
-                        }
-                    },
-                    {
-                        bidang : {
-                            contains : query.bidang,
-                            mode : 'insensitive'
-                        }
-                    },
-                    {
-                        alamat : {
-                            AND : [
-                                {
-                                    negara : {
-                                        contains : query.negara,
-                                        mode : "insensitive"
-                                    }
-                                },
-                                {
-                                    provinsi : {
-                                        contains : query.provinsi,
-                                        mode : "insensitive"
-                                    }
-                                },
-                                {
-                                    kabupaten : {
-                                        contains : query.kabupaten,
-                                        mode : "insensitive"
-                                    }
-                                },
-                                {
-                                    kecamatan : {
-                                        contains : query.kecamatan,
-                                        mode : "insensitive"
-                                    }
-                                },
-                                {
-                                    desa : {
-                                        contains : query.desa,
-                                        mode : "insensitive"
-                                    }
-                                },
-                                {
-                                    detail_tempat : {
-                                        contains : query.detail_tempat,
-                                        mode : "insensitive"
-                                    }
-                                },
-                            ]
-                        }
-                    }
-                ]
-            }
-        ]
-    },
-    skip : 10 * (page - 1),
-    take : 10,
-    select : selectDudiObject
-  })
+  console.log(siswa);
+
+  const findDudi = await db.$queryRaw`SELECT COUNT(s)::int as total_siswa,COUNT(s.jenis_kelamin)filter (where s.jenis_kelamin = 'laki')::int  as total_siswa_laki,COUNT(s.jenis_kelamin) filter (where s.jenis_kelamin = 'perempuan')::int as total_siswa_perempuan,
+  d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara,ks.total as total_kouta,ks.jumlah_wanita as kouta_perempuan,ks.jumlah_pria as kouta_laki
+  FROM dudi as d
+  LEFT JOIN siswa as s ON d.id = s.id_dudi
+  LEFT JOIN alamat_dudi as ad ON d.id = ad.id_dudi
+  LEFT JOIN kouta_siswa as ks ON d.id = ks.id_dudi
+  GROUP BY d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara,ks.total,ks.jumlah_wanita,ks.jumlah_pria
+  LIMIT 10 OFFSET ${10 * (page - 1)}`
+  console.log(findDudi);
+  for (let index = 0; index < findDudi.length; index++) {
+    findDudi[index].enabled = true
+    if(!findDudi[index].total_kouta) {
+      findDudi[index].enabled = false
+    }else if(findDudi[index].total_siswa >= findDudi[index].total_kouta) {
+      findDudi[index].enabled = false
+    }else if(siswa.jenis_kelamin == "laki") {
+      if(findDudi[index].total_siswa_laki >= findDudi[index].kouta_pria) {
+        findDudi[index].enabled = false
+      }
+    }else if(siswa.jenis_kelamin == "perempuan") {
+      if(findDudi[index].total_siswa_perempuan >= findDudi[index].kouta_wanita) {
+        findDudi[index].enabled = false
+      }
+    }
+  }
+
 
   return {dudi : findDudi,page : page,count : findDudi.length}
 }

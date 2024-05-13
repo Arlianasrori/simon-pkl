@@ -20,7 +20,8 @@ export const auth = async (req,res,next) => {
                     const payload = {
                         id : findSiswa.id,
                         nis : findSiswa.nis,
-                        password : findSiswa.password,
+                        jenis_kelamin : findSiswa.jenis_kelamin,
+                        id_sekolah : findSiswa.id_sekolah
                     }
     
                     const acces_token_siswa = jwt.sign(payload,process.env.TOKEN_SECRET_SISWA,{expiresIn : "2d"})
@@ -48,7 +49,6 @@ export const auth = async (req,res,next) => {
                     const payload = {
                         id : findGuruPembimbing.id,
                         nip : findGuruPembimbing.nip,
-                        password : findGuruPembimbing.password,
                     }
                      
                     const acces_token_guru_pembimbing = jwt.sign(payload,process.env.TOKEN_SECRET_GURU_PEMBIMBING,{expiresIn : "2d"})
@@ -70,12 +70,11 @@ export const auth = async (req,res,next) => {
         
             if(findPembimbingDudi) {
                 const isPassowrd = await bcrypt.compare(password, findPembimbingDudi.password)
-                console.log(isPassowrd);
+            
                 if(isPassowrd) {
                     const payload = {
                         id : findPembimbingDudi.id,
-                        username : findPembimbingDudi.username,
-                        password : findPembimbingDudi.password,
+                        username : findPembimbingDudi.username
                     }
                      
                     const acces_token_pembimbing_dudi = jwt.sign(payload,process.env.TOKEN_SECRET_PEMBIMBING_DUDI,{expiresIn : "120d"})

@@ -516,7 +516,7 @@ const deleteDudi = async (req,res,next) => {
 const addPembimbingDudi = async (req,res,next) => {
     try {
         const pembimbingDudi = req.body.pembimbing_dudi
-        pembimbingDudi.id_sekolah = req.admin.id_sekolah
+        pembimbingDudi.add_by = req.admin.id_sekolah
         const alamat = req.body.alamat
 
         const result = await adminService.addPembimbingDudi(pembimbingDudi,alamat)
