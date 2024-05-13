@@ -27,6 +27,19 @@ model sekolah {
   guru_pembimbing guru_pembimbing[]
   pembimbing_dudi Pembimbing_dudi[]
   dudi dudi[]
+  tahun tahun[]
+}
+model tahun {
+  id Int @id
+  tahun String
+  id_sekolah Int
+
+  sekolah sekolah @relation(fields: [id_sekolah],references: [id])
+  siswa siswa[]
+  jurusan jurusan[]
+  pembimbingDudi Pembimbing_dudi[]
+  dudi dudi[]
+  guruPembimbing guru_pembimbing[]
 }
 model kepala_sekolah {
   id_sekolah Int @id
@@ -79,6 +92,7 @@ model siswa {
   id_jurusan Int
   id_kelas Int
   id_sekolah Int 
+  id_tahun Int
 
   jurusan jurusan @relation(fields: [id_jurusan],references: [id])
   kelas kelas @relation(fields: [id_kelas],references: [id])
@@ -95,16 +109,19 @@ model siswa {
   guru_pembimbing guru_pembimbing @relation(fields: [id_guru_pembimbing],references: [id])
   dudi dudi? @relation(fields: [id_dudi],references: [id])
   pembimbing_dudi Pembimbing_dudi? @relation(fields: [id_pembimbing_dudi],references: [id])
+  tahun tahun @relation(fields: [id_tahun],references: [id])
 }
 model jurusan {
   id Int @id
   nama String @db.VarChar(255)
   id_sekolah Int
+  id_tahun Int
 
   kelas kelas[]
   siswa siswa[]
 
   sekolah sekolah @relation(fields: [id_sekolah],references: [id])
+  tahun tahun @relation(fields: [id_tahun],references: [id])
 }
 model kelas {
   id Int @id
@@ -137,6 +154,7 @@ model guru_pembimbing {
   agama String @db.VarChar(255)
   password String @db.VarChar(255)
   id_sekolah Int
+  id_tahun Int
 
   siswa siswa[]
   notification notification[]
@@ -144,6 +162,7 @@ model guru_pembimbing {
   kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
 
   sekolah sekolah @relation(fields: [id_sekolah],references: [id])
+  tahun tahun @relation(fields: [id_tahun],references: [id])
 }
 model alamat_guru_Pembimbing {
   id_guru_Pembimbing Int @id
@@ -166,6 +185,7 @@ model Pembimbing_dudi {
   jenis_kelamin jenis_kelamin
   agama String @db.VarChar(255)
   add_by Int 
+  id_tahun Int
 
   siswa siswa[]
   alamat alamat_pembimbing_dudi?
@@ -179,6 +199,7 @@ model Pembimbing_dudi {
 
   dudi dudi @relation(fields: [id_dudi],references: [id])
   sekolah sekolah @relation(fields: [add_by],references: [id])
+  tahun tahun @relation(fields: [id_tahun],references: [id])
 }
 model dudi {
   id Int @id
@@ -188,6 +209,7 @@ model dudi {
   deksripsi String @db.VarChar(1500)
   add_by Int
   tersedia Boolean @default(false)
+  id_tahun Int
 
   alamat alamat_dudi?
   kouta kouta_siswa?
@@ -202,6 +224,7 @@ model dudi {
   kordinat_absen kordinat_absen[]
 
   sekolah sekolah @relation(fields: [add_by],references: [id])
+  tahun tahun @relation(fields: [id_tahun],references: [id])
 }
 model kouta_siswa {
   id Int @id

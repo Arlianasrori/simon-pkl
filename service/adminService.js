@@ -17,6 +17,93 @@ import jwt from "jsonwebtoken"
 import pembimbingDudiValidation from "../validation/pembimbingDudiValidation.js"
 import siswaValidation from "../validation/siswaValidation.js"
 
+
+// tahun
+const addTahun = async (body,admin) => {
+    body.id = generateId()
+    body = await validate(adminValidation.addSekolahValidation,body)
+
+    const findTahun = await db.tahun.findFirst({
+        where : {
+            AND : [
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    tahun : body.tahun
+                }
+            ]
+        }
+    })
+
+    if(findTahun) {
+        throw new responseError(400,`tahun ${body.tahun} telah ditambahkan`)
+    }
+    body.id_sekolah = admin.id_sekolah
+    return db.tahun.create({
+        data : body
+    })
+}
+const deleteTahun = async (id,admin) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findTahun = await db.tahun.findFirst({
+        where : {
+            AND : [
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(400,"data tahun tidak ditemukan")
+    }
+    return db.tahun.delete({
+        where : {
+            id : id
+        }
+    })
+}
+const updateTahun = async (body,id,admin) => {
+    id = await validate(adminValidation.idValidation,id)
+    const tahun = await validate(adminValidation.namaValidation,body.tahun)
+    const findTahun = await db.tahun.findFirst({
+        where : {
+            AND : [
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    id : id
+                }
+            ]
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(400,"data tahun tidak ditemukan")
+    }
+    return db.tahun.update({
+        where : {
+            id : id
+        },
+        data : {
+            tahun : tahun
+        }
+    })
+}
+const getAllTahun = async (admin) => {
+    return db.tahun.findMany({
+        where : {
+            id_sekolah : admin.id_sekolah
+        }
+    })
+}
 // admin login
 const adminLogin = async (body) => {
     body = await validate(adminValidation.adminLogin, body)
@@ -126,9 +213,18 @@ const addSiswa = async (siswa,alamat) => {
             id : siswa.id_kelas
         }
     })
-
     if(!findKelas) {
         throw new responseError(404,"data kelas tidak ditemukan")
+    }
+
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : siswa.id_tahun
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
     }
 
     return db.$transaction(async (tx) => {
@@ -165,12 +261,29 @@ const findSiswaById = async (id,admin) => {
     return findSiswa
 }
 
-const findAllSiswa = async (page,admin) => {
+const findAllSiswa = async (page,admin,id_tahun) => {
     page = await validate(siswaValidation.pageValidation,page)
+
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(id_tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
 
     const findSiswa = await db.siswa.findMany({
         where : {
-            id : admin.id_sekolah
+            AND : [
+                {
+                    id : admin.id_sekolah
+                },
+                {
+                    id_tahun : parseInt(id_tahun)
+                }
+            ]
         },
         skip : 10 * (page - 1),
         take : 10,
@@ -179,7 +292,17 @@ const findAllSiswa = async (page,admin) => {
 
     return {siswa : findSiswa,page : page,count : findSiswa.length}
 }
-const findSiswaHaventPkl = async (admin) => {
+const findSiswaHaventPkl = async (admin,id_tahun) => {
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(id_tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
+
     return db.siswa.findMany({
         where : {
             AND : [
@@ -187,8 +310,14 @@ const findSiswaHaventPkl = async (admin) => {
                     id_sekolah : admin.id_sekolah
                 },
                 {
+                    id_tahun : id_tahun
+                },
+                {
                     status : "belum_pkl"
 
+                },
+                {
+                    id_tahun : parseInt(id_tahun)
                 }
             ]       
         },
@@ -199,11 +328,24 @@ const findSiswaFilter = async (query,admin,page) => {
     query = await validate(adminValidation.searchSiswaValidation,query)
     page = await validate(siswaValidation.pageValidation,page)
 
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(query.tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
+
     const findSiswa = await db.siswa.findMany({
         where : {
             AND : [
                 {
                     id : admin.id_sekolah
+                },
+                {
+                    id_tahun : parseInt(query.tahun)
                 },
                 {
                     AND : [
@@ -380,8 +522,18 @@ const updateAlamatSiswa = async (data,id,admin) => {
 // jurusan
 const addJurusan = async (body) => {
     body.id = generateId()
-    console.log(body);
     body = await validate(adminValidation.addJurusanValidation,body)
+
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : body.id_tahun
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
+
     return db.jurusan.create({
         data : body
     })
@@ -412,12 +564,29 @@ const deleteJurusan = async (id) => {
         }
     })
 }
-const findAllJurusan = async (page,admin) => {
+const findAllJurusan = async (page,admin,id_tahun) => {
     page = await validate(siswaValidation.pageValidation,page)
+
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(id_tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
 
     const findJurusan = await db.jurusan.findMany({
         where : {
-            id_sekolah : admin.id_sekolah
+            AND : [
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    id_tahun : parseInt(id_tahun)
+                }
+            ]
         },
         skip : 10 * (page - 1),
         take : 10
@@ -552,14 +721,33 @@ const deleteKelas = async (id,admin) => {
         select : selectKelasObject
     })
 }
-const findAllkelas = async (page,admin) => {
+const findAllkelas = async (page,admin,id_tahun) => {
     page = await validate(siswaValidation.pageValidation,page)
+
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : id_tahun
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
 
     const findKelas = await db.kelas.findMany({
         where : {
-            jurusan : {
-                id_sekolah : admin.id_sekolah
-            }
+            AND : [
+                {
+                    jurusan : {
+                        id_sekolah : admin.id_sekolah
+                    }
+                },
+                {
+                    jurusan : {
+                        id_tahun : parseInt(id_tahun)
+                    }
+                }
+            ]          
         },
         skip : 10 * (page - 1),
         take : 10,
@@ -596,12 +784,27 @@ const findKelasById = async (id,admin) => {
 const findKelasFilter = async (query,admin) => {
     query = await validate(adminValidation.searchKelasValidation,query)
 
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(query.tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
+
     const findKelas = await db.kelas.findMany({
         where : {
             AND : [
                 {
                     jurusan : {
                         id_sekolah : admin.id
+                    }
+                },
+                {
+                    jurusan : {
+                        id_tahun : parseInt(query.tahun)
                     }
                 },
                 {
@@ -687,7 +890,16 @@ const addGuruPembimbing = async (guru,alamat) => {
     if(findGuruPembimbing) {
         throw new responseError(400,"guru pemimbing sudah terdaftar")
     }
-    console.log(guru);
+
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : guru.id_tahun
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
 
     return db.$transaction(async (tx) => {
         const addGuruPembimbimg = await tx.guru_pembimbing.create({
@@ -816,11 +1028,30 @@ const deleteGuruPembimbing = async (identify,admin) => {
     })
 }
 
-const findAllGuruPembimbing = async (page,admin) => {
+const findAllGuruPembimbing = async (page,admin,id_tahun) => {
     page = await validate(siswaValidation.pageValidation,page)
+
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(id_tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
+
     const findGuruPembimbing = await db.guru_pembimbing.findMany({
         where : {
-            id_sekolah : admin.id_sekolah
+            AND : [
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    id_tahun : parseInt(id_tahun)
+                }
+            ]
+
         },
         skip : 10 * (page - 1),
         take : 10,
@@ -854,11 +1085,24 @@ const findGuruPembimbingById = async (id,admin) => {
 const findGuruPembimbingfilter = async (query,admin) => {
     query = await validate(adminValidation.searchGuruPembimbingValidation,query)
 
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(query.tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
+
     const findGuruPembimbing = await db.guru_pembimbing.findMany({
         where : {
             AND : [
                 {
                     id_sekolah : admin.id_sekolah
+                },
+                {
+                    id_tahun : parseInt(query.tahun)
                 },
                 {
                     AND : [
@@ -962,6 +1206,16 @@ const addDudi = async (dudi,alamat) => {
         throw new responseError(400,"data dudi telah ditambahkan")
     }
 
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : dudi.id_tahun
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
+
     return db.$transaction(async (tx) => {
         const addDudi = await tx.dudi.create({
             data : dudi,
@@ -981,12 +1235,29 @@ const addDudi = async (dudi,alamat) => {
     })
 }
 
-const findAllDudi = async (page,admin) => {
+const findAllDudi = async (page,admin,id_tahun) => {
     page = await validate(siswaValidation.pageValidation,page)
+
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(id_tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
 
     const findDudi = await db.dudi.findMany({
         where : {
-            add_by : admin.id_sekolah
+            AND : [
+                {
+                    add_by : admin.id_sekolah
+                },
+                {
+                    id_tahun : parseInt(id_tahun)
+                }
+            ]       
         },
         skip : 10 * (page - 1),
         take : 10,
@@ -1129,11 +1400,24 @@ const findDudiFilter = async (query,admin,page) => {
     query = await validate(adminValidation.searchDudiValidation,query)
     page = await validate(siswaValidation.pageValidation,page)
 
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(query.tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
+
     const findDudi = await db.dudi.findMany({
         where : {
             AND : [
                 {
                     add_by : admin.id_sekolah
+                },
+                {
+                    id_tahun : parseInt(query.tahun)
                 },
                 {
                     AND : [
@@ -1241,6 +1525,16 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
     if(!findDudi) {
         throw new responseError(404,"data dudi tidak ditemukan")
     }
+
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : PembimbingDudi.id_tahun
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
     return db.$transaction(async (tx) => {
         const addPembimbingDudi = await tx.pembimbing_dudi.create({
             data : PembimbingDudi,
@@ -1253,12 +1547,29 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
         return {pembimbingDudi : addPembimbingDudi,alamat : addAlamatDudi}
     })
 }
-const findAllPembimbingDudi = async (admin,page) => {
+const findAllPembimbingDudi = async (admin,page,id_tahun) => {
     page = await validate(siswaValidation.pageValidation,page)
+
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(id_tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
 
     return db.pembimbing_dudi.findMany({
         where : {
-            add_by : admin.id_sekolah
+            AND : [
+                {
+                    add_by : admin.id_sekolah
+                },
+                {
+                    id_tahun : parseInt(id_tahun)
+                }
+            ]
         },
         skip : 10 * (page - 1),
         take : 10,
@@ -1290,11 +1601,24 @@ const findPembimbingDudiById = async (id,admin) => {
 const findPembimbingDudifilter = async (query,admin) => {
     query = await validate(adminValidation.searchPembimbingDudiValidation,query)
 
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(query.tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
+
     const findPembimbingDudi = await db.pembimbing_dudi.findMany({
         where : {
             AND : [
                 {
                     add_by : admin.id_sekolah
+                },
+                {
+                    id_tahun : parseInt(query.tahun)
                 },
                 {
                     AND : [
@@ -1532,13 +1856,34 @@ const findPengajuanPklById = async (id,admin) => {
 
 // laporan pembimbing dudi pkl
 
-const findAllLaporanPkl = async (page,admin) => {
+const findAllLaporanPkl = async (page,admin,id_tahun) => {
     page = await validate(siswaValidation.pageValidation,page)
+
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(id_tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
+
     const findLaporan = await db.laporan_pkl.findMany({
         where : {
-            siswa : {
-                id_sekolah : admin.id_sekolah
-            }
+            AND : [
+                {
+                    siswa : {
+                        id_sekolah : admin.id_sekolah
+                    }
+                },
+                {
+                    siswa : {
+                        id_tahun : parseInt(id_tahun)
+                    }
+                }
+            ]
+
         },
         skip : 10 * (page - 1),
         take : 10,
@@ -1574,12 +1919,27 @@ const findLaporanPklFilter = async (query,page,admin) => {
     query = await validate(adminValidation.searchLaporanPkl,query)
     page = await validate(siswaValidation.pageValidation,page)
 
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(query.tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
+
     const findLaporan = await db.laporan_pkl.findMany({
         where : {
             AND : [
                 {
                     siswa : {
                         id_sekolah : admin.id_sekolah
+                    }
+                },
+                {
+                    siswa : {
+                        id_tahun : parseInt(query.tahun)
                     }
                 },
                 {
@@ -1646,13 +2006,33 @@ const findLaporanPklFilter = async (query,page,admin) => {
 
 
 // laporan siswa pkl
-const findAllLaporanSiswaPkl = async (page,admin) => {
+const findAllLaporanSiswaPkl = async (page,admin,id_tahun) => {
     page = await validate(siswaValidation.pageValidation,page)
+
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(id_tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
+
     const findLaporan = await db.laporan_siswa_pkl.findMany({
         where : {
-            siswa : {
-                id_sekolah : admin.id_sekolah
-            }
+            AND : [
+                {                  
+                    siswa : {
+                        id_sekolah : admin.id_sekolah
+                    }
+                },
+                {
+                    siswa : {
+                        id_tahun : parseInt(id_tahun)
+                    }
+                }
+            ]
         },
         skip : 10 * (page - 1),
         take : 10,
@@ -1690,12 +2070,27 @@ const findLaporanPklSiswaFilter = async (query,page,admin) => {
     query = await validate(adminValidation.searchLaporanPklSiswa,query)
     page = await validate(siswaValidation.pageValidation,page)
 
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(query.tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
+
     const findLaporan = await db.laporan_siswa_pkl.findMany({
         where : {
             AND : [
                 {
                     siswa : {
                         id_sekolah : admin.id_sekolah
+                    }
+                },
+                {
+                    siswa : {
+                        id_tahun : parseInt(query.tahun)
                     }
                 },
                 {
@@ -1762,12 +2157,32 @@ const findLaporanPklSiswaFilter = async (query,page,admin) => {
 
 
 // absen
-const findAllAbsen = async (admin) => {
+const findAllAbsen = async (admin,id_tahun) => {
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(id_tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
+
     return db.absen.findMany({
         where : {
-            siswa : {
-                id_sekolah : admin.id_sekolah
-            }
+            AND : [
+                {
+                    siswa : {
+                        id_sekolah : admin.id_sekolah
+                    }
+                },
+                {
+                    siswa : {
+                        id_tahun : parseInt(id_tahun)
+                    }
+                }
+            ]
+      
         },
         select : selectAbsenObject
     })
@@ -1799,6 +2214,16 @@ const findAbsenById = async (id,admin) => {
 const findAbsenFilter = async (query,admin) => {
     query = await validate(adminValidation.searchAbsen,query)
 
+    const findTahun = await db.tahun.findUnique({
+        where : {
+            id : parseInt(query.tahun)
+        }
+    })
+
+    if(!findTahun) {
+        throw new responseError(404,"data tahun tidak ditemukan")
+    }
+
     const findAbsen = await db.absen.findMany({
         where : {
             AND : [
@@ -1808,18 +2233,23 @@ const findAbsenFilter = async (query,admin) => {
                     }
                 },
                 {
-                    AND : [
-                        {
-                            id_dudi : query.id_dudi
-                        },
-                        {
-                            id_siswa : query.id_siswa
-                        },
-                        {
-                            id_pembimbing_dudi : query.id_pembimbing_dudi
-                        }
-                    ]
+                    siswa : {
+                        id_tahun : parseInt(query.tahun)
+                    }
                 },
+                // {
+                //     AND : [
+                //         {
+                //             id_dudi : query.id_dudi
+                //         },
+                //         {
+                //             id_siswa : query.id_siswa
+                //         },
+                //         {
+                //             id_pembimbing_dudi : query.id_pembimbing_dudi
+                //         }
+                //     ]
+                // },
             ]
         },
         select : selectAbsenObject
@@ -1831,6 +2261,12 @@ export default {
     // admin login
     adminLogin,
     updatePassword,
+
+    // tahun
+    addTahun,
+    deleteTahun,
+    updateTahun,
+    getAllTahun,
 
     // siswa
     addSiswa,

@@ -18,6 +18,12 @@ adminRouter.put('/updatePassword/:id',adminController.updatePassword)
 // admin logout 
 adminRouter.delete('/adminLogout',adminController.adminLogout)
 
+// tahun
+adminRouter.post('/addTahun',adminController.addTahun)
+adminRouter.delete('/deleteTahun/:id',adminController.deleteTahun)
+adminRouter.put('/updateTahun/:id',adminController.updateTahun)
+adminRouter.get('/getAllTahun',adminController.getAllTahun)
+
 // siswa router
 adminRouter.post('/addSiswa',adminController.addSiswa)
 adminRouter.get('/findSiswa/:id',adminController.findSiswaById)

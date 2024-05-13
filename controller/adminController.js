@@ -3,6 +3,60 @@ import responseError from "../error/responseError.js"
 import adminService from "../service/adminService.js"
 import jwt from "jsonwebtoken"
 
+
+const addTahun = async (req,res,next) => {
+    try {
+        const body = req.body
+        const admin = req.admin
+        const result = await adminService.addTahun(body,admin)
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const deleteTahun = async (req,res,next) => {
+    try {
+        const id = parseInt(req.params.id)
+        const admin = req.admin
+        const result = await adminService.deleteTahun(id,admin)
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const updateTahun = async (req,res,next) => {
+    try {
+        const id = parseInt(req.params.id)
+        const admin = req.admin
+        const body = req.body
+        const result = await adminService.updateTahun(body,id,admin)
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+const getAllTahun = async (req,res,next) => {
+    try {
+        const admin = req.admin
+        const result = await adminService.getAllTahun(admin)
+        res.status(201).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 const adminLogin = async (req,res,next) => {
     try {
         const body = req.body
@@ -96,7 +150,8 @@ const findSiswaById = async (req, res, next) => {
 const findAllSiswa = async (req,res,next) => {
     try {
         const page = req.query.page
-        const result = await adminService.findAllSiswa(page,req.admin)
+        const id_tahun = req.query.tahun
+        const result = await adminService.findAllSiswa(page,req.admin,id_tahun)
 
         res.status(200).json({
             msg : "succes",
@@ -108,7 +163,8 @@ const findAllSiswa = async (req,res,next) => {
 }
 const findSiswaHaventPkl = async (req,res,next) => {
     try {
-        const result = await adminService.findSiswaHaventPkl(req.admin)
+        const id_tahun = req.query.tahun
+        const result = await adminService.findSiswaHaventPkl(req.admin,id_tahun)
 
         res.status(200).json({
             msg : "succes",
@@ -206,7 +262,8 @@ const deleteJurusan = async (req,res,next) => {
 const findAllJurusan = async (req,res,next) => {
     try {
         const page = req.query.page
-        const result = await adminService.findAllJurusan(page,req.admin)
+        const id_tahun = req.query.tahun
+        const result = await adminService.findAllJurusan(page,req.admin,id_tahun)
 
         res.status(200).json({
             msg : "succes",
@@ -275,7 +332,8 @@ const addKelas = async (req,res,next) => {
 const findAllKelas = async (req,res,next) => {
     try {
         const page = req.query.page
-        const result = await adminService.findAllkelas(page,req.admin)
+        const id_tahun = req.query.tahun
+        const result = await adminService.findAllkelas(page,req.admin,id_tahun)
     
         res.status(200).json({
             msg : "succes",
@@ -360,7 +418,8 @@ const addGuruPembimbing = async (req,res,next) => {
 const findAllGuruPembimbing = async (req,res,next) => {
     try {
         const page = req.query.page
-        const result = await adminService.findAllGuruPembimbing(page,req.admin)
+        const id_tahun = req.query.tahun
+        const result = await adminService.findAllGuruPembimbing(page,req.admin,id_tahun)
 
         res.status(200).json({
             msg : "succes",
@@ -461,7 +520,8 @@ const addDudi = async (req,res,next) => {
 const findAllDudi = async (req,res,next) => {
     try {
         const page = req.query.page
-        const result = await adminService.findAllDudi(page,req.admin)
+        const id_tahun = req.query.tahun
+        const result = await adminService.findAllDudi(page,req.admin,id_tahun)
 
         res.status(200).json({
             msg : "succes",
@@ -561,7 +621,8 @@ const addPembimbingDudi = async (req,res,next) => {
 const findAllPembimbingDudi = async (req,res,next) => {
     try {
         const page = req.query.page
-        const result = await adminService.findAllPembimbingDudi(req.admin,page)
+        const id_tahun = req.query.tahun
+        const result = await adminService.findAllPembimbingDudi(req.admin,page,id_tahun)
 
         res.status(200).json({
             msg : "succes",
@@ -688,7 +749,8 @@ const findPengajuanPklById = async (req,res,next) => {
 const findAllLaporanPkl = async (req,res,next) => {
     try {
         const page = req.query.page
-        const result = await adminService.findAllLaporanPkl(page,req.admin)
+        const id_tahun = req.query.tahun
+        const result = await adminService.findAllLaporanPkl(page,req.admin,id_tahun)
     
         res.status(200).json({
             msg : "succes",
@@ -714,7 +776,8 @@ const findLaporanPklById = async (req,res,next) => {
 const findLaporanPklFilter = async (req,res,next) => {
     try {
         const query = req.query
-        const result = await adminService.findLaporanPklFilter(query,req.admin)
+        const page = req.query.page
+        const result = await adminService.findLaporanPklFilter(query,page,req.admin)
     
         res.status(200).json({
             msg : "succes",
@@ -731,7 +794,8 @@ const findLaporanPklFilter = async (req,res,next) => {
 const findAllLaporanPklSiswa = async (req,res,next) => {
     try {
         const page = req.query.page
-        const result = await adminService.findAllLaporanSiswaPkl(page,req.admin)
+        const id_tahun = req.query.tahun
+        const result = await adminService.findAllLaporanSiswaPkl(page,req.admin,id_tahun)
     
         res.status(200).json({
             msg : "succes",
@@ -759,7 +823,7 @@ const findLaporanPklSiswaFilter = async (req,res,next) => {
         const query = req.query
         const page = req.query.page
 
-        const result = await adminService.findLaporanPklSiswaFilter(query,req.admin,page)
+        const result = await adminService.findLaporanPklSiswaFilter(query,page,req.admin)
     
         res.status(200).json({
             msg : "succes",
@@ -774,7 +838,8 @@ const findLaporanPklSiswaFilter = async (req,res,next) => {
 // absen
 const findAllAbsen = async (req,res,next) => {
     try {
-        const result = await adminService.findAllAbsen(req.admin)
+        const id_tahun = req.query.tahun
+        const result = await adminService.findAllAbsen(req.admin,id_tahun)
     
         res.status(200).json({
             msg : "succes",
@@ -846,7 +911,13 @@ const adminLogout = async (req, res, next) => {
       next(error)
     }
   }
-export default {   
+export default {  
+    // tahun
+    addTahun, 
+    deleteTahun,
+    updateTahun,
+    getAllTahun,
+
     // admin login
     adminLogin,
     updatePassword,
