@@ -7,7 +7,6 @@ export const developerMiddleware = async (req,res,next) => {
     if(!token){
         return res.status(401).json({msg : "unauthorized"})
     }
-    console.log(token);
     
     const developer = await jwt.verify(token,process.env.TOKEN_SECRET_DEVELOPER,(err,developer) => {
         if(err){
@@ -18,13 +17,14 @@ export const developerMiddleware = async (req,res,next) => {
         }
         return developer
     })
-    console.log(developer);
 
-    const findDeveloper = await db.admin.findFirst({
+    const findDeveloper = await db.developer.findFirst({
         where : {
             username : developer.username
         }
     })
+
+    console.log(findDeveloper);
 
     if(!findDeveloper) {
         return res.status(401).json({

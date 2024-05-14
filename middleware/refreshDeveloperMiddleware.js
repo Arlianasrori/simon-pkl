@@ -24,6 +24,8 @@ export const refreshDeveloperMiddleware = async (req,res,next) => {
         }
     })
 
+    // console.log(findDeveloper);
+
     if(!findDeveloper) {
         return res.status(401).json({
             msg : "unauthorized"
