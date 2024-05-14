@@ -59,10 +59,17 @@ const getSiswaById = async (id) => {
   return findSiswa;
 };
 
-const getDudi = (siswa) => {
+const getDudi = (siswa,id_tahun) => {
   return db.dudi.findMany({
     where : {
-      add_by : siswa.id_sekolah
+      AND : [
+        {
+          add_by : siswa.id_sekolah
+        },
+        {
+          id_tahun : parseInt(id_tahun)
+        }
+      ]
     },
     select: selectDudiObject,
   });
@@ -108,10 +115,10 @@ const getDudiById = async (id,siswa) => {
   return dudi;
 };
 
-const getDudiFilter = async (query,page,siswa) => {
+const getDudiFilter = async (query,page,siswa,id_tahun) => {
   query = await validate(adminValidation.searchDudiValidation,query)
   page = await validate(siswaValidation.pageValidation,page)
-  const whereQuery = getQuery(query,page)
+  const whereQuery = getQuery(query,page,id_tahun)
 
   const findDudi = await db.$queryRawUnsafe(whereQuery)
 
@@ -218,6 +225,7 @@ const addPengajuanPkl = async (body,siswa) => {
     },
     select: {
       id : true,
+      tahun : true,
       status: true,
       dudi: true,
       pengajuan_pkl: true,
@@ -258,6 +266,7 @@ const addPengajuanPkl = async (body,siswa) => {
     select : {
       id : true,
       tersedia : true,
+      tahun : true,
       kouta : true,
       siswa : {
         where : {
@@ -274,6 +283,10 @@ const addPengajuanPkl = async (body,siswa) => {
 
   if (!findDudi) {
     throw new responseError(404, "data dudi tidak ditemukan");
+  }
+
+  if((findSiswa.tahun.id != findDudi.tahun.id) || (findSiswa.tahun.tahun !== findDudi.tahun.tahun)) {
+    throw new responseError(400,"tahun pkl anda tidak sesuai dengan tahun dudi")
   }
 
   if(!findDudi.tersedia) {
