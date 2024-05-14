@@ -7,7 +7,6 @@ export const refreshDeveloperMiddleware = async (req,res,next) => {
     if(!token){
         return res.status(401).json({msg : "unauthorized"})
     }
-    console.log(token);
     
     const developer = await jwt.verify(token,process.env.REFRESH_TOKEN_SECRET_DEVELOPER,(err,developer) => {
         if(err){

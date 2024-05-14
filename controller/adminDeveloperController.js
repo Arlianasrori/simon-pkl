@@ -1,5 +1,5 @@
 import adminDeveloperService from "../service/adminDeveloperService.js"
-
+import jwt from "jsonwebtoken"
 
 const refreshToken = async (req,res,next) => {
     try {
@@ -9,7 +9,7 @@ const refreshToken = async (req,res,next) => {
         }
          
         const acces_token_admin = jwt.sign(payload,process.env.TOKEN_SECRET_DEVELOPER,{expiresIn : "60d"})
-        const refresh_token_admin = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRETDEVELOPER,{expiresIn : "120d"})
+        const refresh_token_admin = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_DEVELOPER,{expiresIn : "120d"})
 
         res.status(201).cookie("acces_token",acces_token_admin,{
             maxAge : 24 * 60 * 60 * 60 * 60 * 60 * 60,

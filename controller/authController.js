@@ -116,7 +116,13 @@ export const authAdminDeveloper = async (req,res,next) => {
     
                     const acces_token = jwt.sign(payload,process.env.TOKEN_SECRET_ADMIN,{expiresIn : "2d"})
                     const refresh_token = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_ADMIN,{expiresIn : "60d"})
-                    return res.status(200).json({
+                    return res.status(201).cookie("acces_token",acces_token,{
+                        maxAge : 24 * 60 * 60 * 60,
+                        httpOnly: true,
+                    }).cookie("refresh_token",refresh_token,{
+                        maxAge : 24 * 60 * 60 * 60,
+                        httpOnly: true,
+                    }).json({
                         msg : "succes",
                         acces_token : acces_token,
                         refresh_token : refresh_token,
@@ -130,8 +136,6 @@ export const authAdminDeveloper = async (req,res,next) => {
                     username : textBody
                 }
             })
-
-            console.log(findDevaloper);
         
             if(findDevaloper) {
                 const isPassowrd = await bcrypt.compare(password, findDevaloper.password)
@@ -144,7 +148,13 @@ export const authAdminDeveloper = async (req,res,next) => {
                      
                     const acces_token = jwt.sign(payload,process.env.TOKEN_SECRET_DEVELOPER,{expiresIn : "2d"})
                     const refresh_token = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_DEVELOPER,{expiresIn : "60d"})
-                    return res.status(200).json({
+                    return res.status(201).cookie("acces_token",acces_token,{
+                        maxAge : 24 * 60 * 60 * 60,
+                        httpOnly: true,
+                    }).cookie("refresh_token",refresh_token,{
+                        maxAge : 24 * 60 * 60 * 60,
+                        httpOnly: true,
+                    }).json({
                         msg : "succes",
                         acces_token : acces_token,
                         refresh_token : refresh_token,
