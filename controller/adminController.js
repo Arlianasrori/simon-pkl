@@ -289,7 +289,8 @@ const findJurusanById = async (req,res,next) => {
 const findJurusanByNama = async (req,res,next) => {
     try {
         const nama = req.query.nama
-        const result = await adminService.findJurusanByName(nama,req.admin)
+        const id_tahun = req.query.tahun
+        const result = await adminService.findJurusanByName(nama,req.admin,id_tahun)
 
         res.status(200).json({
             msg : "succes",

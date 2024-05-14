@@ -28,6 +28,7 @@ const selectJadwalAbsen = {
 const addJadwalAbsen = async (body,day) => {
     body.selisih_tanggal_day = getselish(body.tanggal_mulai,body.tanggal_berakhir)
     body = await validate(absenValidation.addJadwalAbsen,body)
+    day = await validate(absenValidation.dayValidation,day)
 
     const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
         where : {

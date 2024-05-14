@@ -1,5 +1,34 @@
 import adminDeveloperService from "../service/adminDeveloperService.js"
 
+
+const refreshToken = async (req,res,next) => {
+    try {
+        const developer = req.developer
+        const payload = {
+            username : developer.username,
+        }
+         
+        const acces_token_admin = jwt.sign(payload,process.env.TOKEN_SECRET_DEVELOPER,{expiresIn : "60d"})
+        const refresh_token_admin = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRETDEVELOPER,{expiresIn : "120d"})
+
+        res.status(201).cookie("acces_token",acces_token_admin,{
+            maxAge : 24 * 60 * 60 * 60 * 60 * 60 * 60,
+            httpOnly: true,
+        }).cookie("refresh_token",refresh_token_admin,{
+            maxAge : 24 * 60 * 60 * 60 * 60 * 60,
+            httpOnly: true,
+        }).json({
+            msg : "succes",
+            data : {
+                acces_token : acces_token_admin,
+                refresh_token : refresh_token_admin
+            }
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 // sekolah
 const addSekolah = async (req,res,next) => {
     try {
@@ -170,6 +199,7 @@ const getAllAdmin = async (req,res,next) => {
 }
 
 export default {
+    refreshToken,
     // sekolah
     addSekolah,
     updateSekolah,

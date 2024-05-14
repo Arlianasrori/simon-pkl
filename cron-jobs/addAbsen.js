@@ -9,6 +9,8 @@ export async function addAbsen () {
         const dateNow = Now.toISOString().substring(0, 10)
         const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"}).split(" ")
 
+        const dataSiswa = []
+
         const findAllSiswa = await db.siswa.findMany({
             select : {
                 id : true,
@@ -34,8 +36,6 @@ export async function addAbsen () {
         })
 
         findAllSiswa.forEach(async siswa => {
-            
-        console.log("gas");
             if(siswa.dudi) {
                 if(siswa.dudi.absen_jadwal[0]) {
                     const findDay = await db.hari_absen.findFirst({
@@ -55,17 +55,29 @@ export async function addAbsen () {
                     })
 
                     if(findDay) {
-                        await db.absen.create({
-                            data : {
-                                id : generateId(),
-                                id_siswa : siswa.id,
-                                id_absen_jadwal : siswa.dudi.absen_jadwal[0].id,
-                                tanggal : dateNow
-                            }
-                        })
+                        let dataAbsen = {
+                            id : generateId(),
+                            id_siswa : siswa.id,
+                            id_absen_jadwal : siswa.dudi.absen_jadwal[0].id,
+                            tanggal : dateNow
+                        }
+                        dataSiswa.push(dataAbsen)
+                        // await db.absen.create({
+                        //     data : {
+                        //         id : generateId(),
+                        //         id_siswa : siswa.id,
+                        //         id_absen_jadwal : siswa.dudi.absen_jadwal[0].id,
+                        //         tanggal : dateNow
+                        //     }
+                        // })
                     }
                 }
             }
+        })
+
+        await db.absen.createMany({
+            data : dataSiswa,
+            skipDuplicates : true
         })
     });
 }

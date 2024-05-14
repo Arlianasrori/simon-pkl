@@ -264,11 +264,13 @@ const findSiswaById = async (id,admin) => {
 const findAllSiswa = async (page,admin,id_tahun) => {
     page = await validate(siswaValidation.pageValidation,page)
 
+    id_tahun = await validate(adminValidation.idValidation,id_tahun)
+
     const findSiswa = await db.siswa.findMany({
         where : {
             AND : [
                 {
-                    id : admin.id_sekolah
+                    id_sekolah : admin.id_sekolah
                 },
                 {
                     id_tahun : parseInt(id_tahun)
@@ -283,6 +285,8 @@ const findAllSiswa = async (page,admin,id_tahun) => {
     return {siswa : findSiswa,page : page,count : findSiswa.length}
 }
 const findSiswaHaventPkl = async (admin,id_tahun) => {
+    id_tahun = await validate(adminValidation.idValidation,id_tahun)
+
     return db.siswa.findMany({
         where : {
             AND : [
@@ -312,7 +316,7 @@ const findSiswaFilter = async (query,admin,page) => {
         where : {
             AND : [
                 {
-                    id : admin.id_sekolah
+                    id_sekolah : admin.id_sekolah
                 },
                 {
                     id_tahun : parseInt(query.tahun)
@@ -396,7 +400,7 @@ const updateSiswa = async (data,identify,admin) => {
         where : {
             AND : [
                 {
-                    id : admin.id_sekolah
+                    id_sekolah : admin.id_sekolah
                 },
                 {
                     OR : [
@@ -430,7 +434,7 @@ const deleteSiswa = async (id,admin) => {
         where : {
             AND : [
                 {
-                    id : admin.id_sekolah
+                    id_sekolah : admin.id_sekolah
                 },
                 {
                     id : id
@@ -457,7 +461,7 @@ const updateAlamatSiswa = async (data,id,admin) => {
         where : {
             AND : [
                 {
-                    id : admin.id_sekolah
+                    id_sekolah : admin.id_sekolah
                 },
                 {
                     id : id
@@ -536,6 +540,7 @@ const deleteJurusan = async (id) => {
 }
 const findAllJurusan = async (page,admin,id_tahun) => {
     page = await validate(siswaValidation.pageValidation,page)
+    id_tahun = await validate(adminValidation.idValidation,id_tahun)
 
     const findJurusan = await db.jurusan.findMany({
         where : {
@@ -576,14 +581,18 @@ const findJurusanById = async (id,admin) => {
 
     return findJurusan
 } 
-const findJurusanByName = async (nama,admin) => {
+const findJurusanByName = async (nama,admin,id_tahun) => {
     nama = await validate(adminValidation.namaValidation,nama)
+    id_tahun = await validate(adminValidation.idValidation,id_tahun)
 
     const findJurusan = await db.jurusan.findFirst({
         where : {
             AND : [
                 {
                     id_sekolah : admin.id_sekolah
+                },
+                {
+                    id_tahun : parseInt(id_tahun)
                 },
                 {
                     nama : {
@@ -970,6 +979,7 @@ const deleteGuruPembimbing = async (identify,admin) => {
 
 const findAllGuruPembimbing = async (page,admin,id_tahun) => {
     page = await validate(siswaValidation.pageValidation,page)
+    id_tahun = await validate(adminValidation.idValidation,id_tahun)
 
     const findGuruPembimbing = await db.guru_pembimbing.findMany({
         where : {
@@ -1157,6 +1167,7 @@ const addDudi = async (dudi,alamat) => {
 
 const findAllDudi = async (page,admin,id_tahun) => {
     page = await validate(siswaValidation.pageValidation,page)
+    id_tahun = await validate(adminValidation.idValidation,id_tahun)
 
     const findTahun = await db.tahun.findUnique({
         where : {
@@ -1459,6 +1470,7 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
 }
 const findAllPembimbingDudi = async (admin,page,id_tahun) => {
     page = await validate(siswaValidation.pageValidation,page)
+    id_tahun = await validate(adminValidation.idValidation,id_tahun)
 
     const findTahun = await db.tahun.findUnique({
         where : {
@@ -1510,16 +1522,6 @@ const findPembimbingDudiById = async (id,admin) => {
 }
 const findPembimbingDudifilter = async (query,admin) => {
     query = await validate(adminValidation.searchPembimbingDudiValidation,query)
-
-    const findTahun = await db.tahun.findUnique({
-        where : {
-            id : parseInt(query.tahun)
-        }
-    })
-
-    if(!findTahun) {
-        throw new responseError(404,"data tahun tidak ditemukan")
-    }
 
     const findPembimbingDudi = await db.pembimbing_dudi.findMany({
         where : {
@@ -1768,6 +1770,7 @@ const findPengajuanPklById = async (id,admin) => {
 
 const findAllLaporanPkl = async (page,admin,id_tahun) => {
     page = await validate(siswaValidation.pageValidation,page)
+    id_tahun = await validate(adminValidation.idValidation,id_tahun)
 
     const findTahun = await db.tahun.findUnique({
         where : {
@@ -1918,6 +1921,7 @@ const findLaporanPklFilter = async (query,page,admin) => {
 // laporan siswa pkl
 const findAllLaporanSiswaPkl = async (page,admin,id_tahun) => {
     page = await validate(siswaValidation.pageValidation,page)
+    id_tahun = await validate(adminValidation.idValidation,id_tahun)
 
     const findLaporan = await db.laporan_siswa_pkl.findMany({
         where : {
@@ -2048,6 +2052,8 @@ const findLaporanPklSiswaFilter = async (query,page,admin) => {
 
 // absen
 const findAllAbsen = async (admin,id_tahun) => {
+    id_tahun = await validate(adminValidation.idValidation,id_tahun)
+
     return db.absen.findMany({
         where : {
             AND : [

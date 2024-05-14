@@ -96,3 +96,67 @@ export const auth = async (req,res,next) => {
         next(error)
     }
 }
+export const authAdminDeveloper = async (req,res,next) => {
+    try {
+        const {textBody,password} = req.body
+
+            const findAdmin = await db.admin.findUnique({
+                where : {
+                    username : textBody
+                }
+            })
+        
+            if(findAdmin) {
+                const isPassowrd = await bcrypt.compare(password, findAdmin.password)
+   
+                if(isPassowrd) {
+                    const payload = {
+                        username : body.username,
+                    }
+    
+                    const acces_token = jwt.sign(payload,process.env.TOKEN_SECRET_ADMIN,{expiresIn : "2d"})
+                    const refresh_token = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_ADMIN,{expiresIn : "60d"})
+                    return res.status(200).json({
+                        msg : "succes",
+                        acces_token : acces_token,
+                        refresh_token : refresh_token,
+                        auth : "admin"
+                    })
+                }
+            }
+        
+            const findDevaloper = await db.developer.findUnique({
+                where : {
+                    username : textBody
+                }
+            })
+
+            console.log(findDevaloper);
+        
+            if(findDevaloper) {
+                const isPassowrd = await bcrypt.compare(password, findDevaloper.password)
+                console.log(isPassowrd);
+          
+                if(password == findDevaloper.password) {
+                    const payload = {
+                        name : findDevaloper.username
+                    }
+                     
+                    const acces_token = jwt.sign(payload,process.env.TOKEN_SECRET_DEVELOPER,{expiresIn : "2d"})
+                    const refresh_token = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_DEVELOPER,{expiresIn : "60d"})
+                    return res.status(200).json({
+                        msg : "succes",
+                        acces_token : acces_token,
+                        refresh_token : refresh_token,
+                        auth : "developer"
+                    })
+                }
+            }
+
+        res.status(404).json({
+            msg : "USERNAME atau PASSWORD salah"
+        })
+    } catch (error) {
+        next(error)
+    }
+}

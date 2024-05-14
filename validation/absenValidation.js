@@ -9,7 +9,7 @@ const addJadwalAbsen = joi.object({
     tanggal_berakhir : joi.string().required(),
     selisih_tanggal_day : joi.string().required(),
 })
-
+const dayValidation = joi.array().items(joi.valid("senin","selasa","rabu","kamis","jumat","sabtu","minggu"))
 
 // absen
 const addAbsenMasukValidation = joi.object({
@@ -75,7 +75,7 @@ const cekRadiusKordinatAbsenValidation = joi.object({
 export default {
     // jadwal absen
     addJadwalAbsen,
-
+    dayValidation,
 
     // absen
     addAbsenMasukValidation,

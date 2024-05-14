@@ -46,7 +46,6 @@ const updateKuotaSiswaValidation = joi.object ({
     jumlah_wanita : joi.number().optional(), 
     total : joi.number().required(),
 })
-
 export default {
     pembimbingDudiLogin,
     updatePassword,
@@ -56,5 +55,5 @@ export default {
     addLaporanPkl,
     updateLaporanPkl,
     addKuotaSiswaValidation,
-    updateKuotaSiswaValidation
+    updateKuotaSiswaValidation,
 }

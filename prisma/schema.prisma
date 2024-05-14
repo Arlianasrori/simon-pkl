@@ -12,7 +12,11 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
+model developer {
+  id Int @id
+  username String @unique
+  password String
+}
 model sekolah {
   id Int @id
   npsn String @unique
@@ -301,7 +305,7 @@ model absen_jadwal {
 model hari_absen {
   id Int @id @default(autoincrement())
   id_jadwal Int
-  nama String
+  nama hari
   batas_absen_masuk String
   batas_absen_pulang String
 
@@ -429,6 +433,16 @@ enum status_cancel_pkl {
   dibatalkan
   setuju
   tidak_setuju
+}
+
+enum hari {
+  senin
+  selasa
+  rabu
+  kamis
+  jumat
+  sabtu
+  minggu
 }
 
 enum status_absen_masuk_keluar {
