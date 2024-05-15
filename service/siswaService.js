@@ -50,6 +50,26 @@ const getSiswaById = async (id) => {
     where: {
       id: id,
     },
+    select: {
+      id : true,
+      nama : true,
+      nis : true,
+      no_telepon : true
+    }
+  });
+
+  if (!findSiswa) {
+    throw new responseError(404, "siswa tidak ditemukan");
+  }
+  return findSiswa;
+};
+const getProfile = async (id) => {
+  id = await validate(adminValidation.idValidation, id);
+
+  const findSiswa = await db.siswa.findUnique({
+    where: {
+      id: id,
+    },
     select: selectSiswaObject
   });
 
@@ -119,7 +139,12 @@ const getDudiFilter = async (query,page,siswa,id_tahun) => {
   query = await validate(adminValidation.searchDudiValidation,query)
   page = await validate(siswaValidation.pageValidation,page)
   const whereQuery = getQuery(query,page,id_tahun)
+  console.log(whereQuery);
 
+  if(!id_tahun) {
+    throw new responseError(400,"tahun is required")
+  }
+  
   const findDudi = await db.$queryRawUnsafe(whereQuery)
 
   for (let index = 0; index < findDudi.length; index++) {
@@ -320,11 +345,16 @@ const addPengajuanPkl = async (body,siswa) => {
       judul : "kabar Baik Untukmu",
       isi : "Ajuan pklmu sedang diproses,tunggu verifikasi dari dudi yang kamu ajukan"
     }
-  
+
+    const Now = new Date()
+
+    payload.tanggal = Now.toISOString().substring(0, 10)
+    const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
+    payload.time = datelocal.split(" ")[1]
+    
     await tx.notification.create({
       data : payload
     })
-  
     return createpengajuan
   })
 };
@@ -461,10 +491,31 @@ const addCancelPkl = async (id_siswa) => {
     id_dudi: findsiswa.dudi.id,
     id_pembimbing_dudi: findsiswa.pembimbing_dudi.id,
   };
-  return db.pengajuan_cancel_pkl.create({
-    data: body,
-    select: selectCancelPkl,
-  });
+
+  return db.$transaction(async tx => {
+    const addCancelPkl = await tx.pengajuan_cancel_pkl.create({
+      data: body,
+      select: selectCancelPkl,
+    });
+
+    const payload = {
+      id : generateId(),
+      id_siswa : body.id_siswa,
+      judul : "kabar Baik Untukmu",
+      isi : "Ajuan cancel pklmu sedang diproses,tunggu verifikasi dari dudi yang kamu ajukan"
+    }
+
+    const Now = new Date()
+
+    payload.tanggal = Now.toISOString().substring(0, 10)
+    const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
+    payload.time = datelocal.split(" ")[1]
+    
+    await tx.notification.create({
+      data : payload
+    })
+    return {pengajanCancelPkl : addCancelPkl}
+  })
 };
 
 const getCancelPklBySiswa = async (id_siswa) => {
@@ -539,11 +590,20 @@ const AddLaporanSiswaPkl = async (body, image, url) => {
     day: "numeric",
   };
 
+  if(!image) {
+    throw new responseError(400,"dokumtasi is required")
+  }
+
+  if(!body.id_dudi || !body.id_pembimbing_dudi) {
+    throw new responseError(400,"siswa belum memiliki tempat pkl")
+  }
+
   const { pathSaveFile, fullPath } = await file(image, url);
   body.dokumentasi = fullPath;
 
   const tanggal = date.toLocaleDateString("id", options);
   body.tanggal = tanggal;
+  console.log(body);
   body = await validate(siswaValidation.addLaporanSiswaPkl, body);
 
   await image.mv(pathSaveFile, async (err) => {
@@ -656,6 +716,7 @@ const findLaporanSiswaPklById = async (id) => {
 export default {
   updatePassword,
   // Get DUDI & Siswa
+  getProfile,
   getSiswaById,
   getDudi,
   getDudiByName,

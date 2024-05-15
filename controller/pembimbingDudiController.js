@@ -93,6 +93,7 @@ const updateStatusPengajuanPkl = async (req,res,next) => {
   try {
     const id_pengajuan = parseInt(req.params.id_pengajuan)
     const body = req.body
+    body.id_pembimbing_dudi = req.pembimbingDudi.id
 
     const result = await pembimbingDudiService.AccDcnPengajuanPkl(body,id_pengajuan)
     res.status(200).json({
@@ -138,7 +139,7 @@ const updateStatusCancelPkl = async (req,res,next) => {
   try {
     const id = parseInt(req.params.id)
     const status = req.body.status
-    const id_pembimbing_dudi = req.body.id_pembimbing_dudi
+    const id_pembimbing_dudi = req.pembimbingDudi.id
 
     const result = await pembimbingDudiService.updateStatusCancelPkl(id,status,id_pembimbing_dudi)
     res.status(200).json({
@@ -155,7 +156,9 @@ const updateStatusCancelPkl = async (req,res,next) => {
 const AddLaporanPkl = async (req, res, next) => {
   try {
     const body = req.body;
-    const image = req.files.file_laporan;
+    body.id_dudi = req.pembimbingDudi.id_dudi
+    body.id_pembimbing_dudi = req.pembimbingDudi.id
+    const image = req.files && req.files.file_laporan;
     console.log(image);
     const url = `http://${req.hostname}:2008/laporan_pkl`;
 
@@ -171,7 +174,7 @@ const AddLaporanPkl = async (req, res, next) => {
 
 const updateLaporanPkl = async (req, res, next) => {
   try {
-    const image = req.files.file_laporan;
+    const image = req.files && req.files.file_laporan;
     const url = `http://${req.hostname}:2008/laporan_pkl`;
     const result = await pembimbingDudiService.updateLaporanPkl(parseInt(req.params.id),req.body,image,url)
     res.status(200).json({
@@ -223,7 +226,8 @@ const findLaporanPklFilter= async (req, res, next) => {
   try {
     const query = req.query
     query.id_pembimbing_dudi = req.pembimbingDudi.id
-    const result = await adminService.findLaporanPklFilter(query)
+    const page = req.query.page
+    const result = await adminService.findLaporanPklFilter(query,page,{id_sekolah : req.pembimbingDudi.add_by})
     res.status(200).json({
       msg: "Success",
       data: result,

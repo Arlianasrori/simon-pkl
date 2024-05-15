@@ -175,7 +175,24 @@ const AccDcnPengajuanPkl = async (body,id_pengajuan) => {
     })
 
     if(updatePengajuan.status == "ditolak") {
-      return {pengajuan : updatePengajuan,msg : `mohon maaf anda ditolak oleh ${findPengajuan.dudi.nama_instansi_perusahaan}`}
+      const payload = {
+        id : generateId(),
+        id_siswa : findPengajuan.siswa.id,
+        judul : "kabar Baik Untukmu",
+        isi : `Ajuan pklmu telah ditolak oleh ${findPengajuan.dudi.nama_instansi_perusahaan}`
+      }
+  
+      const Now = new Date()
+  
+      payload.tanggal = Now.toISOString().substring(0, 10)
+      const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
+      payload.time = datelocal.split(" ")[1]
+      
+      await tx.notification.create({
+        data : payload
+      })
+
+      return {pengajuan : updatePengajuan}
     }
 
     await tx.siswa.update({
@@ -189,6 +206,23 @@ const AccDcnPengajuanPkl = async (body,id_pengajuan) => {
         tanggal_masuk : body.tanggal_masuk,
         tanggal_keluar : body.tanggal_keluar
       }
+    })
+
+    const payload = {
+      id : generateId(),
+      id_siswa : findPengajuan.siswa.id,
+      judul : "kabar Baik Untukmu",
+      isi : `Ajuan pklmu telah di${body.status} oleh ${findPengajuan.dudi.nama_instansi_perusahaan}`
+    }
+
+    const Now = new Date()
+
+    payload.tanggal = Now.toISOString().substring(0, 10)
+    const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
+    payload.time = datelocal.split(" ")[1]
+    
+    await tx.notification.create({
+      data : payload
     })
 
     return {pengajuan : updatePengajuan,msg : `selamat anda diterima oleh ${findPengajuan.dudi.nama_instansi_perusahaan}`}
@@ -235,6 +269,7 @@ const updateStatusCancelPkl = async (id,status,id_pembimbing_dudi) => {
     select : {
       id : true,
       status : true,
+      id_siswa : true,
       dudi : {
         select : {
           id : true,
@@ -267,7 +302,24 @@ const updateStatusCancelPkl = async (id,status,id_pembimbing_dudi) => {
     })
 
     if(updatePengajuan.status == "tidak_setuju") {
-      return {pengajuan : updatePengajuan,msg : `mohon maaf permintaan anda untuk mengundurkan diri di ${findCancelPengajuan.dudi.nama_instansi_perusahaan} ditolak`}
+      const payload = {
+        id : generateId(),
+        id_siswa : findCancelPengajuan.id_siswa,
+        judul : "kabar untukmu",
+        isi : `Ajuan cancel untuk pklmu tidak disetujui oleh ${findCancelPengajuan.dudi.nama_instansi_perusahaan}`
+      }
+  
+      const Now = new Date()
+  
+      payload.tanggal = Now.toISOString().substring(0, 10)
+      const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
+      payload.time = datelocal.split(" ")[1]
+      
+      await tx.notification.create({
+        data : payload
+      })
+
+      return {pengajuan : updatePengajuan}
     }
 
     await tx.siswa.update({
@@ -283,7 +335,24 @@ const updateStatusCancelPkl = async (id,status,id_pembimbing_dudi) => {
       }
     })
 
-    return {pengajuan : updatePengajuan,msg : `selamat permintaan anda untuk mengundurkan diri di ${findCancelPengajuan.dudi.nama_instansi_perusahaan} diterimah,silahkan mencari tempat pkl baru`}
+    const payload = {
+      id : generateId(),
+      id_siswa : findCancelPengajuan.id_siswa,
+      judul : "kabar Baik Untukmu",
+      isi : `Ajuan cancel untuk pklmu telah disetujui oleh ${findCancelPengajuan.dudi.nama_instansi_perusahaan}`
+    }
+
+    const Now = new Date()
+
+    payload.tanggal = Now.toISOString().substring(0, 10)
+    const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
+    payload.time = datelocal.split(" ")[1]
+    
+    await tx.notification.create({
+      data : payload
+    })
+
+    return {pengajuan : updatePengajuan}
   })
 }
 
@@ -298,6 +367,10 @@ const AddLaporanPkl = async (body, image, url) => {
     month: "long",
     day: "numeric",
   };
+
+  if(!image) {
+    throw new responseError(400,"file laporan is required")
+  }
 
   const { pathSaveFile, fullPath } = await fileLaporaPkl(image, url);
   body.file_laporan = fullPath;
@@ -472,7 +545,7 @@ const findAllAbsen = async (pembimbingDudi,query) => {
                 keterangan_absen_masuk : true,
                 absen_pulang : true,
                 status_absen_pulang : true,
-                keterangan_absen_keluar : true,
+                keterangan_absen_pulang : true,
                 foto : true,
                 status : true,
                 tanggal : true,

@@ -590,7 +590,7 @@ const updateAlamatDudi = async (req,res,next) => {
 const deleteDudi = async (req,res,next) => {
     try {
         const id = parseInt(req.params.id)
-        const result = await adminService.deleteDudi(data,id)
+        const result = await adminService.deleteDudi(id,req.admin)
 
         res.status(200).json({
             msg : "succes",
@@ -707,7 +707,7 @@ const deletePembimbingDudi = async (req,res,next) => {
 // pengajuan pkl
 const findAllPengajuanPkl = async (req,res,next) => {
     try {
-        const page = req.querypage
+        const page = req.query.page
         const result = await adminService.findAllPengajuanPkl(page,req.admin)
 
         res.status(200).json({

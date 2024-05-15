@@ -17,7 +17,7 @@ export function getQuery (query,page,id_tahun) {
     LEFT JOIN siswa as s ON d.id = s.id_dudi
     LEFT JOIN alamat_dudi as ad ON d.id = ad.id_dudi
     LEFT JOIN kouta_siswa as ks ON d.id = ks.id_dudi
-    WHERE ${whereQuery} AND d.id_tahun ${id_tahun}
+    WHERE ${whereQuery} AND d.id_tahun = ${id_tahun}
     GROUP BY d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara,ks.total,ks.jumlah_wanita,ks.jumlah_pria
     LIMIT 10 OFFSET ${10 * (page - 1)}`
 }

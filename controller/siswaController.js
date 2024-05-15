@@ -15,6 +15,17 @@ const getSiswaById = async (req, res, next) => {
     next(error);
   }
 };
+const getProfile = async (req, res, next) => {
+  try {
+    const result = await siswaService.getProfile(req.siswa.id);
+    res.status(200).json({
+      msg: "succes",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 const refreshToken = async (req, res, next) => {
   try {
@@ -56,7 +67,8 @@ const getDudiFilter = async (req, res, next) => {
     const query = req.query
     const page = req.query.page
     const siswa = req.siswa
-    const result = await siswaService.getDudiFilter(query,page,siswa);
+    const tahun = parseInt(req.query.tahun)
+    const result = await siswaService.getDudiFilter(query,page,siswa,tahun);
     res.status(200).json({
       msg: "succes",
       data: result,
@@ -122,7 +134,7 @@ const cancelPengajuanPkl = async (req, res, next) => {
   try {
     const body = req.body;
     body.id_siswa = req.siswa.id
-    const result = await siswaService.cancelPengajuanPkl(body);
+    const result = await siswaService.cancelPengajuanPkl(body,req.siswa);
     res.status(200).json({
       msg: "succes",
       data: result,
@@ -134,7 +146,7 @@ const cancelPengajuanPkl = async (req, res, next) => {
 const findAllPengajuanPkl = async (req, res, next) => {
   try {
     const id = req.siswa.id
-    const result = await siswaService.findAllPengajuanPkl(id);
+    const result = await siswaService.findAllPengajuanPkl(id,req.siswa);
     res.status(200).json({
       msg: "success",
       data: result,
@@ -227,7 +239,9 @@ const AddLaporanSiswaPkl = async (req, res, next) => {
   try {
     const body = req.body;
     body.id_siswa = req.siswa.id
-    const image = req.files.dokumentasi;
+    body.id_dudi = req.siswa.id_dudi
+    body.id_pembimbing_dudi = req.siswa.id_pembimbing_dudi
+    const image = req.files && req.files.dokumentasi;
     const url = `http://${req.hostname}:2008/laporan_siswa_pkl`;
 
     const result = await siswaService.AddLaporanSiswaPkl(body, image, url);
@@ -294,7 +308,8 @@ try {
   const query = req.query
   query.id_siswa = req.siswa.id
   const siswaBody = {id_sekolah : req.siswa.id_sekolah}
-  const result = await adminService.findLaporanPklSiswaFilter(query,siswaBody)
+  const page = req.query.page
+  const result = await adminService.findLaporanPklSiswaFilter(query,page,siswaBody)
   res.status(200).json({
     msg: "Success",
     data: result,
@@ -544,6 +559,7 @@ export default {
   getDudiByAlamat,
   getDudiById,
   getDudiFilter,
+  getProfile,
 
   // pengajuan pkl
   addPengajuanPkl,

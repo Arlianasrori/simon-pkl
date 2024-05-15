@@ -15,6 +15,7 @@ siswaRouter.use(siswaMiddleware)
 siswaRouter.put("/updatePassword/:id",siswaController.updatePassword)
 
 siswaRouter.get('/getSiswa', siswaController.getSiswaById)
+siswaRouter.get('/getProfile', siswaController.getProfile)
 
 // dudi
 siswaRouter.get('/getDudi', siswaController.getDudi)
