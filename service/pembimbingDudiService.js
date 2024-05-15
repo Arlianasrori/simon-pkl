@@ -16,6 +16,7 @@ import ejs from 'ejs'
 import { selectPebimbingDudiObject } from "../utils/pembimbingDudiSelect.js";
 import { getQueryAbsen } from "../utils/getQueryAbsen.js";
 import { generatePdf } from "../utils/generatePdf.js";
+import { selectAbsenObject } from "../utils/absenSelect.js";
 
 const updatePassword = async (id, password) => {
   id = await validate(adminValidation.idValidation, id)
@@ -513,52 +514,19 @@ const findAllAbsen = async (pembimbingDudi,query) => {
      monthEnd = `${query.years}-0${query.month}-31`
   }
 
-  return db.siswa.findMany({
+  return db.absen.findMany({
     where : {
-      AND : [
-        {
-          id_pembimbing_dudi : pembimbingDudi.id
-        }
-      ]
-    },
-    select : {
-      id : true,
-      nama : true,
-      absen : {
-        where : {
-          AND : [
-            {
-              tanggal : {
-                gte : monthStart
-              }
-            },
-            {
-              tanggal : {
-                lte : monthEnd
-              }
-            }
-          ]
-        },
-            select : {
-                absen_masuk : true,
-                status_absen_masuk : true,
-                keterangan_absen_masuk : true,
-                absen_pulang : true,
-                status_absen_pulang : true,
-                keterangan_absen_pulang : true,
-                foto : true,
-                status : true,
-                tanggal : true,
-            },
-            orderBy : {
-              tanggal : "desc"
-            }
+      siswa : {
+        id_pembimbing_dudi : pembimbingDudi.id
       }
-    }
-}) 
+    },
+    select : selectAbsenObject
+  }) 
 }
 const findAbsenById = async (pembimbingDudi,id) => {
   id = await validate(adminValidation.idValidation,id)
+  console.log(pembimbingDudi);
+  console.log(id);
 
   const absen = await db.absen.findFirst({
     where : {
@@ -579,12 +547,13 @@ const findAbsenById = async (pembimbingDudi,id) => {
       keterangan_absen_masuk : true,
       absen_pulang : true,
       status_absen_pulang : true,
-      keterangan_absen_keluar : true,
+      keterangan_absen_pulang : true,
       foto : true,
       status : true,
       tanggal : true,
   }
   })
+  console.log(absen);
 
   if(!absen) {
     throw new responseError(404,"data absen tidak ditemukan")
@@ -696,7 +665,7 @@ const cetakAbsen = async (query) => {
 
   const content = fs.readFileSync("pdf-sample/absenDudi.ejs",{encoding : "utf-8"})
   const dataPdf = {data : data,nama : findPembimbingDudi.nama, bulan : query.month && bulan[query.month - 1],years : query.years}
-  await generatePdf(content,dataPdf,"absen-pembimbingDudi")
+  await generatePdf(content,dataPdf,"absen-pembimbingDudi","absen")
 
   return {data : dataPdf}
 }
@@ -717,7 +686,7 @@ const cetakAnalisisAbsen = async (query) => {
   const dataPdf = {data : data,nama : findPembimbingDudi.nama, bulan : query.month && bulan[query.month - 1],years : query.years}
   const content = fs.readFileSync("pdf-sample/analisisAbsendudi.ejs",{encoding : "utf-8"})
 
-  await generatePdf(content,dataPdf,"analisis-pembimbingDudi")
+  await generatePdf(content,dataPdf,"analisis-pembimbingDudi","analisis")
   return {data : dataPdf}
 }
 

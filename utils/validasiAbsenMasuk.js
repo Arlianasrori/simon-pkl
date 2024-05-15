@@ -25,6 +25,8 @@ export const validasiAbsenMasuk = async (body) => {
                     jadwal_absen : true,
                     id : true,
                     status_absen_masuk : true,
+                    absen_masuk : true,
+                    absen_pulang : true,
                     status_absen_pulang : true                 
                 }
             }
@@ -34,7 +36,6 @@ export const validasiAbsenMasuk = async (body) => {
     if(!findSiswa) {
         throw new responseError(404,"data siswa tidak ditemukan")
     }
-
     if(findSiswa.absen[0].absen_masuk) {
         throw new responseError(400,"anda telah melakukan absen masuk")
     }

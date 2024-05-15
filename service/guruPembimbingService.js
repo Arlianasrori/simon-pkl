@@ -9,6 +9,7 @@ import pembimbingDudiValidation from "../validation/pembimbingDudiValidation.js"
 import bcrypt from "bcryptjs"
 import { generatePdf } from "../utils/generatePdf.js";
 import { getQueryAbsen } from "../utils/getQueryAbsen.js";
+import { selectAbsenObject } from "../utils/absenSelect.js";
 
 
 const updatePassword = async (id, password) => {
@@ -169,48 +170,19 @@ const findAllAbsen = async (guruPembimbing,query) => {
      monthEnd = `${query.years}-0${query.month}-31`
   }
 
-  return db.siswa.findMany({
+  return db.absen.findMany({
     where : {
       AND : [
         {
-          id_guru_pembimbing : guruPembimbing.id
+          siswa : {
+            id_guru_pembimbing : guruPembimbing.id
+          }
         }
       ]
     },
-    select : {
-      id : true,
-      nama : true,
-      absen : {
-        where : {
-          AND : [
-            {
-              tanggal : {
-                gte : monthStart
-              }
-            },
-            {
-              tanggal : {
-                lte : monthEnd
-              }
-            }
-          ]
-        },
-            select : {
-                id : true,
-                absen_masuk : true,
-                status_absen_masuk : true,
-                keterangan_absen_masuk : true,
-                absen_pulang : true,
-                status_absen_pulang : true,
-                keterangan_absen_keluar : true,
-                foto : true,
-                status : true,
-                tanggal : true,
-            },
-            orderBy : {
-              tanggal : "desc"
-            }
-      }
+    select : selectAbsenObject,
+    orderBy : {
+      tanggal : "asc"
     }
 }) 
 }
@@ -355,7 +327,7 @@ const cetakAbsen = async (query) => {
 
   const content = fs.readFileSync("pdf-sample/absenPembimbingDudi.ejs",{encoding : "utf-8"})
   const dataPdf = {data : data,nama : findGuruPembimbing.nama, bulan : query.month && bulan[query.month - 1],years : query.years}
-  await generatePdf(content,dataPdf,"absen-guruPembimbing")
+  await generatePdf(content,dataPdf,"absen-guruPembimbing","absen")
 
   return {data : dataPdf}
 }
@@ -376,7 +348,7 @@ const cetakAnalisisAbsen = async (query) => {
   const dataPdf = {data : data,nama : findGuruPembimbing.nama, bulan : query.month && bulan[query.month - 1],years : query.years}
   const content = fs.readFileSync("pdf-sample/analisisAbsenGuruPembimbing.ejs",{encoding : "utf-8"})
 
-  await generatePdf(content,dataPdf,"analisis-guruPembimbing")
+  await generatePdf(content,dataPdf,"analisis-guruPembimbing","analisis")
   return {data : dataPdf}
 }
 

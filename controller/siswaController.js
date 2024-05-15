@@ -244,10 +244,10 @@ const AddLaporanSiswaPkl = async (req, res, next) => {
     const image = req.files && req.files.dokumentasi;
     const url = `http://${req.hostname}:2008/laporan_siswa_pkl`;
 
-    const result = await siswaService.AddLaporanSiswaPkl(body, image, url);
+    const sult = await siswaService.AddLaporanSiswaPkl(body, image, url);
     res.status(200).json({
-      msg: "Success",
-      data: result,
+      msg: "succes",
+      data: sult
     });
   } catch (error) {
     next(error);
@@ -388,7 +388,7 @@ const getCountNotificationNotRead = async (req, res, next) => {
 // absen
 const cekRadiusKoordinat = async (req, res, next) => {
   try {
-    const body = req.body.body
+    const body = req.body
     const siswa = req.siswa
     const result = await absenService.cekRadiusKoordinat(body,siswa)
     res.status(200).json({
@@ -418,7 +418,7 @@ const addAbsenMasuk = async (req,res,next) => {
   try {
       const body = req.body
       body.id_siswa = req.siswa.id
-      const files = req.files.foto
+      const files = req.files && req.files.foto
       const url = `http://${req.hostname}:2008/absen`
 
       const result = await absenService.addAbsenMasuk(body,files,url)

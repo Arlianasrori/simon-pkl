@@ -52,10 +52,7 @@ export const validasiAbsen = async (body) => {
                     id_jadwal : cekWaktu.absen[0].jadwal_absen.id
                 },
                 {
-                    nama : {
-                        equals : datelocal[0],
-                        mode : "insensitive"
-                    },
+                    nama : datelocal[0].toLowerCase()
                     
                 }
             ]

@@ -21,12 +21,19 @@ const addSekolah = async (sekolah,alamat,kepalaSekolah,image,url) => {
 
     const findSekolah = await db.sekolah.findFirst({
         where : {
-            id : sekolah.id
+            OR : [
+                {
+                    id : sekolah.id
+                },
+                {
+                    npsn : sekolah.npsn
+                }
+            ]       
         }
     })
 
     if(findSekolah) {
-        throw new responseError(400,"something wrong")
+        throw new responseError(400,"sekolah telah ditambahkan")
     }
 
     if(image) {
@@ -123,14 +130,20 @@ const deleteSekolah = async (id) => {
         throw new responseError(404,"data sekolah tidak ditemukan")
     }
     const fileName = findSekolah.logo.split("/")[4]
-    fs.unlinkSync(`./public/logo/${fileName}`,(err) => {
-        console.log(err);
-    })
-    return db.sekolah.delete({
+
+    const deleteSekolah = await db.sekolah.delete({
         where : {
             id : id
         }
     })
+
+    if(fileName) {
+        fs.unlinkSync(`public/logo/${fileName}`,(err) => {
+            console.log(err);
+        })
+    }
+
+    return deleteSekolah
 }
 const getAllSekolah = async (page) => {
     page = await validate(adminValidation.idValidation,page)

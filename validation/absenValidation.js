@@ -9,7 +9,11 @@ const addJadwalAbsen = joi.object({
     tanggal_berakhir : joi.string().required(),
     selisih_tanggal_day : joi.string().required(),
 })
-const dayValidation = joi.array().items(joi.valid("senin","selasa","rabu","kamis","jumat","sabtu","minggu"))
+const dayValidation = joi.array().items(joi.object({
+    nama : joi.valid("senin","selasa","rabu","kamis","jumat","sabtu","minggu"),
+    batas_absen_masuk : joi.string().required(),
+    batas_absen_pulang : joi.string().required()
+}))
 
 // absen
 const addAbsenMasukValidation = joi.object({

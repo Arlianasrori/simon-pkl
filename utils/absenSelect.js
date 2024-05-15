@@ -1,12 +1,4 @@
 export const selectAbsenObject = {
-    siswa : {
-        select : {
-            nama : true,
-            nis : true,
-            kelas : true,
-            jurusan : true,                   
-        }
-    },
     id : true,
     absen_masuk : true,
     absen_pulang : true,
@@ -16,4 +8,12 @@ export const selectAbsenObject = {
     keterangan_absen_masuk : true,
     keterangan_absen_pulang : true,
     foto : true,
+    siswa : {
+        select : {
+            nama : true,
+            nis : true,
+            kelas : true,
+            jurusan : true,                   
+        }
+    }
 }

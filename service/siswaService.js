@@ -622,7 +622,9 @@ const AddLaporanSiswaPkl = async (body, image, url) => {
     throw new responseError(404, "Laporan Pkl Sudah Di Tambahkan");
   }
 
-  return db.laporan_siswa_pkl.create
+  return db.laporan_siswa_pkl.create({
+    data : body
+  })
 };
 
 const updateLaporanSiswaPkl = async (id, body, image, url) => {
