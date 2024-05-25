@@ -9,7 +9,7 @@ export const file = async (image,url) => {
     }
     const fullName = `${new Date().getTime()}-${fileName}`
     const fullPath = `${url}/${fullName}`
-    const pathSaveFile = `./public/images/${fullName}`
+    const pathSaveFile = `./public/absen/${fullName}`
 
     return {fullPath,pathSaveFile}
 }

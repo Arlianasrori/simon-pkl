@@ -9,12 +9,26 @@ import { file } from "../utils/absenSaveImages.js"
 import { validasiAbsen } from "../utils/validasiAbsen.js"
 import { validasiAbsenMasuk } from "../utils/validasiAbsenMasuk.js"
 import axios from "axios"
+import { getQueryAbsen } from "../utils/getQueryAbsen.js"
 
-
+const selectJadwalAbsen = {
+    id : true,
+    tanggal_mulai : true,
+    tanggal_berakhir : true,
+    selisih_tanggal_day : true,
+    hari : {
+        select : {
+            nama : true,
+            batas_absen_masuk : true,
+            batas_absen_pulang : true
+        }
+    }
+}
 
 const addJadwalAbsen = async (body,day) => {
     body.selisih_tanggal_day = getselish(body.tanggal_mulai,body.tanggal_berakhir)
     body = await validate(absenValidation.addJadwalAbsen,body)
+    day = await validate(absenValidation.dayValidation,day)
 
     const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
         where : {
@@ -32,6 +46,10 @@ const addJadwalAbsen = async (body,day) => {
 
     if(findPembimbingDudi.id_dudi != body.id_dudi) {
         throw new responseError(404,"invalid id dudi")
+    }
+
+    if(body.tanggal_mulai > body.tanggal_berakhir) {
+        throw new responseError(400,"kesalahan dalam memasukkan tanggal,harap periksa kembali")
     }
 
     const cekTanggal = await db.absen_jadwal.findFirst({
@@ -92,7 +110,8 @@ const findAllJadwalAbsen = async (id_pembimbing_dudi) => {
     return db.absen_jadwal.findMany({
         where : {
             id_pembimbing_dudi : id_pembimbing_dudi
-        }
+        },
+        select : selectJadwalAbsen
     })
 }
 
@@ -102,7 +121,8 @@ const findJadwalAbsenById = async (id) => {
     const findJadwalAbsen = await db.absen_jadwal.findUnique({
         where : {
                 id : id
-        }
+        },
+        select : selectJadwalAbsen
     })
 
     if(!findJadwalAbsen) {
@@ -124,6 +144,9 @@ const addAbsenMasuk = async (body,image,url) => {
     body.tanggal = dateNow
     body.absen_masuk = hourNow
 
+    if(!image) {
+        throw new responseError(400,"foto is required")
+    }
     const {fullPath,pathSaveFile} = await file(image,url)
     image.mv(pathSaveFile,(err) => {
         if(err) {
@@ -131,7 +154,7 @@ const addAbsenMasuk = async (body,image,url) => {
         }
     })
     body.foto = fullPath
-
+    
     const findDay = await db.hari_absen.findFirst({
         where : {
             AND : [
@@ -139,10 +162,7 @@ const addAbsenMasuk = async (body,image,url) => {
                     id_jadwal : jadwal.id
                 },
                 {
-                    nama : {
-                        equals : day,
-                        mode : "insensitive"
-                    }
+                    nama : day.toLowerCase()
                 }
             ]
         }
@@ -162,7 +182,7 @@ const addAbsenMasuk = async (body,image,url) => {
     body.status = "hadir"
 
     let data = {
-        id_absen_jadwal : body.id_absen_jadwal,
+        id_absen_jadwal : jadwal.id,
         id_siswa : body.id_siswa,
         tanggal : body.tanggal,
         absen_masuk : body.absen_masuk,
@@ -246,7 +266,7 @@ const absenTidakMemenuhiJam = async (body) => {
     }
 
     if(findAbsen.absen_pulang) {
-        throw new responseError(400,"anda telah melakukan absen keluar")
+        throw new responseError(400,"anda telah melakukan absen pulang")
     }
 
 
@@ -283,7 +303,7 @@ const absenTidakMemenuhiJam = async (body) => {
 
 
 // izin telat
-const absenIzinTelat = async (body) => {
+const absenIzinTelat = async (body,image,url) => {
     body = await validate(absenValidation.izinAbsenValidation,body)
     const cekradius = await cekRadiusKoordinat({latitude : body.latitude,longtitude : body.longtitude},{id : body.id_siswa})
     const data = {}
@@ -341,10 +361,7 @@ const absenIzinTelat = async (body) => {
                     id_jadwal : findSiswa.absen[0].jadwal_absen.id
                 },
                 {
-                    nama : {
-                        equals : datelocal[0],
-                        mode : "insensitive"
-                    },
+                    nama : datelocal[0].toLowerCase()
                     
                 }
             ]
@@ -357,10 +374,16 @@ const absenIzinTelat = async (body) => {
         throw  new responseError(400,"jadwal absen untuk hari ini tidak ditemukan")
     }
    
-    if(findSiswa.absen[0].status_absen_masuk) { 
+    if(findSiswa.absen[0].status_absen_masuk) {
         if(findSiswa.absen[0].status_absen_pulang) {
             throw new responseError(400,"anda sudah melakukan absen pulang")
         } 
+
+        if(parseFloat(hourNow) - parseFloat(findDay.batas_absen_masuk) < parseFloat(findDay.batas_absen_pulang) - parseFloat(findDay.batas_absen_masuk)) {
+            if(body.status == "telat") {
+                throw new responseError(400,"anda belum memenuhi waktu jam kerja,lakukan izin jika ingin melakukan absen")
+            }
+        }
 
         data.absen_pulang = hourNow
         data.status_absen_pulang = body.status
@@ -373,7 +396,7 @@ const absenIzinTelat = async (body) => {
                 },
                 data : data
             })
-            await tx.izin_absen_keluar.create({
+            await tx.izin_absen_pulang.create({
                 data : {
                     id : parseInt(generateId()),
                     note : body.keterangan,
@@ -391,6 +414,7 @@ const absenIzinTelat = async (body) => {
 
         data.absen_masuk = hourNow
         data.status_absen_masuk = body.status
+        data.status = "hadir"
     
         return db.$transaction(async tx => {
             const updateAbsen = await tx.absen.update({
@@ -449,6 +473,10 @@ const absendiluarRadius = async (body) => {
         throw new responseError(404,"siswa tidak ditemukan")
     }
 
+    if(!findSiswa.absen[0]) {
+        throw new responseError(404,"something wrong")
+    }
+
     const hourNow = datelocal[1]
     const selisih_tanggal_on_day = parseInt(getselish(findSiswa.absen[0].jadwal_absen.tanggal_mulai,dateNow))
 
@@ -458,8 +486,8 @@ const absendiluarRadius = async (body) => {
         throw new responseError(400,"tanggal absen tidak sesuai dengan jadawal")
     }
 
-    if(!findSiswa.absen[0]) {
-        throw new responseError(400,"something went wrong")
+    if(!findSiswa.absen[0].status_absen_masuk) {
+        throw new responseError(400,"anda belum melakukan absen masuk")
     }
 
     const findDay = await db.hari_absen.findFirst({
@@ -469,10 +497,7 @@ const absendiluarRadius = async (body) => {
                     id_jadwal : findSiswa.absen[0].jadwal_absen.id
                 },
                 {
-                    nama : {
-                        equals : datelocal[0],
-                        mode : "insensitive"
-                    },
+                    nama : datelocal[0].toLowerCase()
                     
                 }
             ]
@@ -500,7 +525,7 @@ const absendiluarRadius = async (body) => {
                 },
                 data : data
             })
-            await tx.izin_absen_keluar.create({
+            await tx.izin_absen_pulang.create({
                 data : {
                     id : parseInt(generateId()),
                     note : body.keterangan,
@@ -518,6 +543,7 @@ const absendiluarRadius = async (body) => {
 
         data.absen_masuk = hourNow
         data.status_absen_pulang = "diluar_radius"
+        data.status = "hadir"
     
         return db.$transaction(async tx => {
             const updateAbsen = await tx.absen.update({
@@ -585,16 +611,18 @@ const cekAbsen = async (body) => {
         }
     })
 
-    console.log(dateNow);
 
     if(!findSiswa) {
         throw new responseError(404,"siswa tidak ditemukan")
     }
 
+    if(!findSiswa.dudi) {
+        return {absen : false,jenis_absen : null,msg : "anda belum memiliki tempat pkl,segera cari tempat pkl"}
+    }
+
     if(!findSiswa.absen[0]) {
-        console.log(findSiswa.dudi.absen_jadwal[0]);
         if(!findSiswa.dudi.absen_jadwal[0]) {
-            return {absen : false,msg : "jadawl absen tidak ditemukan hari ini"}
+            return {absen : false,jenis_absen : null,msg : "jadwal absen tidak ditemukan hari ini"}
         }
         const findDay = await db.hari_absen.findFirst({
             where : {
@@ -603,10 +631,7 @@ const cekAbsen = async (body) => {
                         id_jadwal : findSiswa.dudi.absen_jadwal[0].id
                     },
                     {
-                        nama : {
-                            equals : datelocal[0],
-                            mode : "insensitive"
-                        }
+                        nama : datelocal[0].toLowerCase()
                     }
                 ]
             }
@@ -626,13 +651,13 @@ const cekAbsen = async (body) => {
         }
 
 
-        return {absen : false,msg : "jadawl absen tidak ditemukan hari ini"}
+        return {absen : false,jenis_absen : null,msg : "jadawl absen tidak ditemukan hari ini"}
     }
 
     if(findSiswa.absen[0].status_absen_masuk) {
-        return {absen : true,jenis_absen : "absen masuk",msg : "silahkan melakukan absen masuk"}
-    }else {
         return {absen : true,jenis_absen : "absen pulang",msg : "silahkan melakukan absen pulang"}
+    }else {
+        return {absen : true,jenis_absen : "absen masuk",msg : "silahkan melakukan absen masuk"}
     }
 }
 
@@ -651,14 +676,11 @@ const findAbsen = async (id_siswa) => {
             status_absen_masuk : true,
             status_absen_pulang : true,
             keterangan_absen_masuk : true,
-            keterangan_absen_keluar : true,
+            keterangan_absen_pulang : true,
             foto : true,
-            izin : {
-                select : {
-                    note : true,
-                    status_izin : true
-                }
-            }
+        },
+        orderBy : {
+            tanggal : "asc"
         }
     })
 }
@@ -728,7 +750,7 @@ const findAbsenFilter = async (query) => {
             status_absen_masuk : true,
             status_absen_pulang : true,
             keterangan_absen_masuk : true,
-            keterangan_absen_keluar : true,
+            keterangan_absen_pulang : true,
             foto : true,
             jadwal_absen : true,
             siswa : {
@@ -743,87 +765,9 @@ const findAbsenFilter = async (query) => {
 }
 const analisisAbsen = async (query) => {
     query = await validate(absenValidation.findAbsenFilterValidation,query)
+    const dbQuery = getQueryAbsen(query)
 
-    if(query.month_ago) {
-        query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago + 1)
-    }
-    console.log(query);
-
-    return db.$queryRaw`SELECT COUNT(status_absen_masuk) filter (where status_absen_masuk = 'hadir') as absen_masuk_hadir,COUNT(status_absen_masuk) filter (where absen_masuk = 'tidak_hadir') as absen_masuk_tidak_hadir,COUNT(absen_masuk) filter (where status_absen_masuk = 'telat') as absen_masuk_telat,COUNT(status_absen_masuk) filter (where status_absen_masuk = 'izin') as absen_masuk_izin,
-    COUNT(status_absen_keluar) filter (where status_absen_keluar = 'hadir') as absen_keluar_hadir,COUNT(status_absen_keluar) filter (where status_absen_keluar = 'tidak_hadir') as absen_keluar_tidak_hadir,COUNT(status_absen_keluar) filter (where status_absen_keluar = 'telat') as absen_keluar_telat,COUNT(status_absen_keluar) filter (where status_absen_keluar = 'izin') as absen_keluar_izin,
-    id_siswa,siswa.nama
-    FROM absen
-    INNER JOIN siswa ON absen.id_siswa = siswa.id
-    WHERE absen.id_siswa = ${query.id_siswa} AND siswa.id_pembimbing_dudi = ${query.id_pembimbing_dudi} AND siswa.id_guru_pembimbing = ${query.id_guru_pembimbing} AND siswa.id_dudi = ${query.id_dudi} AND (absen.tanggal = ${query.tanggal} OR (absen.tanggal >= ${query.tanggal_start} AND absen.tanggal <= ${query.tanggal_end})) AND absen.tanggal = ?${query.month_ago}
-    GROUP BY id_siswa,nama`
-    // return db.absen.findMany({
-    //     where : {
-    //         AND : [
-    //             {
-    //                 id_siswa : query.id_siswa
-    //             },
-    //             {
-    //                 siswa : {
-    //                     id_pembimbing_dudi : query.id_pembimbing_dudi
-    //                 }
-    //             },
-    //             {
-    //                 siswa : {
-    //                     id_guru_pembimbing : query.id_guru_pembimbing
-    //                 }
-    //             },
-    //             {
-    //                 siswa : {
-    //                     id_dudi : query.id_dudi
-    //                 }
-    //             },
-    //             {
-    //                 OR : [
-    //                     {
-    //                         tanggal : query.tanggal
-    //                     },
-    //                     {
-    //                         AND : [
-    //                             {
-    //                                 tanggal : {
-    //                                     gte : query.tanggal_start
-    //                                 }
-    //                             },
-    //                             {
-    //                                 tanggal : {
-    //                                     lte : query.tanggal_end
-    //                                 }
-    //                             },
-    //                         ]
-    //                     }
-    //                 ]
-    //             },
-    //             {
-    //                 tanggal : query.month_ago
-    //             }
-    //         ]
-    //     },
-    //     orderBy : {
-    //         tanggal : "desc"
-    //     },
-    //     select : {
-    //         id : true,
-    //         tanggal : true,
-    //         absen_masuk : true,
-    //         absen_pulang : true,
-    //         status_absen_masuk : true,
-    //         status_absen_keluar : true,
-    //         foto : true,
-    //         jadwal_absen : true,
-    //         siswa : {
-    //             select : {
-    //                 id : true,
-    //                 nama : true,
-    //                 nis : true
-    //             }
-    //         }
-    //     }
-    // })
+    return db.$queryRawUnsafe(dbQuery)
 }
 
 
@@ -912,7 +856,7 @@ async function cekRadiusKoordinat (body,siswa) {
     }
 
     if(!findSiswa.id_dudi) {
-        throw new responseError(400,"siswa belum memiliki tampat pkl")
+        throw new responseError(400,"siswa belum memiliki tempat pkl")
     }
 
     const findKordinat = await db.kordinat_absen.findMany({
@@ -922,24 +866,23 @@ async function cekRadiusKoordinat (body,siswa) {
     })
 
     if(!findKordinat[0]) {
-        throw new responseError(404,"kordinat tidak ditemukan")
+        throw new responseError(404,"kordinat tidak ditemukan,pembimbing dudi belum memasukkan kordinat untuk absen")
     }
 
     for (let index = 0; index < findKordinat.length; index++) {
         const e = findKordinat[index];
-        
+
         const cekDistance = await axios({
             method : "GET",
             url : `https://api.distancematrix.ai/maps/api/distancematrix/json?origins=${e.latitude},${e.longtitude}&destinations=${body.latitude},${body.longtitude}&key=AE8YE06HZ7XeZEcOsDR4SiShL8zPocpQ7XpgdctgGrECYiA1nLg09ffJxxa1n9M3`,
         })
         
-        if(cekDistance.status !== 200) {
-                throw new responseError(400,"invalid koordinat")
-        }
-        const distance = cekDistance.data.rows[0].elements[0].distance.value
-    
-        if(e.radius_absen_meter > distance) {
-            return {insideRadius : true,msg : "anda berada didalam radius"}
+        if(cekDistance.status == 200) {
+            const distance = cekDistance.data.rows[0].elements[0].distance.value
+        
+            if(e.radius_absen_meter > distance) {
+                return {insideRadius : true,msg : "anda berada didalam radius"}
+            }
         }
     }
 
@@ -966,6 +909,22 @@ const deleteKoordinatAbsen = async (id_koordinat) => {
     })
 }
 
+const findkoordinatById = async (id_koordinat) => {
+    id_koordinat = await validate(adminValidation.idValidation,id_koordinat)
+
+    const findKordinat = await db.kordinat_absen.findUnique({
+        where : {
+            id : id_koordinat
+        }
+    })
+
+    if(!findKordinat) {
+        throw new responseError(404,"data kordinat tidak ditemmukan")
+    }
+
+    return findKordinat
+}
+
 export default {
     addJadwalAbsen,
     findAllJadwalAbsen,
@@ -988,5 +947,6 @@ export default {
     addKordinatAbsen,
     findAllKordinatAbsen,
     cekRadiusKoordinat,
-    deleteKoordinatAbsen
+    deleteKoordinatAbsen,
+    findkoordinatById
 }

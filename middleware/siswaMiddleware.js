@@ -3,7 +3,7 @@ import { db } from "../config/prismaClient.js"
 
 export const siswaMiddleware = async (req,res,next) => {
     const tokenHeader = req.get("Authorization")
-    console.log(tokenHeader);
+    
     const token = tokenHeader && tokenHeader.split(" ")[1]
 
     if(!token){
@@ -17,7 +17,6 @@ export const siswaMiddleware = async (req,res,next) => {
                 msg : err.message
             }
         }
-        req.siswa = siswa
         return siswa
     })
 
@@ -29,7 +28,11 @@ export const siswaMiddleware = async (req,res,next) => {
             id : true,
             nama : true,
             nis : true,
-            id_sekolah : true
+            id_sekolah : true,
+            jenis_kelamin : true,
+            id_dudi : true,
+            id_tahun : true,
+            id_pembimbing_dudi : true
         }
     })
 
@@ -44,6 +47,6 @@ export const siswaMiddleware = async (req,res,next) => {
             msg : siswa.msg
         })
     }
-    
+    req.siswa = findSiswa
      next()
 }

@@ -4,7 +4,6 @@ import { db } from "../config/prismaClient.js"
 export const pembimbingDudiMiddleware = async (req,res,next) => {
     const tokenHeader = req.get("Authorization")
     const token = tokenHeader && tokenHeader.split(" ")[1]
-    console.log(token);
 
     if(!token){
         return res.status(401).json({msg : "unauthorized"})
@@ -17,14 +16,18 @@ export const pembimbingDudiMiddleware = async (req,res,next) => {
                 msg : err.message
             }
         }
-        req.pembimbingDudi = pembimbingDudi
-        console.log("j");
         return pembimbingDudi
     })
 
     const findPembimbingDudi = await db.pembimbing_dudi.findFirst({
         where : {
             id : pembimbingDudi.id
+        },
+        select : {
+            id : true,
+            id_dudi : true,
+            add_by : true,
+            nama : true
         }
     })
 
@@ -39,6 +42,7 @@ export const pembimbingDudiMiddleware = async (req,res,next) => {
             msg : pembimbingDudi.msg
         })
     }
-    console.log("hay");
+
+    req.pembimbingDudi = findPembimbingDudi
      next()
 }

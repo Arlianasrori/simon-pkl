@@ -14,6 +14,9 @@ import absenValidation from "../validation/absenValidation.js";
 import puppeteer from "puppeteer"
 import ejs from 'ejs'
 import { selectPebimbingDudiObject } from "../utils/pembimbingDudiSelect.js";
+import { getQueryAbsen } from "../utils/getQueryAbsen.js";
+import { generatePdf } from "../utils/generatePdf.js";
+import { selectAbsenObject } from "../utils/absenSelect.js";
 
 const updatePassword = async (id, password) => {
   id = await validate(adminValidation.idValidation, id)
@@ -173,7 +176,24 @@ const AccDcnPengajuanPkl = async (body,id_pengajuan) => {
     })
 
     if(updatePengajuan.status == "ditolak") {
-      return {pengajuan : updatePengajuan,msg : `mohon maaf anda ditolak oleh ${findPengajuan.dudi.nama_instansi_perusahaan}`}
+      const payload = {
+        id : generateId(),
+        id_siswa : findPengajuan.siswa.id,
+        judul : "kabar Baik Untukmu",
+        isi : `Ajuan pklmu telah ditolak oleh ${findPengajuan.dudi.nama_instansi_perusahaan}`
+      }
+  
+      const Now = new Date()
+  
+      payload.tanggal = Now.toISOString().substring(0, 10)
+      const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
+      payload.time = datelocal.split(" ")[1]
+      
+      await tx.notification.create({
+        data : payload
+      })
+
+      return {pengajuan : updatePengajuan}
     }
 
     await tx.siswa.update({
@@ -187,6 +207,23 @@ const AccDcnPengajuanPkl = async (body,id_pengajuan) => {
         tanggal_masuk : body.tanggal_masuk,
         tanggal_keluar : body.tanggal_keluar
       }
+    })
+
+    const payload = {
+      id : generateId(),
+      id_siswa : findPengajuan.siswa.id,
+      judul : "kabar Baik Untukmu",
+      isi : `Ajuan pklmu telah di${body.status} oleh ${findPengajuan.dudi.nama_instansi_perusahaan}`
+    }
+
+    const Now = new Date()
+
+    payload.tanggal = Now.toISOString().substring(0, 10)
+    const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
+    payload.time = datelocal.split(" ")[1]
+    
+    await tx.notification.create({
+      data : payload
     })
 
     return {pengajuan : updatePengajuan,msg : `selamat anda diterima oleh ${findPengajuan.dudi.nama_instansi_perusahaan}`}
@@ -233,6 +270,7 @@ const updateStatusCancelPkl = async (id,status,id_pembimbing_dudi) => {
     select : {
       id : true,
       status : true,
+      id_siswa : true,
       dudi : {
         select : {
           id : true,
@@ -265,7 +303,24 @@ const updateStatusCancelPkl = async (id,status,id_pembimbing_dudi) => {
     })
 
     if(updatePengajuan.status == "tidak_setuju") {
-      return {pengajuan : updatePengajuan,msg : `mohon maaf permintaan anda untuk mengundurkan diri di ${findCancelPengajuan.dudi.nama_instansi_perusahaan} ditolak`}
+      const payload = {
+        id : generateId(),
+        id_siswa : findCancelPengajuan.id_siswa,
+        judul : "kabar untukmu",
+        isi : `Ajuan cancel untuk pklmu tidak disetujui oleh ${findCancelPengajuan.dudi.nama_instansi_perusahaan}`
+      }
+  
+      const Now = new Date()
+  
+      payload.tanggal = Now.toISOString().substring(0, 10)
+      const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
+      payload.time = datelocal.split(" ")[1]
+      
+      await tx.notification.create({
+        data : payload
+      })
+
+      return {pengajuan : updatePengajuan}
     }
 
     await tx.siswa.update({
@@ -281,7 +336,24 @@ const updateStatusCancelPkl = async (id,status,id_pembimbing_dudi) => {
       }
     })
 
-    return {pengajuan : updatePengajuan,msg : `selamat permintaan anda untuk mengundurkan diri di ${findCancelPengajuan.dudi.nama_instansi_perusahaan} diterimah,silahkan mencari tempat pkl baru`}
+    const payload = {
+      id : generateId(),
+      id_siswa : findCancelPengajuan.id_siswa,
+      judul : "kabar Baik Untukmu",
+      isi : `Ajuan cancel untuk pklmu telah disetujui oleh ${findCancelPengajuan.dudi.nama_instansi_perusahaan}`
+    }
+
+    const Now = new Date()
+
+    payload.tanggal = Now.toISOString().substring(0, 10)
+    const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
+    payload.time = datelocal.split(" ")[1]
+    
+    await tx.notification.create({
+      data : payload
+    })
+
+    return {pengajuan : updatePengajuan}
   })
 }
 
@@ -296,6 +368,10 @@ const AddLaporanPkl = async (body, image, url) => {
     month: "long",
     day: "numeric",
   };
+
+  if(!image) {
+    throw new responseError(400,"file laporan is required")
+  }
 
   const { pathSaveFile, fullPath } = await fileLaporaPkl(image, url);
   body.file_laporan = fullPath;
@@ -421,12 +497,88 @@ const findLaporanPklById = async (id) => {
 };
 
 // absen
-const cetakAbsen = async (query) => {
+const findAllAbsen = async (pembimbingDudi,query) => {
+  const Now = new Date()
+  const dateNow = `${Now.getFullYear()}-${("0" + (Now.getMonth() + 1)).slice(-2)}-${("0" + (Now.getDay())).slice(-2)}`
+
   query = await validate(absenValidation.findAbsenFilterValidation,query)
-console.log(query);
-  if(query.month_ago) {
-    query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago + 1)
+
+  let monthStart;
+  let monthEnd;
+
+  if(query.month) {
+    if(!query.years) {
+      query.years = dateNow.split("-")[0]
+    }
+     monthStart = `${query.years}-0${query.month}-01`
+     monthEnd = `${query.years}-0${query.month}-31`
   }
+
+  return db.absen.findMany({
+    where : {
+      siswa : {
+        id_pembimbing_dudi : pembimbingDudi.id
+      }
+    },
+    select : selectAbsenObject
+  }) 
+}
+const findAbsenById = async (pembimbingDudi,id) => {
+  id = await validate(adminValidation.idValidation,id)
+  console.log(pembimbingDudi);
+  console.log(id);
+
+  const absen = await db.absen.findFirst({
+    where : {
+      AND : [
+        {
+          id : id
+        },
+        {
+          siswa : {
+            id_pembimbing_dudi : pembimbingDudi.id
+          }
+        }
+      ]
+    },
+    select : {
+      absen_masuk : true,
+      status_absen_masuk : true,
+      keterangan_absen_masuk : true,
+      absen_pulang : true,
+      status_absen_pulang : true,
+      keterangan_absen_pulang : true,
+      foto : true,
+      status : true,
+      tanggal : true,
+  }
+  })
+  console.log(absen);
+
+  if(!absen) {
+    throw new responseError(404,"data absen tidak ditemukan")
+  }
+
+  return absen
+}
+const cetakAbsen = async (query) => {
+  const Now = new Date()
+  const dateNow = `${Now.getFullYear()}-${("0" + (Now.getMonth() + 1)).slice(-2)}-${("0" + (Now.getDay())).slice(-2)}`
+
+  query = await validate(absenValidation.findAbsenFilterValidation,query)
+
+  let monthStart;
+  let monthEnd;
+
+  if(query.month) {
+    if(!query.years) {
+      query.years = dateNow.split("-")[0]
+    }
+     monthStart = `${query.years}-0${query.month}-01`
+     monthEnd = `${query.years}-0${query.month}-31`
+  }
+
+  const bulan = ["januari","februari","maret","april","mei","juni","juli","agustus","september","oktober","november","desember"]
 
   const data = await db.absen.findMany({
     where : {
@@ -443,6 +595,20 @@ console.log(query);
                 siswa : {
                     id_dudi : query.id_dudi
                 }
+            },
+            {
+              AND : [
+                {
+                  tanggal : {
+                    gte : monthStart
+                  }
+                },
+                {
+                  tanggal : {
+                    lte : monthEnd
+                  }
+                }
+              ]
             },
             {
                 OR : [
@@ -464,9 +630,6 @@ console.log(query);
                         ]
                     }
                 ]
-            },
-            {
-                tanggal : query.month_ago
             }
         ]
     },
@@ -478,7 +641,8 @@ console.log(query);
         absen_masuk : true,
         absen_pulang : true,
         status_absen_masuk : true,
-        status_absen_keluar : true,
+        status_absen_pulang : true,
+        status : true,
         siswa : {
             select : {
                 nama : true,
@@ -499,16 +663,96 @@ console.log(query);
   },
   })
 
-  const html = fs.readFileSync("index.ejs",{encoding : "utf-8"})
+  const content = fs.readFileSync("pdf-sample/absenDudi.ejs",{encoding : "utf-8"})
+  const dataPdf = {data : data,nama : findPembimbingDudi.nama, bulan : query.month && bulan[query.month - 1],years : query.years}
+  await generatePdf(content,dataPdf,"absen-pembimbingDudi","absen")
 
-  const browser = await puppeteer.launch({ headless: true});
-  const page = await browser.newPage();
-  await page.setContent(ejs.render(html,{data : data,nama : findPembimbingDudi.nama, tanggal_start: query.tanggal_start, tanggal_end: query.tanggal_end}))
-  const pdf = await page.pdf({ format : "a4",path : "pdf.pdf"});
+  return {data : dataPdf}
+}
 
-  await browser.close();
+const cetakAnalisisAbsen = async (query) => {
+  query = await validate(absenValidation.findAbsenFilterValidation,query)
 
-  return data
+  const dbQuery = getQueryAbsen(query)
+  const data = await db.$queryRawUnsafe(dbQuery)
+
+  const bulan = ["januari","februari","maret","april","mei","juni","juli","agustus","september","oktober","november","desember"]
+
+  const findPembimbingDudi = await db.pembimbing_dudi.findFirst({
+    where: {
+      id : query.id_pembimbing_dudi
+    },
+  })
+  const dataPdf = {data : data,nama : findPembimbingDudi.nama, bulan : query.month && bulan[query.month - 1],years : query.years}
+  const content = fs.readFileSync("pdf-sample/analisisAbsendudi.ejs",{encoding : "utf-8"})
+
+  await generatePdf(content,dataPdf,"analisis-pembimbingDudi","analisis")
+  return {data : dataPdf}
+}
+
+const cekKoordinat = async (id_pembimbing_dudi) => {
+  id_pembimbing_dudi = await validate(adminValidation.idValidation,id_pembimbing_dudi)
+  const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
+    where : {
+      id : id_pembimbing_dudi
+    }
+  })
+
+  if(!findPembimbingDudi) {
+    throw new responseError(404,"pembimbing dudi tidak ditemukan")
+  }
+
+  const findKoordinat = await db.kordinat_absen.findMany({
+    where : {
+      id_dudi : findPembimbingDudi.id_dudi
+    }
+  })
+
+  if(!findKoordinat[0]) {
+    return {koordinat : false}
+  }
+
+  return {koordinat : true}
+}
+const cekJadwalAbsen = async (id_pembimbing_dudi) => {
+  id_pembimbing_dudi = await validate(adminValidation.idValidation,id_pembimbing_dudi)
+
+  const findPembimbingDudi = await db.pembimbing_dudi.findUnique({
+    where : {
+      id : id_pembimbing_dudi
+    }
+  })
+
+  if(!findPembimbingDudi) {
+    throw new responseError(404,"data dudi tidak ditemukan")
+  }
+
+  const Now = new Date()
+
+  const dateNow = Now.toISOString().substring(0, 10)
+
+  const findJadwaAbsen = await db.absen_jadwal.findMany({
+    where : {
+      AND : [
+        {
+          tanggal_mulai : {
+            lte : dateNow
+          }
+        },
+        {
+          tanggal_berakhir : {
+            gte : dateNow
+          }
+        }
+      ]
+    }
+  })
+
+  if(!findJadwaAbsen[0]) {
+    return {jadwalAbsen : false}
+  }
+
+  return {jadwalAbsen : true}
 }
 
 // Kuota SISWA 
@@ -540,6 +784,8 @@ const addKuotaSiswa = async (body) => {
     const addkouta = await tx.kouta_siswa.create ({
       data: body,
       select : {
+        id : true,
+        id_dudi : true,
         jumlah_pria: true,
         jumlah_wanita: true,
         total: true
@@ -586,6 +832,8 @@ const updateKuotaSiswa = async (id,body) => {
     },
     data: body,
     select: {
+      id : true,
+      id_dudi : true,
       jumlah_pria: true,
       jumlah_wanita: true,
       total: true
@@ -631,6 +879,37 @@ const deleteKuotaSiswa = async (id) => {
     return {kouta : deleteKouta}
   })
 }
+const findAllKouta = async (id_dudi) => {
+  id_dudi = await validate(adminValidation.idValidation,id_dudi)
+
+  return db.kouta_siswa.findMany({
+    where : {
+      id_dudi : id_dudi
+    }
+  })
+}
+const findKoutabyid = async (id,id_dudi) => {
+  id_dudi = await validate(adminValidation.idValidation,id_dudi)
+  id = await validate(adminValidation.idValidation,id)
+
+  const findKouta = await db.kouta_siswa.findFirst({
+    where : {
+      AND : [
+        {
+          id_dudi : id_dudi
+        },
+        {
+          id : id
+        }
+      ]
+    }
+  })
+
+  if(!findKouta) {
+    throw new responseError(404,"data kouta tidak ditemukan")
+  }
+  return findKouta
+}
 
 export default {
   updatePassword,
@@ -661,11 +940,18 @@ export default {
 
 
   // absen
+  findAllAbsen,
+  findAbsenById,
   cetakAbsen,
+  cetakAnalisisAbsen,
+  cekKoordinat,
+  cekJadwalAbsen,
 
   // Kuota Siswa 
   addKuotaSiswa,
   updateKuotaSiswa,
-  deleteKuotaSiswa
+  deleteKuotaSiswa,
+  findAllKouta,
+  findKoutabyid
 };
 

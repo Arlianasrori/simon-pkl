@@ -1,18 +1,20 @@
 import express from "express"
 import guruPembimbingController from "../controller/guruPembimbingController.js"
 import { guruPembimbingMiddleware } from "../middleware/guruPembimbingMiddleware.js"
+import { refreshGuruPembimbingMiddleware } from "../middleware/refreshGuruPembimbingMiddleware.js"
 
 export const guruPembimbingRouter = express.Router()
-
+// token
+guruPembimbingRouter.get("/refreshToken",refreshGuruPembimbingMiddleware,guruPembimbingController.refreshToken)
 // middleware
 guruPembimbingRouter.use(guruPembimbingMiddleware)
 
-guruPembimbingRouter.put("/updatePassword/:id", guruPembimbingController.updatePassword)
+guruPembimbingRouter.put("/updatePassword", guruPembimbingController.updatePassword)
 
 
 guruPembimbingRouter.get("/getGuruPembimbing", guruPembimbingController.getGuruPembimbing)
 guruPembimbingRouter.get("/getSiswa/:id_siswa", guruPembimbingController.getSiswa)
-guruPembimbingRouter.get("/getAllSiswaGuruPembimbing/:id", guruPembimbingController.getAllSiswaGuruPembimbing)
+guruPembimbingRouter.get("/getAllSiswaGuruPembimbing", guruPembimbingController.getAllSiswaGuruPembimbing)
 
 // laporan pkl siswa
 guruPembimbingRouter.get("/findLaporanPklSiswaFilter", guruPembimbingController.findLaporanPklSiswaFilter)
@@ -23,8 +25,19 @@ guruPembimbingRouter.get("/findLaporanPklSiswa/:id", guruPembimbingController.fi
 guruPembimbingRouter.get("/findLaporanPklFilter", guruPembimbingController.findLaporanPklFilter)
 guruPembimbingRouter.get("/findLaporanPkl/:id", guruPembimbingController.findLaporanPklById)
 
+
+// absen
+guruPembimbingRouter.get("/findAllAbsen",guruPembimbingController.findAllAbsen)
+guruPembimbingRouter.get("/findAbsenById/:id",guruPembimbingController.findAbsenById)
+guruPembimbingRouter.get("/cetakAbsen",guruPembimbingController.cetakAbsen)
+guruPembimbingRouter.get("/cetakAnalisAbsen",guruPembimbingController.cetakAnalisAbsen)
+
+// notification
+guruPembimbingRouter.post("/addNotification",guruPembimbingController.addNotification)
+
+
+
+
 // get laporan pkl siswa
 guruPembimbingRouter.get("/getLaporanPklSiswa/:id_guru_pembimbing", guruPembimbingController.getLaporanPklSiswa)
 guruPembimbingRouter.get("/getAllLaporanPklSiswa/:id_guru_pembimbing", guruPembimbingController.getAllLaporanPklSiswa)
-guruPembimbingRouter.get("/cetakAbsen",guruPembimbingController.cetakAbsen)
-

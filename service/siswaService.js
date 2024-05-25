@@ -13,6 +13,8 @@ import { file } from "../utils/imageSaveUtilsLaporanPklSiswa.js";
 import { selectLaporanSiswaPkl } from "../utils/LaporanSiswaPklUtil.js";
 import bcrypt from "bcryptjs"
 import pembimbingDudiValidation from "../validation/pembimbingDudiValidation.js";
+import { getQuery } from "../utils/getQueryDudi.js";
+import notificationService from "./notificationService.js";
 
 const updatePassword = async (id, password) => {
   id = await validate (adminValidation.idValidation,id)
@@ -56,7 +58,7 @@ const getSiswaById = async (id) => {
       jurusan : true,
       kelas : true,
       alamat : true
-    },
+    }
   });
 
   if (!findSiswa) {
@@ -71,7 +73,7 @@ const getProfile = async (id) => {
     where: {
       id: id,
     },
-    select: selectSiswaObject,
+    select: selectSiswaObject
   });
 
   if (!findSiswa) {
@@ -80,10 +82,17 @@ const getProfile = async (id) => {
   return findSiswa;
 };
 
-const getDudi = (siswa) => {
+const getDudi = (siswa,id_tahun) => {
   return db.dudi.findMany({
     where : {
-      add_by : siswa.id_sekolah
+      AND : [
+        {
+          add_by : siswa.id_sekolah
+        },
+        {
+          id_tahun : parseInt(id_tahun)
+        }
+      ]
     },
     select: selectDudiObject,
   });
@@ -104,7 +113,7 @@ const getDudiById = async (id,siswa) => {
   if (!dudi) {
     throw new responseError(404, "data dudi tidak ditemukan");
   }
-
+   console.log(siswa);
   if(!dudi.total_kouta) {
     dudi.enabled = false
     return dudi;
@@ -129,21 +138,18 @@ const getDudiById = async (id,siswa) => {
   return dudi;
 };
 
-const getDudiFilter = async (query,page,siswa) => {
+const getDudiFilter = async (query,page,siswa,id_tahun) => {
   query = await validate(adminValidation.searchDudiValidation,query)
-  page = await validate(siswaValidation.pageValidation,parseInt(page))
+  page = await validate(siswaValidation.pageValidation,page)
+  const whereQuery = getQuery(query,page,id_tahun)
+  console.log(whereQuery);
 
-  console.log(siswa);
+  if(!id_tahun) {
+    throw new responseError(400,"tahun is required")
+  }
+  
+  const findDudi = await db.$queryRawUnsafe(whereQuery)
 
-  const findDudi = await db.$queryRaw`SELECT COUNT(s)::int as total_siswa,COUNT(s.jenis_kelamin)filter (where s.jenis_kelamin = 'laki')::int  as total_siswa_laki,COUNT(s.jenis_kelamin) filter (where s.jenis_kelamin = 'perempuan')::int as total_siswa_perempuan,
-  d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara,ks.total as total_kouta,ks.jumlah_wanita as kouta_perempuan,ks.jumlah_pria as kouta_laki
-  FROM dudi as d
-  LEFT JOIN siswa as s ON d.id = s.id_dudi
-  LEFT JOIN alamat_dudi as ad ON d.id = ad.id_dudi
-  LEFT JOIN kouta_siswa as ks ON d.id = ks.id_dudi
-  GROUP BY d.id,d.nama_instansi_perusahaan,d.no_telepon,d.deksripsi,d.bidang,ad.detail_tempat,ad.desa,ad.kecamatan,ad.kabupaten,ad.provinsi,ad.negara,ks.total,ks.jumlah_wanita,ks.jumlah_pria
-  LIMIT 10 OFFSET ${10 * (page - 1)}`
-  console.log(findDudi);
   for (let index = 0; index < findDudi.length; index++) {
     findDudi[index].enabled = true
     if(!findDudi[index].total_kouta) {
@@ -161,12 +167,11 @@ const getDudiFilter = async (query,page,siswa) => {
     }
   }
 
-
   return {dudi : findDudi,page : page,count : findDudi.length}
 }
 
 const getDudiByName = async (nama,siswa) => {
-  nama = await validate(siswaValidation.NameValidation, nama);
+  nama = await validate(siswaValidation.stringValidation, nama);
 
   return db.dudi.findMany({
     where: {
@@ -247,6 +252,8 @@ const addPengajuanPkl = async (body,siswa) => {
       id: body.id_siswa,
     },
     select: {
+      id : true,
+      tahun : true,
       status: true,
       dudi: true,
       pengajuan_pkl: true,
@@ -273,7 +280,7 @@ const addPengajuanPkl = async (body,siswa) => {
     }
   }
 
-  const findDudi = await db.dudi.findUnique({
+  const findDudi = await db.dudi.findFirst({
     where: {
       AND : [
         {
@@ -287,6 +294,7 @@ const addPengajuanPkl = async (body,siswa) => {
     select : {
       id : true,
       tersedia : true,
+      tahun : true,
       kouta : true,
       siswa : {
         where : {
@@ -300,10 +308,13 @@ const addPengajuanPkl = async (body,siswa) => {
       },
     }
   });
-  console.log(findDudi);
 
   if (!findDudi) {
     throw new responseError(404, "data dudi tidak ditemukan");
+  }
+
+  if((findSiswa.tahun.id != findDudi.tahun.id) || (findSiswa.tahun.tahun !== findDudi.tahun.tahun)) {
+    throw new responseError(400,"tahun pkl anda tidak sesuai dengan tahun dudi")
   }
 
   if(!findDudi.tersedia) {
@@ -325,13 +336,31 @@ const addPengajuanPkl = async (body,siswa) => {
       throw new responseError(400,"kouta untuk pria sudah penuh")
     }
   }
+  return db.$transaction(async tx => {
+    const createpengajuan = await tx.pengajuan_pkl.create({
+      data: body,
+      select: selectPengajuanPklObject,
+    });
+  
+    const payload = {
+      id : generateId(),
+      id_siswa : findSiswa.id,
+      judul : "kabar Baik Untukmu",
+      isi : "Ajuan pklmu sedang diproses,tunggu verifikasi dari dudi yang kamu ajukan"
+    }
 
-  return db.pengajuan_pkl.create({
-    data: body,
-    select: selectPengajuanPklObject,
-  });
+    const Now = new Date()
+
+    payload.tanggal = Now.toISOString().substring(0, 10)
+    const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
+    payload.time = datelocal.split(" ")[1]
+    
+    await tx.notification.create({
+      data : payload
+    })
+    return createpengajuan
+  })
 };
-
 const cancelPengajuanPkl = async (body,siswa) => {
   body = await validate(siswaValidation.cancelPengjuanPklValidation, body);
 
@@ -397,7 +426,7 @@ const findAllPengajuanPkl = async (id,siswa) => {
 const findPengajuanPklById = async (id,siswa) => {
   id = await validate(adminValidation.idValidation, id);
 
-  const findPengajuan = await db.pengajuan_pkl.findUnique({
+  const findPengajuan = await db.pengajuan_pkl.findFirst({
     where: {
       AND : [
         {
@@ -465,10 +494,31 @@ const addCancelPkl = async (id_siswa) => {
     id_dudi: findsiswa.dudi.id,
     id_pembimbing_dudi: findsiswa.pembimbing_dudi.id,
   };
-  return db.pengajuan_cancel_pkl.create({
-    data: body,
-    select: selectCancelPkl,
-  });
+
+  return db.$transaction(async tx => {
+    const addCancelPkl = await tx.pengajuan_cancel_pkl.create({
+      data: body,
+      select: selectCancelPkl,
+    });
+
+    const payload = {
+      id : generateId(),
+      id_siswa : body.id_siswa,
+      judul : "kabar Baik Untukmu",
+      isi : "Ajuan cancel pklmu sedang diproses,tunggu verifikasi dari dudi yang kamu ajukan"
+    }
+
+    const Now = new Date()
+
+    payload.tanggal = Now.toISOString().substring(0, 10)
+    const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
+    payload.time = datelocal.split(" ")[1]
+    
+    await tx.notification.create({
+      data : payload
+    })
+    return {pengajanCancelPkl : addCancelPkl}
+  })
 };
 
 const getCancelPklBySiswa = async (id_siswa) => {
@@ -543,11 +593,20 @@ const AddLaporanSiswaPkl = async (body, image, url) => {
     day: "numeric",
   };
 
+  if(!image) {
+    throw new responseError(400,"dokumtasi is required")
+  }
+
+  if(!body.id_dudi || !body.id_pembimbing_dudi) {
+    throw new responseError(400,"siswa belum memiliki tempat pkl")
+  }
+
   const { pathSaveFile, fullPath } = await file(image, url);
   body.dokumentasi = fullPath;
 
   const tanggal = date.toLocaleDateString("id", options);
   body.tanggal = tanggal;
+  console.log(body);
   body = await validate(siswaValidation.addLaporanSiswaPkl, body);
 
   await image.mv(pathSaveFile, async (err) => {
@@ -566,7 +625,9 @@ const AddLaporanSiswaPkl = async (body, image, url) => {
     throw new responseError(404, "Laporan Pkl Sudah Di Tambahkan");
   }
 
-  return db.laporan_siswa_pkl.create
+  return db.laporan_siswa_pkl.create({
+    data : body
+  })
 };
 
 const updateLaporanSiswaPkl = async (id, body, image, url) => {
@@ -660,6 +721,7 @@ const findLaporanSiswaPklById = async (id) => {
 export default {
   updatePassword,
   // Get DUDI & Siswa
+  getProfile,
   getSiswaById,
   getDudi,
   getDudiByName,

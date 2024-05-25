@@ -6,7 +6,9 @@ const addNotificationValidation = joi.object({
     id_pembimbing_dudi : joi.number().optional(),
     id_guru_pembimbing : joi.number().optional(),
     judul : joi.string().max(255),
-    isi : joi.string().max(255)
+    isi : joi.string().max(255),
+    tanggal : joi.string().required(),
+    time : joi.string().required()
 })
 
 export default {

@@ -1,11 +1,13 @@
 import express from "express"
 import adminController from "../controller/adminController.js"
 import { adminMiddleware } from "../middleware/adminMiddleware.js"
+import { refreshAdminMiddleware } from "../middleware/refreshAdminMiddleware.js"
 
 export const adminRouter = express.Router()
 
 // admin login 
 adminRouter.post('/adminLogin',adminController.adminLogin)
+adminRouter.get('/refreshToken',refreshAdminMiddleware,adminController.refreshToken)
 
 // middleware
 adminRouter.use(adminMiddleware)
@@ -15,6 +17,12 @@ adminRouter.put('/updatePassword/:id',adminController.updatePassword)
 
 // admin logout 
 adminRouter.delete('/adminLogout',adminController.adminLogout)
+
+// tahun
+adminRouter.post('/addTahun',adminController.addTahun)
+adminRouter.delete('/deleteTahun/:id',adminController.deleteTahun)
+adminRouter.put('/updateTahun/:id',adminController.updateTahun)
+adminRouter.get('/getAllTahun',adminController.getAllTahun)
 
 // siswa router
 adminRouter.post('/addSiswa',adminController.addSiswa)

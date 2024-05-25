@@ -6,24 +6,52 @@ import { db } from "../config/prismaClient.js"
 import adminDeveloperValidation from "../validation/adminDeveloperValidation.js"
 import adminValidation from "../validation/adminValidation.js"
 import { adminDeveloperSelect } from "../utils/adminSelect.js"
+import { file } from "../utils/saveImagesLogo.js"
+import fs from "fs"
 
+const sekolahSelect = {
+    id : true,
+    nama : true,
+    alamat : true,
+    kepala_sekolah : true
+}
 // sekolah
-const addSekolah = async (sekolah,alamat) => {
-    console.log(sekolah);
+const addSekolah = async (sekolah,alamat,kepalaSekolah,image,url) => {
     sekolah.id = generateId()
-    sekolah = await validate(adminDeveloperValidation.addSekolahValidation,sekolah)
-    alamat.id_sekolah = sekolah.id
-    alamat = await validate(adminDeveloperValidation.addAlamatValidation,alamat)
 
     const findSekolah = await db.sekolah.findFirst({
         where : {
-            id : sekolah.id
+            OR : [
+                {
+                    id : sekolah.id
+                },
+                {
+                    npsn : sekolah.npsn
+                }
+            ]       
         }
     })
 
     if(findSekolah) {
-        throw new responseError(400,"something wrong")
+        throw new responseError(400,"sekolah telah ditambahkan")
     }
+
+    if(image) {
+        const { pathSaveFile, fullPath } = await file(image, url);
+    
+        await image.mv(pathSaveFile, async (err) => {
+            if (err) {
+              throw new responseError(500, err.message);
+            }
+        });
+    
+        sekolah.logo = fullPath
+    }
+    sekolah = await validate(adminDeveloperValidation.addSekolahValidation,sekolah)
+    alamat.id_sekolah = sekolah.id
+    alamat = await validate(adminDeveloperValidation.addAlamatValidation,alamat)
+    kepalaSekolah.id_sekolah = sekolah.id
+    kepalaSekolah = await validate(adminDeveloperValidation.addKepalaSekolahValidation,kepalaSekolah)
 
     return db.$transaction(async tx => {
         const addSekolah = await tx.sekolah.create({
@@ -34,8 +62,115 @@ const addSekolah = async (sekolah,alamat) => {
             data : alamat
         })
 
-        return {sekolah : addSekolah,alamat : addAlamat}
+        const addKepalaSekolah = await tx.kepala_sekolah.create({
+            data : kepalaSekolah
+        })
+
+        return {sekolah : addSekolah,alamat : addAlamat,sekolah : addKepalaSekolah}
     })
+}
+
+const updateSekolah = async (id,sekolah,alamat,kepala_sekolah,image,url) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    if(image) {
+        const { pathSaveFile, fullPath } = await file(image, url);
+    
+        await image.mv(pathSaveFile, async (err) => {
+            if (err) {
+              throw new responseError(500, err.message);
+            }
+        });
+    
+        sekolah.logo = fullPath
+    }
+
+    return db.$transaction(async tx => {
+        if(sekolah) {
+            sekolah = await validate(adminDeveloperValidation.updateSekolahValidation,sekolah)
+            await tx.sekolah.update({
+                where : {
+                    id : id
+                },
+                data : sekolah
+            })
+        }
+        if(alamat) {
+            alamat = await validate(adminDeveloperValidation.updateAlamatSekolahValidation,alamat)
+            await tx.alamat_sekolah.update({
+                where : {
+                    id_sekolah : id
+                },
+                data : alamat
+            })
+        }
+        if(kepala_sekolah) {
+            kepala_sekolah = await validate(adminDeveloperValidation.updateKepalaSekolahValidation,kepala_sekolah)
+            await tx.kepala_sekolah.update({
+                where : {
+                    id_sekolah : id
+                },
+                data : kepala_sekolah
+            })
+        }
+
+        return "success"
+    })
+}
+const deleteSekolah = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findSekolah = await db.sekolah.findUnique({
+        where : {
+            id : id
+        }
+    })
+
+    if(!findSekolah) {
+        throw new responseError(404,"data sekolah tidak ditemukan")
+    }
+    const fileName = findSekolah.logo.split("/")[4]
+
+    const deleteSekolah = await db.sekolah.delete({
+        where : {
+            id : id
+        }
+    })
+
+    if(fileName) {
+        fs.unlinkSync(`public/logo/${fileName}`,(err) => {
+            console.log(err);
+        })
+    }
+
+    return deleteSekolah
+}
+const getAllSekolah = async (page) => {
+    page = await validate(adminValidation.idValidation,page)
+
+    const findAllSekolah = await db.sekolah.findMany({
+        skip : 10 * (page - 1),
+        take : 10,
+        select : sekolahSelect
+    })
+
+    return {sekolah : findAllSekolah,page : page,count : findAllSekolah.length}
+}
+const getSekolahById = async (id) => {
+    id = await validate(adminValidation.idValidation,id)
+
+    const findSekolah = await db.sekolah.findUnique({
+        where : {
+            id : id
+        },
+        select : sekolahSelect
+    })
+
+    if(!findSekolah) {
+        throw new responseError(404,"data sekolah tidak ditemukan")
+    }
+
+    return findSekolah
 }
 
 
@@ -143,6 +278,10 @@ const getAllAdmin = async () => {
 export default {
     // sekolah
     addSekolah,
+    updateSekolah,
+    deleteSekolah,
+    getAllSekolah,
+    getSekolahById,
 
 
     // admin

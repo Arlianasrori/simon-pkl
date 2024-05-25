@@ -5,10 +5,11 @@ import { selectSiswaObject } from "../utils/siswaSelect.js";
 import adminValidation from "../validation/adminValidation.js";
 import absenValidation from "../validation/absenValidation.js";
 import fs from "fs"
-import puppeteer from "puppeteer"
-import ejs from 'ejs'
-import guruPembimbingValidation from "../validation/guruPembimbingValidation.js";
 import pembimbingDudiValidation from "../validation/pembimbingDudiValidation.js";
+import bcrypt from "bcryptjs"
+import { generatePdf } from "../utils/generatePdf.js";
+import { getQueryAbsen } from "../utils/getQueryAbsen.js";
+import { selectAbsenObject } from "../utils/absenSelect.js";
 
 
 const updatePassword = async (id, password) => {
@@ -153,12 +154,94 @@ const getAllLaporanPklSiswa = async (id_guru_pembimbing) => {
 }
 
 // absen
-const cetakAbsen = async (query) => {
+const findAllAbsen = async (guruPembimbing,query) => {
+  const Now = new Date()
+  const dateNow = `${Now.getFullYear()}-${("0" + (Now.getMonth() + 1)).slice(-2)}-${("0" + (Now.getDay())).slice(-2)}`
+
   query = await validate(absenValidation.findAbsenFilterValidation,query)
 
-  if(query.month_ago) {
-    query.month_ago = new Date().setMonth(new Date().getMonth() - query.month_ago + 1)
+  let monthStart;
+  let monthEnd;
+
+  if(query.month) {
+    if(!query.years) {
+      query.years = dateNow.split("-")[0]
+    }
+     monthStart = `${query.years}-0${query.month}-01`
+     monthEnd = `${query.years}-0${query.month}-31`
+  }
+
+  return db.absen.findMany({
+    where : {
+      AND : [
+        {
+          siswa : {
+            id_guru_pembimbing : guruPembimbing.id
+          }
+        }
+      ]
+    },
+    select : selectAbsenObject,
+    orderBy : {
+      tanggal : "asc"
+    }
+}) 
 }
+
+const findAbsenById = async (guruPembimbing,id) => {
+  id = await validate(adminValidation.idValidation,id)
+
+  const absen = await db.absen.findFirst({
+    where : {
+      AND : [
+        {
+          id : id
+        },
+        {
+          siswa : {
+            id_guru_pembimbing : guruPembimbing.id
+          }
+        }
+      ]
+    },
+    select : {
+      absen_masuk : true,
+      status_absen_masuk : true,
+      keterangan_absen_masuk : true,
+      absen_pulang : true,
+      status_absen_pulang : true,
+      keterangan_absen_keluar : true,
+      foto : true,
+      status : true,
+      tanggal : true,
+  }
+  })
+
+  if(!absen) {
+    throw new responseError(404,"data absen tidak ditemukan")
+  }
+
+  return absen
+}
+
+const cetakAbsen = async (query) => {
+  const Now = new Date()
+  const dateNow = `${Now.getFullYear()}-${("0" + (Now.getMonth() + 1)).slice(-2)}-${("0" + (Now.getDay())).slice(-2)}`
+
+  query = await validate(absenValidation.findAbsenFilterValidation,query)
+
+  let monthStart;
+  let monthEnd;
+
+  if(query.month) {
+    if(!query.years) {
+      query.years = dateNow.split("-")[0]
+    }
+     monthStart = `${query.years}-0${query.month}-01`
+     monthEnd = `${query.years}-0${query.month}-31`
+  }
+
+  const bulan = ["januari","februari","maret","april","mei","juni","juli","agustus","september","oktober","november","desember"]
 
   const data = await db.absen.findMany({
     where : {
@@ -175,6 +258,20 @@ const cetakAbsen = async (query) => {
                 siswa : {
                     id_dudi : query.id_dudi
                 }
+            },
+            {
+              AND : [
+                {
+                  tanggal : {
+                    gte : monthStart
+                  }
+                },
+                {
+                  tanggal : {
+                    lte : monthEnd
+                  }
+                }
+              ]
             },
             {
                 OR : [
@@ -196,9 +293,6 @@ const cetakAbsen = async (query) => {
                         ]
                     }
                 ]
-            },
-            {
-                tanggal : query.month_ago
             }
         ]
     },
@@ -210,7 +304,7 @@ const cetakAbsen = async (query) => {
         absen_masuk : true,
         absen_pulang : true,
         status_absen_masuk : true,
-        status_absen_keluar : true,
+        status_absen_pulang : true,
         status : true,
         siswa : {
             select : {
@@ -226,16 +320,37 @@ const cetakAbsen = async (query) => {
     }
   })
 
-  const html = fs.readFileSync("index.ejs",{encoding : "utf-8"})
+  const findGuruPembimbing = await db.guru_pembimbing.findFirst({
+    where: {
+      id : query.id_guru_pembimbing
+    },
+  })
 
-  const browser = await puppeteer.launch({ headless: true});
-  const page = await browser.newPage();
-  await page.setContent(ejs.render(html,{data : data}))
-  const pdf = await page.pdf({ format : "a4",path : "p.pdf"});
+  const content = fs.readFileSync("pdf-sample/absenPembimbingDudi.ejs",{encoding : "utf-8"})
+  const dataPdf = {data : data,nama : findGuruPembimbing.nama, bulan : query.month && bulan[query.month - 1],years : query.years}
+  await generatePdf(content,dataPdf,"absen-guruPembimbing","absen")
 
-  await browser.close();
+  return {data : dataPdf}
+}
 
-  return data
+const cetakAnalisisAbsen = async (query) => {
+  query = await validate(absenValidation.findAbsenFilterValidation,query)
+
+  const dbQuery = getQueryAbsen(query)
+  const data = await db.$queryRawUnsafe(dbQuery)
+
+  const bulan = ["januari","februari","maret","april","mei","juni","juli","agustus","september","oktober","november","desember"]
+
+  const findGuruPembimbing = await db.guru_pembimbing.findFirst({
+    where: {
+      id : query.id_guru_pembimbing
+    },
+  })
+  const dataPdf = {data : data,nama : findGuruPembimbing.nama, bulan : query.month && bulan[query.month - 1],years : query.years}
+  const content = fs.readFileSync("pdf-sample/analisisAbsenGuruPembimbing.ejs",{encoding : "utf-8"})
+
+  await generatePdf(content,dataPdf,"analisis-guruPembimbing","analisis")
+  return {data : dataPdf}
 }
 
 export default {
@@ -251,5 +366,8 @@ export default {
   getAllLaporanPklSiswa,
 
   // cetakAbsen
-  cetakAbsen 
+  findAllAbsen,
+  findAbsenById,
+  cetakAbsen,
+  cetakAnalisisAbsen
 };

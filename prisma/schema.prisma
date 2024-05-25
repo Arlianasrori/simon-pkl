@@ -12,19 +12,45 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
+model developer {
+  id Int @id
+  username String @unique
+  password String
+}
 model sekolah {
   id Int @id
-  npsn Int @unique
+  npsn String @unique
   nama String @db.VarChar(255)
+  logo String?
 
   alamat alamat_sekolah?
+  kepala_sekolah kepala_sekolah?
   admin admin[]
   siswa siswa[]
   jurusan jurusan[]
   guru_pembimbing guru_pembimbing[]
   pembimbing_dudi Pembimbing_dudi[]
   dudi dudi[]
+  tahun tahun[]
+}
+model tahun {
+  id Int @id
+  tahun String
+  id_sekolah Int
+
+  sekolah sekolah @relation(fields: [id_sekolah],references: [id])
+  siswa siswa[]
+  jurusan jurusan[]
+  pembimbingDudi Pembimbing_dudi[]
+  dudi dudi[]
+  guruPembimbing guru_pembimbing[]
+}
+model kepala_sekolah {
+  id_sekolah Int @id
+  nama String
+  nip String
+
+  sekolah sekolah @relation(fields: [id_sekolah],references: [id],onDelete: Cascade)
 }
 
 model alamat_sekolah {
@@ -36,7 +62,7 @@ model alamat_sekolah {
   provinsi String @db.VarChar(255)
   negara String @db.VarChar(255)
 
-  sekolah sekolah @relation(fields: [id_sekolah],references: [id])
+  sekolah sekolah @relation(fields: [id_sekolah],references: [id],onDelete: Cascade)
 }
 model admin {
   id Int @id
@@ -70,6 +96,7 @@ model siswa {
   id_jurusan Int
   id_kelas Int
   id_sekolah Int 
+  id_tahun Int
 
   jurusan jurusan @relation(fields: [id_jurusan],references: [id])
   kelas kelas @relation(fields: [id_kelas],references: [id])
@@ -86,16 +113,19 @@ model siswa {
   guru_pembimbing guru_pembimbing @relation(fields: [id_guru_pembimbing],references: [id])
   dudi dudi? @relation(fields: [id_dudi],references: [id])
   pembimbing_dudi Pembimbing_dudi? @relation(fields: [id_pembimbing_dudi],references: [id])
+  tahun tahun @relation(fields: [id_tahun],references: [id])
 }
 model jurusan {
   id Int @id
   nama String @db.VarChar(255)
   id_sekolah Int
+  id_tahun Int
 
   kelas kelas[]
   siswa siswa[]
 
   sekolah sekolah @relation(fields: [id_sekolah],references: [id])
+  tahun tahun @relation(fields: [id_tahun],references: [id])
 }
 model kelas {
   id Int @id
@@ -104,7 +134,7 @@ model kelas {
   id_jurusan Int
 
   siswa siswa[]
-  jurusan jurusan @relation(fields: [id_jurusan],references: [id])
+  jurusan jurusan @relation(fields: [id_jurusan],references: [id],onDelete: Cascade)
 }
 model alamat_siswa {
   id_siswa Int @id
@@ -128,6 +158,7 @@ model guru_pembimbing {
   agama String @db.VarChar(255)
   password String @db.VarChar(255)
   id_sekolah Int
+  id_tahun Int
 
   siswa siswa[]
   notification notification[]
@@ -135,6 +166,7 @@ model guru_pembimbing {
   kunjungan_guru_pembimbing kunjungan_guru_pembimbing_pkl[]
 
   sekolah sekolah @relation(fields: [id_sekolah],references: [id])
+  tahun tahun @relation(fields: [id_tahun],references: [id])
 }
 model alamat_guru_Pembimbing {
   id_guru_Pembimbing Int @id
@@ -157,6 +189,7 @@ model Pembimbing_dudi {
   jenis_kelamin jenis_kelamin
   agama String @db.VarChar(255)
   add_by Int 
+  id_tahun Int
 
   siswa siswa[]
   alamat alamat_pembimbing_dudi?
@@ -170,6 +203,7 @@ model Pembimbing_dudi {
 
   dudi dudi @relation(fields: [id_dudi],references: [id])
   sekolah sekolah @relation(fields: [add_by],references: [id])
+  tahun tahun @relation(fields: [id_tahun],references: [id])
 }
 model dudi {
   id Int @id
@@ -179,6 +213,7 @@ model dudi {
   deksripsi String @db.VarChar(1500)
   add_by Int
   tersedia Boolean @default(false)
+  id_tahun Int
 
   alamat alamat_dudi?
   kouta kouta_siswa?
@@ -193,6 +228,7 @@ model dudi {
   kordinat_absen kordinat_absen[]
 
   sekolah sekolah @relation(fields: [add_by],references: [id])
+  tahun tahun @relation(fields: [id_tahun],references: [id])
 }
 model kouta_siswa {
   id Int @id
@@ -201,7 +237,7 @@ model kouta_siswa {
   jumlah_wanita Int
   total Int
 
-  dudi dudi @relation(fields: [id_dudi],references: [id])
+  dudi dudi @relation(fields: [id_dudi],references: [id],onDelete: Cascade)
 }
 model alamat_pembimbing_dudi {
   id_pembimbing_dudi Int @id
@@ -269,7 +305,7 @@ model absen_jadwal {
 model hari_absen {
   id Int @id @default(autoincrement())
   id_jadwal Int
-  nama String
+  nama hari
   batas_absen_masuk String
   batas_absen_pulang String
 
@@ -287,7 +323,7 @@ model absen {
   foto String? @db.VarChar(1500)
   status status_absen?
   keterangan_absen_masuk izin_absen_masuk?
-  keterangan_absen_keluar izin_absen_keluar?
+  keterangan_absen_pulang izin_absen_pulang?
 
   jadwal_absen absen_jadwal @relation(fields: [id_absen_jadwal],references: [id])
   siswa siswa @relation(fields: [id_siswa],references: [id])
@@ -298,15 +334,15 @@ model izin_absen_masuk {
   note String @db.VarChar(30000)
   status_izin status_other_absen
 
-  absen absen @relation(fields: [id_absen],references: [id])
+  absen absen @relation(fields: [id_absen],references: [id],onDelete: Cascade)
 }
-model izin_absen_keluar {
+model izin_absen_pulang {
   id Int @id
   id_absen Int @unique
   note String @db.VarChar(30000)
   status_izin status_other_absen
 
-  absen absen @relation(fields: [id_absen],references: [id])
+  absen absen @relation(fields: [id_absen],references: [id],onDelete: Cascade)
 }
 model kordinat_absen {
   id Int @id
@@ -317,8 +353,8 @@ model kordinat_absen {
   longtitude Float
   radius_absen_meter Float
 
-  dudi dudi @relation(fields: [id_dudi],references: [id])
-  pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id])
+  dudi dudi @relation(fields: [id_dudi],references: [id],onDelete: Cascade)
+  pembimbing_dudi Pembimbing_dudi @relation(fields: [id_pembimbing_dudi],references: [id],onDelete: Cascade)
 }
 model laporan_pkl {
   id Int @id
@@ -366,6 +402,8 @@ model notification {
   id_siswa Int? 
   id_pembimbing_dudi Int?
   id_guru_pembimbing Int?
+  tanggal String
+  time String
   judul String @db.VarChar(600)
   isi String @db.VarChar(2500)
   
@@ -395,6 +433,16 @@ enum status_cancel_pkl {
   dibatalkan
   setuju
   tidak_setuju
+}
+
+enum hari {
+  senin
+  selasa
+  rabu
+  kamis
+  jumat
+  sabtu
+  minggu
 }
 
 enum status_absen_masuk_keluar {

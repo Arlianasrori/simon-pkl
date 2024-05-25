@@ -1,4 +1,7 @@
+import responseError from "../error/responseError.js";
+import absenService from "../service/absenService.js";
 import adminService from "../service/adminService.js";
+import notificationService from "../service/notificationService.js";
 import siswaService from "../service/siswaService.js";
 
 const getSiswaById = async (req, res, next) => {
@@ -22,11 +25,34 @@ const getProfile = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+}
+const refreshToken = async (req, res, next) => {
+  try {
+    const siswa = req.siswa
+    const payload = {
+      id : siswa.id,
+      nis : siswa.nis,
+      jenis_kelamin : siswa.jenis_kelamin,
+      id_sekolah : siswa.id_sekolah
+    }
+
+  const acces_token_siswa = jwt.sign(payload,process.env.TOKEN_SECRET_SISWA,{expiresIn : "60d"})
+  const refresh_token_siswa = jwt.sign(payload,process.env.REFRESH_TOKEN_SECRET_SISWA,{expiresIn : "120d"})
+
+  res.status(200).json({
+    msg : "succes",
+    acces_token : acces_token_siswa,
+    refresh_token : refresh_token_siswa,
+    auth : "siswa"
+  })
+  } catch (error) {
+    next(error);
+  }
 };
 
 const getDudi = async (req, res, next) => {
   try {
-    const result = await siswaService.getDudi(req.siswa);
+    const result = await siswaService.getDudi(req.siswa,req.siswa.id_tahun);
     res.status(200).json({
       msg: "succes",
       data: result,
@@ -40,7 +66,8 @@ const getDudiFilter = async (req, res, next) => {
     const query = req.query
     const page = req.query.page
     const siswa = req.siswa
-    const result = await siswaService.getDudiFilter(query,page,siswa);
+    const tahun = req.siswa.id_tahun
+    const result = await siswaService.getDudiFilter(query,page,siswa,tahun);
     res.status(200).json({
       msg: "succes",
       data: result,
@@ -77,7 +104,8 @@ const getDudiByAlamat = async (req, res, next) => {
 };
 const getDudiById = async (req, res, next) => {
   try {
-    const result = await siswaService.getDudiById(req.params.id);
+    const siswa = req.siswa
+    const result = await siswaService.getDudiById(req.params.id,siswa);
     res.status(200).json({
       msg: "succes",
       data: result,
@@ -105,7 +133,7 @@ const cancelPengajuanPkl = async (req, res, next) => {
   try {
     const body = req.body;
     body.id_siswa = req.siswa.id
-    const result = await siswaService.cancelPengajuanPkl(body);
+    const result = await siswaService.cancelPengajuanPkl(body,req.siswa);
     res.status(200).json({
       msg: "succes",
       data: result,
@@ -117,7 +145,7 @@ const cancelPengajuanPkl = async (req, res, next) => {
 const findAllPengajuanPkl = async (req, res, next) => {
   try {
     const id = req.siswa.id
-    const result = await siswaService.findAllPengajuanPkl(id);
+    const result = await siswaService.findAllPengajuanPkl(id,req.siswa);
     res.status(200).json({
       msg: "success",
       data: result,
@@ -210,13 +238,15 @@ const AddLaporanSiswaPkl = async (req, res, next) => {
   try {
     const body = req.body;
     body.id_siswa = req.siswa.id
-    const image = req.files.dokumentasi;
+    body.id_dudi = req.siswa.id_dudi
+    body.id_pembimbing_dudi = req.siswa.id_pembimbing_dudi
+    const image = req.files && req.files.dokumentasi;
     const url = `http://${req.hostname}:2008/laporan_siswa_pkl`;
 
-    const result = await siswaService.AddLaporanSiswaPkl(body, image, url);
+    const sult = await siswaService.AddLaporanSiswaPkl(body, image, url);
     res.status(200).json({
-      msg: "Success",
-      data: result,
+      msg: "succes",
+      data: sult
     });
   } catch (error) {
     next(error);
@@ -277,7 +307,8 @@ try {
   const query = req.query
   query.id_siswa = req.siswa.id
   const siswaBody = {id_sekolah : req.siswa.id_sekolah}
-  const result = await adminService.findLaporanPklSiswaFilter(query,siswaBody)
+  const page = req.query.page
+  const result = await adminService.findLaporanPklSiswaFilter(query,page,siswaBody)
   res.status(200).json({
     msg: "Success",
     data: result,
@@ -301,11 +332,225 @@ const updatePassword = async (req, res, next) => {
   }
 }
 
+
+// notification
+const getAllNotification = async (req, res, next) => {
+  try {
+    const result = await notificationService.getNotification(req.siswa.id)
+    res.status(200).json({
+      msg: "Success",
+      data: result,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+const getNotificationByID = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id)
+    const result = await notificationService.getNotificationById(id)
+    res.status(200).json({
+      msg: "Success",
+      data: result,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+const notificationRead = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id)
+    const id_siswa = req.siswa.id
+    const result = await notificationService.readNotification(id,id_siswa)
+    res.status(200).json({
+      msg: "Success",
+      data: result,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+const getCountNotificationNotRead = async (req, res, next) => {
+  try {
+    const id_siswa = req.siswa.id
+    const result = await notificationService.getCountNotificationNotRead(id_siswa)
+    res.status(200).json({
+      msg: "Success",
+      data: result,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+
+// absen
+const cekRadiusKoordinat = async (req, res, next) => {
+  try {
+    const body = req.body
+    const siswa = req.siswa
+    const result = await absenService.cekRadiusKoordinat(body,siswa)
+    res.status(200).json({
+      msg: "Success",
+      data: result,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const cekAbsen = async (req,res,next) => {
+  try {
+      const body = {id_siswa : req.siswa.id}
+
+      const result = await absenService.cekAbsen(body)
+      res.status(201).json({
+          msg : "succes",
+          data : result
+      })
+  } catch (error) {
+      next(error)
+  }
+}
+
+const addAbsenMasuk = async (req,res,next) => {
+  try {
+      const body = req.body
+      body.id_siswa = req.siswa.id
+      const files = req.files && req.files.foto
+      const url = `http://${req.hostname}:2008/absen`
+
+      const result = await absenService.addAbsenMasuk(body,files,url)
+      res.status(201).json({
+          msg : "succes",
+          data : result
+      })
+  } catch (error) {
+      next(error)
+  }
+}
+
+const addAbsenPulang = async (req,res,next) => {
+  try {
+      const body = req.body
+      body.id_siswa = req.siswa.id
+
+      const result = await absenService.addAbsenPulang(body)
+      res.status(201).json({
+          msg : "succes",
+          data : result
+      })
+  } catch (error) {
+      next(error)
+  }
+}
+
+const absenIzintelat = async (req,res,next) => {
+  try {
+      const body = req.body
+      body.id_siswa = req.siswa.id
+
+      const result = await absenService.absenIzinTelat(body)
+      res.status(201).json({
+          msg : "succes",
+          data : result
+      })
+  } catch (error) {
+      next(error)
+  }
+}
+
+const absenDiluarRadius = async (req,res,next) => {
+  try {
+      const body = req.body
+      body.id_siswa = req.siswa.id
+
+      const result = await absenService.absendiluarRadius(body)
+      res.status(201).json({
+          msg : "succes",
+          data : result
+      })
+  } catch (error) {
+      next(error)
+  }
+}
+const findAllKordinatAbsen = async (req,res,next) => {
+  try {
+      const id_pembimbing_dudi = req.siswa.id_pembimbing_dudi
+      if(!id_pembimbing_dudi) {
+        throw new responseError(400,"siswa belum memiliki dudi")
+      }
+      const result = await absenService.findAllKordinatAbsen(id_pembimbing_dudi)
+
+      res.status(201).json({
+          msg : "succes",
+          data : result
+      })
+  } catch (error) {
+      next(error)
+  }
+}
+const findAbsen = async (req,res,next) => {
+  try {
+      const id_siswa = req.siswa.id
+
+      const result = await absenService.findAbsen(id_siswa)
+      res.status(201).json({
+          msg : "succes",
+          data : result
+      })
+  } catch (error) {
+      next(error)
+  }
+}
+const findAbsenById = async (req,res,next) => {
+  try {  
+      const id = parseInt(req.params.id)
+      const result = await adminService.findAbsenById(id,req.siswa)
+  
+      res.status(200).json({
+          msg : "succes",
+          data : result
+      })
+  } catch (error) {
+      next(error)
+  }
+}
+
+const findAllJadwalAbsen = async (req,res,next) => {
+  try {
+      const id_pembimbing_dudi = req.siswa.id_pembimbing_dudi
+      if(!id_pembimbing_dudi) {
+        throw new responseError(400,"siswa belum memiliki tempat pkl")
+      }
+      const result = await absenService.findAllJadwalAbsen(id_pembimbing_dudi)
+      res.status(200).json({
+          msg : "succes",
+          data : result
+      })
+  } catch (error) {
+      next(error)
+  }
+}
+
+const findJadwalAbsenById = async (req,res,next) => {
+  try {
+      const id_jadwal = parseInt(req.params.id_jadwal)
+      const result = await absenService.findJadwalAbsenById(id_jadwal)
+      res.status(200).json({
+          msg : "succes",
+          data : result
+      })
+  } catch (error) {
+      next(error)
+  }
+}
+
 export default {
   updatePassword,
-
-
   getProfile,
+  // token
+  refreshToken,
 
   // get siswa & dudi 
   getSiswaById,
@@ -314,6 +559,7 @@ export default {
   getDudiByAlamat,
   getDudiById,
   getDudiFilter,
+  getProfile,
 
   // pengajuan pkl
   addPengajuanPkl,
@@ -335,4 +581,25 @@ export default {
   findAllLaporanSiswaPkl,
   findLaporanSiswaPklById,
   findLaporanSiswaPklFilter,
-};
+
+
+  // notification
+  getAllNotification,
+  getNotificationByID,
+  notificationRead,
+  getCountNotificationNotRead,
+
+
+  // absen
+  cekRadiusKoordinat,
+  cekAbsen,
+  addAbsenMasuk,
+  addAbsenPulang,
+  absenIzintelat,
+  absenDiluarRadius,
+  findAllKordinatAbsen,
+  findAbsen,
+  findAbsenById,
+  findAllJadwalAbsen,
+  findJadwalAbsenById
+}

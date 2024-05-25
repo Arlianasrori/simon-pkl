@@ -12,10 +12,12 @@ const addAdminValidation = joi.object ({
     password: joi.string().max(255).optional()
   })
 
+  // sekolah
   const addSekolahValidation = joi.object({
     id : joi.number().required(),
     nama : joi.string().required(),
-    npsn : joi.number().required()
+    npsn : joi.string().required(),
+    logo : joi.string().optional()
   })
 
   const addAlamatValidation = joi.object({
@@ -27,9 +29,39 @@ const addAdminValidation = joi.object ({
     provinsi : joi.string().max(255).required(),
     negara : joi.string().max(255).required(),
   })
+
+  const addKepalaSekolahValidation = joi.object({
+    id_sekolah : joi.number().required(),
+    nama : joi.string().required(),
+    nip : joi.string().required()
+  })
+  const updateSekolahValidation = joi.object({
+    nama : joi.string().optional(),
+    npsn : joi.string().optional(),
+    logo : joi.string().optional()
+  })
+
+  const updateAlamatSekolahValidation = joi.object({
+    detail_tempat : joi.string().max(500).optional(),
+    desa : joi.string().max(255).optional(),
+    kecamatan : joi.string().max(255).optional(),
+    kabupaten : joi.string().max(255).optional(),
+    provinsi : joi.string().max(255).optional(),
+    negara : joi.string().max(255).optional(),
+  })
+  const updateKepalaSekolahValidation = joi.object({
+    nama : joi.string().optional(),
+    nip : joi.string().optional()
+  })
 export default {
     addAdminValidation,
     updateAdminValidation,
+
+    // sekolah
     addSekolahValidation,
-    addAlamatValidation
+    addAlamatValidation,
+    addKepalaSekolahValidation,
+    updateSekolahValidation,
+    updateAlamatSekolahValidation,
+    updateKepalaSekolahValidation
 }

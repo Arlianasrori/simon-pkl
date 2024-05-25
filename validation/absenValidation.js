@@ -9,7 +9,11 @@ const addJadwalAbsen = joi.object({
     tanggal_berakhir : joi.string().required(),
     selisih_tanggal_day : joi.string().required(),
 })
-
+const dayValidation = joi.array().items(joi.object({
+    nama : joi.valid("senin","selasa","rabu","kamis","jumat","sabtu","minggu"),
+    batas_absen_masuk : joi.string().required(),
+    batas_absen_pulang : joi.string().required()
+}))
 
 // absen
 const addAbsenMasukValidation = joi.object({
@@ -46,7 +50,8 @@ const findAbsenFilterValidation = joi.object({
     id_pembimbing_dudi : joi.number().optional(),
     id_guru_pembimbing : joi.number().optional(),
     id_dudi : joi.number().optional(),
-    month_ago : joi.number().optional(),
+    month : joi.number().optional(),
+    years : joi.number().optional(),
     tanggal : joi.string().optional(),
     tanggal_start : joi.string().optional(),
     tanggal_end : joi.string().optional(),
@@ -74,7 +79,7 @@ const cekRadiusKordinatAbsenValidation = joi.object({
 export default {
     // jadwal absen
     addJadwalAbsen,
-
+    dayValidation,
 
     // absen
     addAbsenMasukValidation,

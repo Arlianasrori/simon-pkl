@@ -1,10 +1,14 @@
 import express from "express"
 import siswaController from "../controller/siswaController.js"
 import { siswaMiddleware } from "../middleware/siswaMiddleware.js"
+import { refreshSiswaMiddleware } from "../middleware/refreshSiswaMiddleware.js"
 
 export const siswaRouter = express.Router()
 
-// middlewarew
+// token
+siswaRouter.get("/refreshToken",refreshSiswaMiddleware,siswaController.refreshToken)
+
+// middleware
 siswaRouter.use(siswaMiddleware)
 
 // updatePasswordSiswa
@@ -42,3 +46,23 @@ siswaRouter.get("/findAllLaporanSiswaPkl",siswaController.findAllLaporanSiswaPkl
 siswaRouter.get("/findLaporanSiswaPklById/:id",siswaController.findLaporanSiswaPklById)
 siswaRouter.get("/findLaporanSiswaPklFilter",siswaController.findLaporanSiswaPklFilter)
 
+
+// notification
+siswaRouter.get("/getAllNotification",siswaController.getAllNotification)
+siswaRouter.get("/getNotificationById/:id",siswaController.getNotificationByID)
+siswaRouter.get("/readNotification/:id",siswaController.notificationRead)
+siswaRouter.get("/countNotificationNotRead",siswaController.getCountNotificationNotRead)
+
+
+// absen
+siswaRouter.post("/cekRadiuskoordinat",siswaController.cekRadiusKoordinat)
+siswaRouter.get("/cekAbsen",siswaController.cekAbsen)
+siswaRouter.post("/addAbsenMasuk",siswaController.addAbsenMasuk)
+siswaRouter.post("/addAbsenPulang",siswaController.addAbsenPulang)
+siswaRouter.post("/absenIzinTelat",siswaController.absenIzintelat)
+siswaRouter.post("/absenDiluarRadius",siswaController.absenDiluarRadius)
+siswaRouter.get("/findAllKoordinatAbsen",siswaController.findAllKordinatAbsen)
+siswaRouter.get("/riwayatAbsen",siswaController.findAbsen)
+siswaRouter.get("/findAbsenById/:id",siswaController.findAbsenById)
+siswaRouter.get("/findAllJadwalAbsen",siswaController.findAllJadwalAbsen)
+siswaRouter.get("/findJadwalAbsenById/:id_jadwal",siswaController.findJadwalAbsenById)
