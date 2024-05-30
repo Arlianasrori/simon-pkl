@@ -79,6 +79,7 @@ enum jenis_kelamin {
 enum status_pkl {
   pkl
   belum_pkl
+  pending
 }
 model siswa {
   id Int @id
@@ -93,6 +94,7 @@ model siswa {
   tanggal_keluar DateTime? @db.Timestamp()
   password String @db.VarChar(255)
   status status_pkl @default(belum_pkl)
+  token_FCM String?
   id_jurusan Int
   id_kelas Int
   id_sekolah Int 

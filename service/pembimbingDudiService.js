@@ -193,6 +193,16 @@ const AccDcnPengajuanPkl = async (body,id_pengajuan) => {
         data : payload
       })
 
+      const payloadPushNotif = {
+        notification : {
+            body : payload.isi,
+            title : payload.judul
+        },
+        token : ""
+      }
+      
+      sendNotification(payloadPushNotif)
+
       return {pengajuan : updatePengajuan}
     }
 
@@ -225,6 +235,16 @@ const AccDcnPengajuanPkl = async (body,id_pengajuan) => {
     await tx.notification.create({
       data : payload
     })
+
+    const payloadPushNotif = {
+      notification : {
+          body : payload.isi,
+          title : payload.judul
+      },
+      token : ""
+    }
+    
+    sendNotification(payloadPushNotif)
 
     return {pengajuan : updatePengajuan,msg : `selamat anda diterima oleh ${findPengajuan.dudi.nama_instansi_perusahaan}`}
   })
@@ -306,7 +326,7 @@ const updateStatusCancelPkl = async (id,status,id_pembimbing_dudi) => {
       const payload = {
         id : generateId(),
         id_siswa : findCancelPengajuan.id_siswa,
-        judul : "kabar untukmu",
+        judul : "proses dibatalkan",
         isi : `Ajuan cancel untuk pklmu tidak disetujui oleh ${findCancelPengajuan.dudi.nama_instansi_perusahaan}`
       }
   
@@ -319,6 +339,16 @@ const updateStatusCancelPkl = async (id,status,id_pembimbing_dudi) => {
       await tx.notification.create({
         data : payload
       })
+
+      const payloadPushNotif = {
+        notification : {
+            body : payload.isi,
+            title : payload.judul
+        },
+        token : ""
+      }
+      
+      sendNotification(payloadPushNotif)
 
       return {pengajuan : updatePengajuan}
     }
@@ -352,6 +382,16 @@ const updateStatusCancelPkl = async (id,status,id_pembimbing_dudi) => {
     await tx.notification.create({
       data : payload
     })
+
+    const payloadPushNotif = {
+      notification : {
+          body : payload.isi,
+          title : payload.judul
+      },
+      token : ""
+    }
+    
+    sendNotification(payloadPushNotif)
 
     return {pengajuan : updatePengajuan}
   })

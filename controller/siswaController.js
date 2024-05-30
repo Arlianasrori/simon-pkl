@@ -546,6 +546,33 @@ const findJadwalAbsenById = async (req,res,next) => {
       next(error)
   }
 }
+
+const statustokenFCM = async (req,res,next) => {
+  try {
+    const id_siswa = req.siswa.id
+    const result = await siswaService.statusTokenFCM(id_siswa)
+    res.status(200).json({
+        msg : "succes",
+        data : result
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const addTokenFCM = async (req,res,next) => {
+  try {
+    const id_siswa = req.siswa.id
+    const token = req.tokenFCM
+    const result = await siswaService.addTokenFCM(id_siswa,token)
+    res.status(200).json({
+        msg : "succes",
+        data : result
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 export default {
   updatePassword,
 
@@ -601,5 +628,9 @@ export default {
   findAbsen,
   findAbsenById,
   findAllJadwalAbsen,
-  findJadwalAbsenById
+  findJadwalAbsenById,
+
+  // token
+  statustokenFCM,
+  addTokenFCM
 };

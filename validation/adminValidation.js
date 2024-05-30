@@ -191,7 +191,7 @@ const searchDudiValidation = joi.object({
   provinsi : joi.string().max(255).optional(),
   negara : joi.string().max(255).optional(),
   page : joi.number().optional(),
-  tahun : joi.number().required()
+  tahun : joi.number().optional()
 })
 
 
@@ -282,7 +282,7 @@ const searchLaporanPkl = joi.object({
 const searchAbsen = joi.object({
   id_dudi : joi.number().optional(),
   id_siswa : joi.number().optional(),
-  tahun : joi.number().required(),
+  tahun : joi.number().optional(),
   id_pembimbing_dudi: joi.number().optional()
 })
 

@@ -15,6 +15,7 @@ import bcrypt from "bcryptjs"
 import pembimbingDudiValidation from "../validation/pembimbingDudiValidation.js";
 import { getQuery } from "../utils/getQueryDudi.js";
 import notificationService from "./notificationService.js";
+import { sendNotification } from "../utils/sendNotification.js";
 
 const updatePassword = async (id, password) => {
   id = await validate (adminValidation.idValidation,id)
@@ -338,6 +339,15 @@ const addPengajuanPkl = async (body,siswa) => {
       data: body,
       select: selectPengajuanPklObject,
     });
+
+    await tx.siswa.update({
+      where : {
+        id : findSiswa.id
+      },
+      data : {
+        status : "pending"
+      }
+    })
   
     const payload = {
       id : generateId(),
@@ -355,6 +365,15 @@ const addPengajuanPkl = async (body,siswa) => {
     await tx.notification.create({
       data : payload
     })
+
+    const payloadPushNotif = {
+      notification : {
+          body : payload.isi,
+          title : payload.judul
+      },
+      token : ""
+    }
+    sendNotification(payloadPushNotif)
     return createpengajuan
   })
 };
@@ -391,15 +410,54 @@ const cancelPengajuanPkl = async (body,siswa) => {
     );
   }
 
-  return db.pengajuan_pkl.update({
-    where: {
-      id: body.id,
-    },
-    data: {
-      status: "dibatalkan",
-    },
-    select: selectPengajuanPklObject,
-  });
+  return db.$transaction(async tx => {
+    
+    const pengajun_pkl = await tx.pengajuan_pkl.update({
+      where: {
+        id: body.id,
+      },
+      data: {
+        status: "dibatalkan",
+      },
+      select: selectPengajuanPklObject,
+    });
+
+    const payload = {
+      id : generateId(),
+      id_siswa : pengajun_pkl.siswa.id,
+      judul : "kabar Baik Untukmu",
+      isi : "Ajuan pklmu telah dibatalkan"
+    }
+
+    const Now = new Date()
+
+    payload.tanggal = Now.toISOString().substring(0, 10)
+    const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
+    payload.time = datelocal.split(" ")[1]
+    
+    await tx.siswa.update({
+      where : {
+        id : pengajun_pkl.siswa.id
+      },
+      data : {
+        status : "belum_pkl"
+      }
+    })
+
+    await tx.notification.create({
+      data : payload
+    })
+
+    const payloadPushNotif = {
+      notification : {
+          body : payload.isi,
+          title : payload.judul
+      },
+      token : ""
+    }
+    sendNotification(payloadPushNotif)
+    return pengajun_pkl
+  })
 };
 
 const findAllPengajuanPkl = async (id,siswa) => {
@@ -510,7 +568,17 @@ const addCancelPkl = async (id_siswa) => {
     payload.tanggal = Now.toISOString().substring(0, 10)
     const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
     payload.time = datelocal.split(" ")[1]
+
+    const payloadPushNotif = {
+      notification : {
+          body : payload.isi,
+          title : payload.judul
+      },
+      token : ""
+    }
     
+    sendNotification(payloadPushNotif)
+
     await tx.notification.create({
       data : payload
     })
@@ -569,15 +637,41 @@ const cancelPengajuanCancelPkl = async (body) => {
     );
   }
 
-  return db.pengajuan_cancel_pkl.update({
-    where: {
-      id: body.id,
-    },
-    data: {
-      status: "dibatalkan",
-    },
-    select: selectCancelPkl,
-  });
+  return db.$transaction(async tx => {
+    const cancel_pengajuan = await tx.pengajuan_cancel_pkl.update({
+      where: {
+        id: body.id,
+      },
+      data: {
+        status: "dibatalkan",
+      },
+      select: selectCancelPkl,
+    });
+
+    const payload = {
+      id : generateId(),
+      id_siswa : findPengajuanPkl.siswa.id,
+      judul : "kabar Baik Untukmu",
+      isi : "Pengajuan cancel pkl mu telah dibatalkan"
+    }
+
+    const Now = new Date()
+
+    payload.tanggal = Now.toISOString().substring(0, 10)
+    const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"})
+    payload.time = datelocal.split(" ")[1]
+
+    const payloadPushNotif = {
+      notification : {
+          body : payload.isi,
+          title : payload.judul
+      },
+      token : ""
+    }
+    
+    sendNotification(payloadPushNotif)
+    return cancel_pengajuan
+  })
 };
 
 const AddLaporanSiswaPkl = async (body, image, url) => {
@@ -715,6 +809,53 @@ const findLaporanSiswaPklById = async (id) => {
   return findLaporan;
 };
 
+const statusTokenFCM = async (id_siswa) => {
+  const findSiswa = await db.siswa.findUnique({
+    where : {
+      id : id_siswa
+    },
+    select : {
+      token_FCM : true
+    }
+  })
+
+  if(!findSiswa) {
+    throw new responseError(404,"siswa tidak ditemukan")
+  }
+
+  if(findSiswa.token_FCM) {
+    return {token_FCM : true}
+  }
+  return {token_FCM : false} 
+}
+
+const addTokenFCM = async (id_siswa,tokenFCM) =>{
+  const findSiswa = await db.siswa.findUnique({
+    where : {
+      id : id_siswa
+    },
+    select : {
+      token_FCM : true
+    }
+  })
+
+  if(!findSiswa) {
+    throw new responseError(404,"siswa tidak ditemukan")
+  }
+
+  return db.siswa.update({
+    where : {
+      id : findSiswa.id
+    },
+    data : {
+      token_FCM : tokenFCM
+    },
+    select : {
+      id : true,
+      nama : true
+    }
+  })
+}
 export default {
   updatePassword,
   // Get DUDI & Siswa
@@ -745,4 +886,8 @@ export default {
   deleteLaporanSiswaPkl,
   findAllLaporanSiswaPkl,
   findLaporanSiswaPklById,
+
+  // token
+  statusTokenFCM,
+  addTokenFCM
 };
