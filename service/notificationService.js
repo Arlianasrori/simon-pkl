@@ -18,6 +18,8 @@ const addNotification = async (body) => {
 
     body = await validate(notificationValidation.addNotificationValidation,body)
 
+    const payloadPush = {}
+
     if(body.id_siswa)  {
         const findSiswa = await db.siswa.findFirst({
             where : {
@@ -29,6 +31,47 @@ const addNotification = async (body) => {
             throw new responseError(404,"siswa tidak ditemukan")
         }
 
+        payloadPush = {
+            notification : {
+                body : body.isi,
+                title : payload.judul
+            },
+            token : ""
+        }
+
+        sendNotification(payloadPush)
+    }else if (body.id_pembimbing_dudi) {
+        const findSiswa = await db.siswa.findMany({
+            where : {
+                id_pembimbing_dudi : body.id_pembimbing_dudi
+            }
+        })
+
+        payloadPush = {
+            notification : {
+                body : body.isi,
+                title : payload.judul
+            },
+            token : ""
+        }
+
+        sendNotification(payloadPush)
+    }else if(body.id_guru_pembimbing) {
+        const findSiswa = await db.siswa.findMany({
+            where : {
+                id_guru_pembimbing : body.id_guru_pembimbing
+            }
+        })
+
+        payloadPush = {
+            notification : {
+                body : body.isi,
+                title : payload.judul
+            },
+            token : ""
+        }
+
+        sendNotification(payloadPush)
     }
 
     return db.notification.create({

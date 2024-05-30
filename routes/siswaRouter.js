@@ -66,3 +66,6 @@ siswaRouter.get("/riwayatAbsen",siswaController.findAbsen)
 siswaRouter.get("/findAbsenById/:id",siswaController.findAbsenById)
 siswaRouter.get("/findAllJadwalAbsen",siswaController.findAllJadwalAbsen)
 siswaRouter.get("/findJadwalAbsenById/:id_jadwal",siswaController.findJadwalAbsenById)
+
+siswaRouter.get("/statusTokenFCM",siswaController.statustokenFCM)
+siswaRouter.get("/addTokenFCM",siswaController.addTokenFCM)

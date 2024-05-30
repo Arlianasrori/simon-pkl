@@ -1435,7 +1435,14 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
 
     const findPembimbingDudi = await db.pembimbing_dudi.findFirst({
         where : {
-            id : PembimbingDudi.id
+            OR : [
+                {
+                    username : PembimbingDudi.username
+                },
+                {
+                    id : PembimbingDudi.id
+                }
+            ]
         }
     })
 

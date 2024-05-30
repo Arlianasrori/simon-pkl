@@ -3,6 +3,7 @@ export const selectCancelPkl = {
     status : true,     
     siswa : {
       select : {
+        id : true,
         nama : true
       }
     },
