@@ -157,17 +157,31 @@ const getDudiFilter = async (query,page,siswa,id_tahun) => {
     }else if(findDudi[index].total_siswa >= findDudi[index].total_kouta) {
       findDudi[index].enabled = false
     }else if(siswa.jenis_kelamin == "laki") {
-      if(findDudi[index].total_siswa_laki >= findDudi[index].kouta_pria) {
+      if(findDudi[index].total_siswa_laki >= findDudi[index].kouta_laki) {
         findDudi[index].enabled = false
       }
     }else if(siswa.jenis_kelamin == "perempuan") {
-      if(findDudi[index].total_siswa_perempuan >= findDudi[index].kouta_wanita) {
+      if(findDudi[index].total_siswa_perempuan >= findDudi[index].kouta_perempuan) {
         findDudi[index].enabled = false
       }
     }
   }
 
-  return {dudi : findDudi,page : page,count : findDudi.length}
+  const count = await db.dudi.count({
+    where : {
+      AND : [
+        {
+          add_by : siswa.id_sekolah
+        },
+        {
+          id_tahun : id_tahun
+        }
+      ]
+    }
+  })
+
+  const countPage = Math.ceil(count / 10)
+  return {dudi : findDudi,page : page,count : findDudi.length,countPage : countPage}
 }
 
 const getDudiByName = async (nama,siswa) => {

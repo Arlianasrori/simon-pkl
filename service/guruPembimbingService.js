@@ -59,8 +59,6 @@ const getGuruPembimbing = async (id) => {
       nama: true,
       no_telepon: true,
       jenis_kelamin: true,
-      tempat_lahir: true,
-      tanggal_lahir: true,
       agama: true,
       alamat : true
     },
@@ -178,7 +176,24 @@ const findAllAbsen = async (guruPembimbing,query) => {
           siswa : {
             id_guru_pembimbing : guruPembimbing.id
           }
-        }
+        },
+        {
+          tanggal : query.tanggal
+        },
+        {
+          AND : [
+              {
+                  tanggal : {
+                      gte :monthStart
+                  }
+              },
+              {
+                  tanggal : {
+                      lte : monthEnd
+                  }
+              },
+          ]
+      }
       ]
     },
     select : selectAbsenObject,

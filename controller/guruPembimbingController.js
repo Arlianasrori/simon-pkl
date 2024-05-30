@@ -47,6 +47,17 @@ const getGuruPembimbing = async (req, res, next) => {
         next(error)
     }
 }
+const getProfile = async (req, res, next) => {
+    try {
+        const result = await guruPembimbingService.getGuruPembimbing(req.guruPembimbing.id)
+        res.status(200).json({
+            msg : "Success",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 
 const getSiswa = async (req, res, next) => {
     try {
@@ -105,6 +116,7 @@ const findLaporanPklFilter = async (req, res, next) => {
     try {
         const query = req.query
         query.id_guru_pembimbing = req.guruPembimbing.id
+        query.tahun = req.guruPembimbing.id_tahun
         const page = parseInt(req.query.page)
         const result = await adminService.findLaporanPklFilter(query,page,req.guruPembimbing)
         res.status(200).json({
@@ -218,6 +230,7 @@ const addNotification = async (req,res,next) => {
     }
   }
 export default {
+    getProfile,
     refreshToken,
     updatePassword,
     getGuruPembimbing,

@@ -13,6 +13,7 @@ guruPembimbingRouter.put("/updatePassword", guruPembimbingController.updatePassw
 
 
 guruPembimbingRouter.get("/getGuruPembimbing", guruPembimbingController.getGuruPembimbing)
+guruPembimbingRouter.get("/getProfile", guruPembimbingController.getProfile)
 guruPembimbingRouter.get("/getSiswa/:id_siswa", guruPembimbingController.getSiswa)
 guruPembimbingRouter.get("/getAllSiswaGuruPembimbing", guruPembimbingController.getAllSiswaGuruPembimbing)
 

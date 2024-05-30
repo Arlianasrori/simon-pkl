@@ -27,6 +27,7 @@ export const guruPembimbingMiddleware = async (req,res,next) => {
             id : true,
             id_sekolah : true,
             jenis_kelamin : true,
+            id_tahun : true,
             nip : true,
             nama : true
         }

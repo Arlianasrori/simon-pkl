@@ -1344,6 +1344,7 @@ const deleteDudi = async (id,admin) => {
 
 const findDudiFilter = async (query,admin,page) => {
     query = await validate(adminValidation.searchDudiValidation,query)
+    console.log(query);
     page = await validate(siswaValidation.pageValidation,page)
 
     const findDudi = await db.dudi.findMany({

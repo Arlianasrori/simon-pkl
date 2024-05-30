@@ -109,11 +109,8 @@ const searchKelasValidation = joi.object({
 // guruPembimbing validation
 const addGuruPembimbingValidation = joi.object({
     id : joi.number().required(),
-<<<<<<< HEAD
-=======
     id_sekolah : joi.number().required(),
     id_tahun : joi.number().required(),
->>>>>>> 189a5ac07d80ced4fa9d25c5459ab4de0ab8d028
     nip : joi.string().required(),
     nama : joi.string().max(255).required(),
     no_telepon : joi.string().max(12).regex(/^[0-9]{12}$/).messages({'string.pattern.base': `Nomor telepon harus terdiri dari 12 digit.`}).required(),
@@ -194,7 +191,7 @@ const searchDudiValidation = joi.object({
   provinsi : joi.string().max(255).optional(),
   negara : joi.string().max(255).optional(),
   page : joi.number().optional(),
-  tahun : joi.number().required()
+  tahun : joi.number().optional()
 })
 
 
