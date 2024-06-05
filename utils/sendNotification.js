@@ -1,10 +1,12 @@
 import admin from "firebase-admin"
-import serviceAccount from "C:\\Users\\Farhan\\Desktop\\simon_pkl_backend\\private_key.json"
-
+import serviceAccount from "file:\\C:\\Users\\pc-03\\Desktop\\backend2\\simon-pkl-2a7c6-firebase-adminsdk-zvkwd-08e150fa34.json" with {type : "json"}
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+});
 export async function sendNotification(message) {
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-    });
-    
-    admin.messaging().send(message)
+    try {             
+        admin.messaging().send(message)
+    }catch(e) {
+        console.log(e);
+    }
 }

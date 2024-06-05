@@ -58,7 +58,8 @@ const getSiswaById = async (id) => {
       no_telepon : true,
       jurusan : true,
       kelas : true,
-      alamat : true
+      alamat : true,
+      status : true
     }
   });
 
@@ -272,7 +273,8 @@ const addPengajuanPkl = async (body,siswa) => {
       status: true,
       dudi: true,
       pengajuan_pkl: true,
-      jenis_kelamin : true
+      jenis_kelamin : true,
+      token_FCM : true
     },
   });
 
@@ -369,8 +371,8 @@ const addPengajuanPkl = async (body,siswa) => {
     const payload = {
       id : generateId(),
       id_siswa : findSiswa.id,
-      judul : "kabar Baik Untukmu",
-      isi : "Ajuan pklmu sedang diproses,tunggu verifikasi dari dudi yang kamu ajukan"
+      judul : "Menunggu proses...",
+      isi : "Ajuan pkl mu sedang diproses, tunggu verifikasi dari dudi yang kamu ajukan"
     }
 
     const Now = new Date()
@@ -388,9 +390,11 @@ const addPengajuanPkl = async (body,siswa) => {
           body : payload.isi,
           title : payload.judul
       },
-      token : ""
+      token : findSiswa.token_FCM
     }
-    sendNotification(payloadPushNotif)
+    if (payloadPushNotif.token) {
+      sendNotification(payloadPushNotif)
+    }
     return createpengajuan
   })
 };
@@ -442,7 +446,7 @@ const cancelPengajuanPkl = async (body,siswa) => {
     const payload = {
       id : generateId(),
       id_siswa : pengajun_pkl.siswa.id,
-      judul : "kabar Baik Untukmu",
+      judul : "Kabar Baik Untukmu!",
       isi : "Ajuan pklmu telah dibatalkan"
     }
 
@@ -470,9 +474,12 @@ const cancelPengajuanPkl = async (body,siswa) => {
           body : payload.isi,
           title : payload.judul
       },
-      token : ""
+      token : pengajun_pkl.siswa.token_FCM
     }
-    sendNotification(payloadPushNotif)
+
+    if (payloadPushNotif.token) {
+      sendNotification(payloadPushNotif)
+    }
     return pengajun_pkl
   })
 };
@@ -552,7 +559,12 @@ const addCancelPkl = async (id_siswa) => {
     where: {
       id: id_siswa,
     },
-    select: selectSiswaObject,
+    select: {
+      id : true,
+      token_FCM : true,
+      dudi : true,
+      pembimbing_dudi : true
+    },
   });
 
   if (!findsiswa) {
@@ -576,8 +588,8 @@ const addCancelPkl = async (id_siswa) => {
     const payload = {
       id : generateId(),
       id_siswa : body.id_siswa,
-      judul : "kabar Baik Untukmu",
-      isi : "Ajuan cancel pklmu sedang diproses,tunggu verifikasi dari dudi yang kamu ajukan"
+      judul : "Menunggu proses...",
+      isi : "Ajuan cancel pklmu sedang diproses, tunggu verifikasi dari dudi yang kamu ajukan"
     }
 
     const Now = new Date()
@@ -591,10 +603,11 @@ const addCancelPkl = async (id_siswa) => {
           body : payload.isi,
           title : payload.judul
       },
-      token : ""
+      token : findsiswa.token_FCM
     }
-    
-    sendNotification(payloadPushNotif)
+    if (payloadPushNotif.token) {
+      sendNotification(payloadPushNotif)
+    }
 
     await tx.notification.create({
       data : payload
@@ -668,7 +681,7 @@ const cancelPengajuanCancelPkl = async (body) => {
     const payload = {
       id : generateId(),
       id_siswa : findPengajuanPkl.siswa.id,
-      judul : "kabar Baik Untukmu",
+      judul : "Kabar Baik Untukmu!",
       isi : "Pengajuan cancel pkl mu telah dibatalkan"
     }
 
@@ -683,10 +696,11 @@ const cancelPengajuanCancelPkl = async (body) => {
           body : payload.isi,
           title : payload.judul
       },
-      token : ""
+      token : findPengajuanPkl.siswa.token_FCM
     }
-    
-    sendNotification(payloadPushNotif)
+    if (payloadPushNotif.token) {
+      sendNotification(payloadPushNotif)
+    }
     return cancel_pengajuan
   })
 };
@@ -862,7 +876,7 @@ const addTokenFCM = async (id_siswa,tokenFCM) =>{
 
   return db.siswa.update({
     where : {
-      id : findSiswa.id
+      id : id_siswa
     },
     data : {
       token_FCM : tokenFCM

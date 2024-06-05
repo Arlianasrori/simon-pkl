@@ -7,7 +7,8 @@ export const selectPengajuanPklObject = {
           id : true,
           nama : true,
           nis : true,
-          no_telepon : true
+          no_telepon : true,
+          token_FCM : true
         }
       },
       dudi : {

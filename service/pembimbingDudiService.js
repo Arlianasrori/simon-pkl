@@ -179,7 +179,7 @@ const AccDcnPengajuanPkl = async (body,id_pengajuan) => {
       const payload = {
         id : generateId(),
         id_siswa : findPengajuan.siswa.id,
-        judul : "kabar Baik Untukmu",
+        judul : "Sayang sekali...",
         isi : `Ajuan pklmu telah ditolak oleh ${findPengajuan.dudi.nama_instansi_perusahaan}`
       }
   
@@ -198,7 +198,7 @@ const AccDcnPengajuanPkl = async (body,id_pengajuan) => {
             body : payload.isi,
             title : payload.judul
         },
-        token : ""
+        token : findPengajuan.siswa.token_FCM
       }
       
       sendNotification(payloadPushNotif)
@@ -222,7 +222,7 @@ const AccDcnPengajuanPkl = async (body,id_pengajuan) => {
     const payload = {
       id : generateId(),
       id_siswa : findPengajuan.siswa.id,
-      judul : "kabar Baik Untukmu",
+      judul : "Kabar Baik Untukmu!",
       isi : `Ajuan pklmu telah di${body.status} oleh ${findPengajuan.dudi.nama_instansi_perusahaan}`
     }
 
@@ -241,7 +241,7 @@ const AccDcnPengajuanPkl = async (body,id_pengajuan) => {
           body : payload.isi,
           title : payload.judul
       },
-      token : ""
+      token : findPengajuan.siswa.token_FCM
     }
     
     sendNotification(payloadPushNotif)
@@ -326,7 +326,7 @@ const updateStatusCancelPkl = async (id,status,id_pembimbing_dudi) => {
       const payload = {
         id : generateId(),
         id_siswa : findCancelPengajuan.id_siswa,
-        judul : "proses dibatalkan",
+        judul : "Sayang sekali...",
         isi : `Ajuan cancel untuk pklmu tidak disetujui oleh ${findCancelPengajuan.dudi.nama_instansi_perusahaan}`
       }
   
@@ -345,7 +345,7 @@ const updateStatusCancelPkl = async (id,status,id_pembimbing_dudi) => {
             body : payload.isi,
             title : payload.judul
         },
-        token : ""
+        token : findCancelPengajuan.siswa.token_FCM
       }
       
       sendNotification(payloadPushNotif)
@@ -369,7 +369,7 @@ const updateStatusCancelPkl = async (id,status,id_pembimbing_dudi) => {
     const payload = {
       id : generateId(),
       id_siswa : findCancelPengajuan.id_siswa,
-      judul : "kabar Baik Untukmu",
+      judul : "Kabar Baik Untukmu!",
       isi : `Ajuan cancel untuk pklmu telah disetujui oleh ${findCancelPengajuan.dudi.nama_instansi_perusahaan}`
     }
 
@@ -388,7 +388,7 @@ const updateStatusCancelPkl = async (id,status,id_pembimbing_dudi) => {
           body : payload.isi,
           title : payload.judul
       },
-      token : ""
+      token : findCancelPengajuan.siswa.token_FCM
     }
     
     sendNotification(payloadPushNotif)

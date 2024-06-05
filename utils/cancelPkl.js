@@ -4,7 +4,8 @@ export const selectCancelPkl = {
     siswa : {
       select : {
         id : true,
-        nama : true
+        nama : true,
+        token_FCM : true
       }
     },
     dudi : {

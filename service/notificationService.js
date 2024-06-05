@@ -5,6 +5,7 @@ import generateId from "../utils/generateIdUtils.js"
 import notificationValidation from "../validation/notificationValidation.js"
 import { db } from "../config/prismaClient.js"
 import { cekNotif } from "../utils/ceknotif.js"
+import { sendNotification } from "../utils/sendNotification.js"
 
 
 const addNotification = async (body) => {
@@ -36,7 +37,7 @@ const addNotification = async (body) => {
                 body : body.isi,
                 title : payload.judul
             },
-            token : ""
+            token : findSiswa.token_FCM
         }
 
         sendNotification(payloadPush)
@@ -44,6 +45,15 @@ const addNotification = async (body) => {
         const findSiswa = await db.siswa.findMany({
             where : {
                 id_pembimbing_dudi : body.id_pembimbing_dudi
+            },
+            select : {
+                token_FCM : true
+            }
+        })
+        const token = []
+        findSiswa.forEach(e => {
+            if (e.token_FCM) {
+                token.push(e.token_FCM)
             }
         })
 
@@ -52,7 +62,7 @@ const addNotification = async (body) => {
                 body : body.isi,
                 title : payload.judul
             },
-            token : ""
+            token : token
         }
 
         sendNotification(payloadPush)
@@ -63,12 +73,19 @@ const addNotification = async (body) => {
             }
         })
 
+        const token = []
+        findSiswa.forEach(e => {
+            if (e.token_FCM) {
+                token.push(e.token_FCM)
+            }
+        })
+
         payloadPush = {
             notification : {
                 body : body.isi,
                 title : payload.judul
             },
-            token : ""
+            token : token
         }
 
         sendNotification(payloadPush)
