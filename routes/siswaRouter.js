@@ -30,6 +30,7 @@ siswaRouter.get('/findAllPengajuanPkl', siswaController.findAllPengajuanPkl)
 siswaRouter.get('/findPengajuanPklByStatus', siswaController.findPengajuanPklByStatus)
 siswaRouter.get('/findPengajuanPkl/:id', siswaController.findPengajuanPklbyId)
 siswaRouter.post('/cancelPengajuanPkl', siswaController.cancelPengajuanPkl)
+siswaRouter.get('/findPengajuanPending', siswaController.findPengajuanPending)
 
 
 // cancel pkl siswa

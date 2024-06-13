@@ -478,7 +478,11 @@ const cancelPengajuanPkl = async (body,siswa) => {
     }
 
     if (payloadPushNotif.token) {
-      sendNotification(payloadPushNotif)
+      try {
+        await sendNotification(payloadPushNotif)
+      }catch (e) {
+        console.log("p");
+      }
     }
     return pengajun_pkl
   })
@@ -500,6 +504,45 @@ const findAllPengajuanPkl = async (id,siswa) => {
         }
       ]
     },
+  });
+};
+const findPengajuanPending = async (siswa) => {
+  return db.pengajuan_pkl.findFirst({
+    where: {
+      AND : [
+        {
+          AND : [
+            {
+              siswa : {
+                id_sekolah : siswa.id_sekolah
+              }
+            },
+            {
+              id_siswa: siswa.id,
+            }
+          ]
+        },
+        {
+          AND : [
+            {
+              status : "proses"
+            }
+          ]
+        }
+      ]
+    },
+    select : {
+      id : true,
+      status : true,
+      dudi : {
+        select : {
+          id : true,
+          nama_instansi_perusahaan : true,
+          alamat : true,
+          no_telepon : true,
+        }
+      }
+    }
   });
 };
 const findPengajuanPklById = async (id,siswa) => {
@@ -906,6 +949,7 @@ export default {
   findAllPengajuanPkl,
   findPengajuanPklById,
   findPengajuanPklByStatus,
+  findPengajuanPending,
 
   // cancel pkl
   addCancelPkl,

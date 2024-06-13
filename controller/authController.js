@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs"
 import { db } from "../config/prismaClient.js"
 import jwt from "jsonwebtoken"
+import { status_pkl } from "@prisma/client"
 
 export const auth = async (req,res,next) => {
     try {
@@ -18,6 +19,7 @@ export const auth = async (req,res,next) => {
    
                 if(isPassowrd) {
                     const payload = {
+                        status_pkl : findSiswa.status,
                         id : findSiswa.id,
                         nis : findSiswa.nis,
                         jenis_kelamin : findSiswa.jenis_kelamin,

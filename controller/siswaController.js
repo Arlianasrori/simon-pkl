@@ -179,6 +179,18 @@ const findPengajuanPklByStatus = async (req, res, next) => {
     next(error);
   }
 };
+const findPengajuanPending = async (req, res, next) => {
+  try {
+    const siswa = req.siswa
+    const result = await siswaService.findPengajuanPending(siswa);
+    res.status(200).json({
+      msg: "succes",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // cancel pkl
 const addCancelPkl = async (req, res, next) => {
@@ -615,6 +627,7 @@ export default {
   getNotificationByID,
   notificationRead,
   getCountNotificationNotRead,
+  findPengajuanPending,
 
 
   // absen
