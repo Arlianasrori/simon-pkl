@@ -191,7 +191,8 @@ const searchDudiValidation = joi.object({
   provinsi : joi.string().max(255).optional(),
   negara : joi.string().max(255).optional(),
   page : joi.number().optional(),
-  tahun : joi.number().optional()
+  tahun : joi.number().optional(),
+  noPage : joi.boolean().optional(),
 })
 
 

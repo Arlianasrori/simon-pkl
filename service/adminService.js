@@ -99,9 +99,12 @@ const updateTahun = async (body,id,admin) => {
 }
 const getAllTahun = async (admin) => {
     return db.tahun.findMany({
+        orderBy : {
+            tahun : "desc"
+        },
         where : {
             id_sekolah : admin.id_sekolah
-        }
+        },       
     })
 }
 // admin login
@@ -166,6 +169,7 @@ const updatePassword = async (id, password) => {
 const addSiswa = async (siswa,alamat) => {
     siswa.id = generateId()
     alamat.id_siswa = siswa.id
+    console.log(siswa);
     siswa = await validate(adminValidation.addSiswaValidation,siswa)
     alamat = await validate(adminValidation.addAlamatSiswaValidation,alamat)
 
@@ -261,12 +265,29 @@ const findSiswaById = async (id,admin) => {
     return findSiswa
 }
 
-const findAllSiswa = async (page,admin,id_tahun) => {
-    page = await validate(siswaValidation.pageValidation,page)
+const findAllSiswa = async (page,admin,id_tahun,nopage) => {
 
      if(!id_tahun) {
         throw new responseError(400,"tahun is required")
     }
+
+    if(nopage) {
+        return db.siswa.findMany({
+            where : {
+                AND : [
+                    {
+                        id_sekolah : admin.id_sekolah
+                    },
+                    {
+                        id_tahun : parseInt(id_tahun)
+                    }
+                ]
+            },
+            select : selectSiswaObject
+        })
+    }
+    page = await validate(siswaValidation.pageValidation,page)
+
 
     const findSiswa = await db.siswa.findMany({
         where : {
@@ -284,7 +305,20 @@ const findAllSiswa = async (page,admin,id_tahun) => {
         select : selectSiswaObject
     })
 
-    return {siswa : findSiswa,page : page,count : findSiswa.length}
+    const countSiswa = await db.siswa.count({
+        where : {
+            AND : [
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    id_tahun : parseInt(id_tahun)
+                }
+            ]
+        },
+        })
+    const countPage = Math.ceil(countSiswa / 10)
+    return {siswa : findSiswa,page : page,count : findSiswa.length,countPage : countPage}
 }
 const findSiswaHaventPkl = async (admin,id_tahun) => {
      if(!id_tahun) {
@@ -394,7 +428,85 @@ const findSiswaFilter = async (query,admin,page) => {
         select : selectSiswaObject
     })
 
-    return {count : findSiswa.length,data : findSiswa}
+    const countSiswa = await db.siswa.count({
+        where : {
+            AND : [
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    id_tahun : parseInt(query.tahun)
+                },
+                {
+                    AND : [
+                        {
+                            nama : {
+                                contains : query.nama,
+                                mode : 'insensitive'
+                            }
+                        },
+                        {
+                            id_jurusan : query.id_jurusan
+                        },
+                        {
+                            id_kelas : query.id_kelas
+                        },
+                        {
+                            jenis_kelamin : query.jenis_kelamin
+                        },
+                        {
+                            alamat : {
+                                AND : [
+                                    {
+                                        negara : {
+                                            contains : query.negara,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        provinsi : {
+                                            contains : query.provinsi,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        kabupaten : {
+                                            contains : query.kabupaten,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        kecamatan : {
+                                            contains : query.kecamatan,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        desa : {
+                                            contains : query.desa,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        detail_tempat : {
+                                            contains : query.detail_tempat,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                ]
+                            }
+                        }
+                    ]
+
+                }
+            ]
+        },
+    }
+    )
+
+    const countPage = Math.ceil(countSiswa / 10)
+
+    return {count : findSiswa.length,data : findSiswa,page : page,countPage}
 }
 
 const updateSiswa = async (data,identify,admin) => {
@@ -542,13 +654,12 @@ const deleteJurusan = async (id) => {
         }
     })
 }
-const findAllJurusan = async (page,admin,id_tahun) => {
-    page = await validate(siswaValidation.pageValidation,page)
+const findAllJurusan = async (admin,id_tahun) => {
      if(!id_tahun) {
         throw new responseError(400,"tahun is required")
     }
 
-    const findJurusan = await db.jurusan.findMany({
+    return db.jurusan.findMany({
         where : {
             AND : [
                 {
@@ -558,12 +669,8 @@ const findAllJurusan = async (page,admin,id_tahun) => {
                     id_tahun : parseInt(id_tahun)
                 }
             ]
-        },
-        skip : 10 * (page - 1),
-        take : 10
+        }
     })
-
-    return {jurusan : findJurusan,page : page,count : findJurusan.length}
 } 
 const findJurusanById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
@@ -698,13 +805,12 @@ const deleteKelas = async (id,admin) => {
         select : selectKelasObject
     })
 }
-const findAllkelas = async (page,admin,id_tahun) => {
-    page = await validate(siswaValidation.pageValidation,page)
+const findAllkelas = async (admin,id_tahun) => {
     if(!id_tahun) {
         throw new responseError(400,"tahun is required")
     }
 
-    const findKelas = await db.kelas.findMany({
+    return db.kelas.findMany({
         where : {
             AND : [
                 {
@@ -719,12 +825,8 @@ const findAllkelas = async (page,admin,id_tahun) => {
                 }
             ]          
         },
-        skip : 10 * (page - 1),
-        take : 10,
         select : selectKelasObject
     })
-
-    return {kelas : findKelas,page : page,count : findKelas.length}
 } 
 const findKelasById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
@@ -832,7 +934,6 @@ const addGuruPembimbing = async (guru,alamat) => {
 
     guru.password = await bcrypt.hash(guru.password,10)
 
-    console.log(guru);
 
     const findGuruPembimbing = await db.guru_pembimbing.findFirst({
        where : {
@@ -988,11 +1089,28 @@ const deleteGuruPembimbing = async (identify,admin) => {
     })
 }
 
-const findAllGuruPembimbing = async (page,admin,id_tahun) => {
-    page = await validate(siswaValidation.pageValidation,page)
+const findAllGuruPembimbing = async (page,admin,id_tahun,noPage) => {
      if(!id_tahun) {
         throw new responseError(400,"tahun is required")
     }
+
+    if(noPage) {
+        return db.guru_pembimbing.findMany({
+            where : {
+                AND : [
+                    {
+                        id_sekolah : admin.id_sekolah
+                    },
+                    {
+                        id_tahun : parseInt(id_tahun)
+                    }
+                ]
+    
+            },
+            select : selectGuruPembimbingPbject
+        })
+    }
+    page = await validate(siswaValidation.pageValidation,page)
 
     const findGuruPembimbing = await db.guru_pembimbing.findMany({
         where : {
@@ -1010,8 +1128,22 @@ const findAllGuruPembimbing = async (page,admin,id_tahun) => {
         take : 10,
         select : selectGuruPembimbingPbject
     })
+    const countGuru = await db.guru_pembimbing.count({
+        where : {
+            AND : [
+                {
+                    id_sekolah : admin.id_sekolah
+                },
+                {
+                    id_tahun : parseInt(id_tahun)
+                }
+            ]
 
-    return {guruPembimbing : findGuruPembimbing,page : page,count : findGuruPembimbing.length}
+        },
+    })
+    const countpage = Math.ceil(countGuru / 10)
+
+    return {guruPembimbing : findGuruPembimbing,page : page,count : findGuruPembimbing.length,countpage}
 }
 const findGuruPembimbingById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
@@ -1178,8 +1310,7 @@ const addDudi = async (dudi,alamat) => {
     })
 }
 
-const findAllDudi = async (page,admin,id_tahun) => {
-    page = await validate(siswaValidation.pageValidation,page)
+const findAllDudi = async (page,admin,id_tahun,noPage) => {
      if(!id_tahun) {
         throw new responseError(400,"tahun is required")
     }
@@ -1193,7 +1324,23 @@ const findAllDudi = async (page,admin,id_tahun) => {
     if(!findTahun) {
         throw new responseError(404,"data tahun tidak ditemukan")
     }
-
+ 
+    if(noPage) {
+        return db.dudi.findMany({
+            where : {
+                AND : [
+                    {
+                        add_by : admin.id_sekolah
+                    },
+                    {
+                        id_tahun : parseInt(id_tahun)
+                    }
+                ]       
+            },
+            select : selectDudiObject
+        })
+    }
+    page = await validate(siswaValidation.pageValidation,page)
     const findDudi = await db.dudi.findMany({
         where : {
             AND : [
@@ -1342,9 +1489,85 @@ const deleteDudi = async (id,admin) => {
     })
 }
 
-const findDudiFilter = async (query,admin,page) => {
+const findDudiFilter = async (query,admin,page,nopage) => {
     query = await validate(adminValidation.searchDudiValidation,query)
-    console.log(query);
+    if(!query.tahun) {
+        throw new responseError(400,"tahun is required")
+    }
+
+    if(nopage) {
+        return db.dudi.findMany({
+            where : {
+                AND : [
+                    {
+                        add_by : admin.id_sekolah
+                    },
+                    {
+                        id_tahun : parseInt(query.tahun)
+                    },
+                    {
+                        AND : [
+                            {
+                                nama_instansi_perusahaan : {
+                                    contains : query.nama_instansi_perusahaan,
+                                    mode : 'insensitive'
+                                }
+                            },
+                            {
+                                bidang : {
+                                    contains : query.bidang,
+                                    mode : 'insensitive'
+                                }
+                            },
+                            {
+                                alamat : {
+                                    AND : [
+                                        {
+                                            negara : {
+                                                contains : query.negara,
+                                                mode : "insensitive"
+                                            }
+                                        },
+                                        {
+                                            provinsi : {
+                                                contains : query.provinsi,
+                                                mode : "insensitive"
+                                            }
+                                        },
+                                        {
+                                            kabupaten : {
+                                                contains : query.kabupaten,
+                                                mode : "insensitive"
+                                            }
+                                        },
+                                        {
+                                            kecamatan : {
+                                                contains : query.kecamatan,
+                                                mode : "insensitive"
+                                            }
+                                        },
+                                        {
+                                            desa : {
+                                                contains : query.desa,
+                                                mode : "insensitive"
+                                            }
+                                        },
+                                        {
+                                            detail_tempat : {
+                                                contains : query.detail_tempat,
+                                                mode : "insensitive"
+                                            }
+                                        },
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            select : selectDudiObject
+        })
+    }
     page = await validate(siswaValidation.pageValidation,page)
 
     const findDudi = await db.dudi.findMany({
@@ -1421,7 +1644,79 @@ const findDudiFilter = async (query,admin,page) => {
         select : selectDudiObject
     })
 
-    return {dudi : findDudi,page : page,count : findDudi.length}
+    const countDudi = await db.dudi.count({
+        where : {
+            AND : [
+                {
+                    add_by : admin.id_sekolah
+                },
+                {
+                    id_tahun : parseInt(query.tahun)
+                },
+                {
+                    AND : [
+                        {
+                            nama_instansi_perusahaan : {
+                                contains : query.nama_instansi_perusahaan,
+                                mode : 'insensitive'
+                            }
+                        },
+                        {
+                            bidang : {
+                                contains : query.bidang,
+                                mode : 'insensitive'
+                            }
+                        },
+                        {
+                            alamat : {
+                                AND : [
+                                    {
+                                        negara : {
+                                            contains : query.negara,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        provinsi : {
+                                            contains : query.provinsi,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        kabupaten : {
+                                            contains : query.kabupaten,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        kecamatan : {
+                                            contains : query.kecamatan,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        desa : {
+                                            contains : query.desa,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                    {
+                                        detail_tempat : {
+                                            contains : query.detail_tempat,
+                                            mode : "insensitive"
+                                        }
+                                    },
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+    })
+
+    const countpage = Math.ceil(countDudi / 10)
+    return {dudi : findDudi,page : page,count : findDudi.length,countpage}
 }
 
 
@@ -1491,8 +1786,7 @@ const addPembimbingDudi = async (PembimbingDudi,alamat) => {
         return {pembimbingDudi : addPembimbingDudi,alamat : addAlamatDudi}
     })
 }
-const findAllPembimbingDudi = async (admin,page,id_tahun) => {
-    page = await validate(siswaValidation.pageValidation,page)
+const findAllPembimbingDudi = async (admin,page,id_tahun,noPage) => {
      if(!id_tahun) {
         throw new responseError(400,"tahun is required")
     }
@@ -1507,7 +1801,40 @@ const findAllPembimbingDudi = async (admin,page,id_tahun) => {
         throw new responseError(404,"data tahun tidak ditemukan")
     }
 
-    return db.pembimbing_dudi.findMany({
+    if(noPage) {
+        return db.pembimbing_dudi.findMany({
+            where : {
+                AND : [
+                    {
+                        add_by : admin.id_sekolah
+                    },
+                    {
+                        id_tahun : parseInt(id_tahun)
+                    }
+                ]
+            },
+            select : selectPebimbingDudiObject
+        })
+    }
+
+    page = await validate(siswaValidation.pageValidation,page)
+
+    const countPembimbing = await db.pembimbing_dudi.count({
+        where : {
+            AND : [
+                {
+                    add_by : admin.id_sekolah
+                },
+                {
+                    id_tahun : parseInt(id_tahun)
+                }
+            ]
+        },
+    })
+
+    const countPage = Math.ceil(countPembimbing / 10)
+
+    const pembimbingDudi = await db.pembimbing_dudi.findMany({
         where : {
             AND : [
                 {
@@ -1522,6 +1849,8 @@ const findAllPembimbingDudi = async (admin,page,id_tahun) => {
         take : 10,
         select : selectPebimbingDudiObject
     })
+
+    return {pembimbingDudi: pembimbingDudi,page : page,count : pembimbingDudi.length,countPage}
 }
 const findPembimbingDudiById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
@@ -1829,7 +2158,26 @@ const findAllLaporanPkl = async (page,admin,id_tahun) => {
         select : selectLaporanpklObject
     })
 
-    return {laporan : findLaporan,page : page,count : findLaporan.length}
+    const countLaporan = await db.laporan_pkl.count({
+        where : {
+            AND : [
+                {
+                    siswa : {
+                        id_sekolah : admin.id_sekolah
+                    }
+                },
+                {
+                    siswa : {
+                        id_tahun : parseInt(id_tahun)
+                    }
+                }
+            ]
+
+        },
+    }) 
+
+    const countPage = Math.ceil(countLaporan / 10)
+    return {laporan : findLaporan,page : page,count : findLaporan.length,countPage}
 }
 const findLaporanPklById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
@@ -1971,10 +2319,27 @@ const findAllLaporanSiswaPkl = async (page,admin,id_tahun) => {
         select : selectLaporanpklSiswaObject
     })
 
-    return {laporan : findLaporan,page : page,count : findLaporan.length}
+    const countLaporan = await db.laporan_siswa_pkl.count({
+        where : {
+            AND : [
+                {                  
+                    siswa : {
+                        id_sekolah : admin.id_sekolah
+                    }
+                },
+                {
+                    siswa : {
+                        id_tahun : parseInt(id_tahun)
+                    }
+                }
+            ]
+        },
+    }) 
+    
+    const countPage = Math.ceil(countLaporan / 10)
+    return {laporan : findLaporan,page : page,count : findLaporan.length,countPage}
 }
 const findLaporanPklSiswaById = async (id,admin) => {
-    console.log(admin);
     id = await validate(adminValidation.idValidation,id)
 
     const findLaporan = await db.laporan_siswa_pkl.findFirst({
@@ -2074,12 +2439,13 @@ const findLaporanPklSiswaFilter = async (query,page,admin) => {
 
 
 // absen
-const findAllAbsen = async (admin,id_tahun) => {
+const findAllAbsen = async (admin,id_tahun,page) => {
+    page = await validate(siswaValidation.pageValidation,page)
      if(!id_tahun) {
         throw new responseError(400,"tahun is required")
     }
 
-    return db.absen.findMany({
+    const countAbsen = await db.absen.count({
         where : {
             AND : [
                 {
@@ -2093,10 +2459,31 @@ const findAllAbsen = async (admin,id_tahun) => {
                     }
                 }
             ]
-      
         },
+        })
+    const countPage = Math.ceil(countAbsen / 10)
+
+    const findAbsen = await db.absen.findMany({
+        where : {
+            AND : [
+                {
+                    siswa : {
+                        id_sekolah : admin.id_sekolah
+                    }
+                },
+                {
+                    siswa : {
+                        id_tahun : parseInt(id_tahun)
+                    }
+                }
+            ]
+        },
+        skip : 10 * (page - 1),
+        take : 10,
         select : selectAbsenObject
     })
+
+    return {absen : findAbsen,page : page,count : findAbsen.length,countPage : countPage}
 }
 const findAbsenById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
