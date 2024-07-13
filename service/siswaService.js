@@ -393,7 +393,7 @@ const addPengajuanPkl = async (body,siswa) => {
       token : findSiswa.token_FCM
     }
     if (payloadPushNotif.token) {
-      sendNotification(payloadPushNotif)
+      sendNotification(payloadPushNotif,findSiswa.id)
     }
     return createpengajuan
   })
@@ -479,7 +479,7 @@ const cancelPengajuanPkl = async (body,siswa) => {
 
     if (payloadPushNotif.token) {
       try {
-        await sendNotification(payloadPushNotif)
+        await sendNotification(payloadPushNotif,pengajun_pkl.siswa.id)
       }catch (e) {
         console.log("p");
       }
@@ -649,7 +649,7 @@ const addCancelPkl = async (id_siswa) => {
       token : findsiswa.token_FCM
     }
     if (payloadPushNotif.token) {
-      sendNotification(payloadPushNotif)
+      sendNotification(payloadPushNotif,findsiswa.id)
     }
 
     await tx.notification.create({
@@ -742,7 +742,7 @@ const cancelPengajuanCancelPkl = async (body) => {
       token : findPengajuanPkl.siswa.token_FCM
     }
     if (payloadPushNotif.token) {
-      sendNotification(payloadPushNotif)
+      sendNotification(payloadPushNotif,findPengajuanPkl.siswa.id)
     }
     return cancel_pengajuan
   })

@@ -567,7 +567,8 @@ const absendiluarRadius = async (body) => {
 
 }
 
-const cekAbsen = async (body) => {
+const cekAbsen = async (body,location) => {
+    const cekradius = await cekRadiusKoordinat({latitude : location.latitude,longtitude : location.longitude},{id : body.id_siswa})
     const Now = new Date()
 
     const dateNow = Now.toISOString().substring(0, 10)
@@ -611,7 +612,6 @@ const cekAbsen = async (body) => {
         }
     })
 
-
     if(!findSiswa) {
         throw new responseError(404,"siswa tidak ditemukan")
     }
@@ -620,22 +620,23 @@ const cekAbsen = async (body) => {
         return {absen : false,jenis_absen : null,msg : "anda belum memiliki tempat pkl,segera cari tempat pkl"}
     }
 
+    const findDay = await db.hari_absen.findFirst({
+        where : {
+            AND : [
+                {
+                    id_jadwal : findSiswa.dudi.absen_jadwal[0] //kasi id sy hapus kemarin
+                },
+                {
+                    nama : datelocal[0].toLowerCase()
+                }
+            ]
+        }
+    })
+
     if(!findSiswa.absen[0]) {
         if(!findSiswa.dudi.absen_jadwal[0]) {
             return {absen : false,jenis_absen : null,msg : "jadwal absen tidak ditemukan hari ini"}
         }
-        const findDay = await db.hari_absen.findFirst({
-            where : {
-                AND : [
-                    {
-                        id_jadwal : findSiswa.dudi.absen_jadwal[0].id
-                    },
-                    {
-                        nama : datelocal[0].toLowerCase()
-                    }
-                ]
-            }
-        })
 
         if(findDay) {
             await db.absen.create({
@@ -646,15 +647,24 @@ const cekAbsen = async (body) => {
                     tanggal : dateNow
                 }
             })
-
+            if(dateNow > findDay.batas_absen_masuk) {
+                return {absen : true,jenis_absen : "absen telat",msg : "anda telat dalam melakukan absen masuk, silahkan melakukan absen telat"}
+            }
             return {absen : true,jenis_absen : "absen masuk",msg : "silahkan melakukan absen masuk"}
         }
 
-
-        return {absen : false,jenis_absen : null,msg : "jadawl absen tidak ditemukan hari ini"}
+        return {absen : false,jenis_absen : null,msg : "jadwal absen hari ini tidak ditemukan"}
+    }
+    if(findDay) {
+        if(dateNow > findDay.batas_absen_pulang) {
+            return {absen : true,jenis_absen : "absen telat",msg : "anda telat dalam melakukan absen pulang, silahkan melakukan absen telat"}
+        }
     }
 
     if(findSiswa.absen[0].status_absen_masuk) {
+        if(!cekradius.insideRadius) {
+            return {absen : true,jenis_absen : "absen diluar radius",msg : "silahkan melakukan absen diluar radius"}
+        }
         return {absen : true,jenis_absen : "absen pulang",msg : "silahkan melakukan absen pulang"}
     }else {
         return {absen : true,jenis_absen : "absen masuk",msg : "silahkan melakukan absen masuk"}
@@ -871,13 +881,17 @@ async function cekRadiusKoordinat (body,siswa) {
 
     for (let index = 0; index < findKordinat.length; index++) {
         const e = findKordinat[index];
+        console.log(e);
 
         const cekDistance = await axios({
             method : "GET",
             url : `https://api.distancematrix.ai/maps/api/distancematrix/json?origins=${e.latitude},${e.longtitude}&destinations=${body.latitude},${body.longtitude}&key=AE8YE06HZ7XeZEcOsDR4SiShL8zPocpQ7XpgdctgGrECYiA1nLg09ffJxxa1n9M3`,
         })
-        
+        console.log(cekDistance.data.rows[0]);
         if(cekDistance.status == 200) {
+            if(!cekDistance.data.rows[0].elements[0].distance) {
+                return {insideRadius : false,msg : "anda berada diluar radius kordinat absen"}
+            }
             const distance = cekDistance.data.rows[0].elements[0].distance.value
         
             if(e.radius_absen_meter > distance) {

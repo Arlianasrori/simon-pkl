@@ -414,8 +414,8 @@ const cekRadiusKoordinat = async (req, res, next) => {
 const cekAbsen = async (req,res,next) => {
   try {
       const body = {id_siswa : req.siswa.id}
-
-      const result = await absenService.cekAbsen(body)
+      const location = req.query
+      const result = await absenService.cekAbsen(body,location)
       res.status(201).json({
           msg : "succes",
           data : result
@@ -431,6 +431,7 @@ const addAbsenMasuk = async (req,res,next) => {
       body.id_siswa = req.siswa.id
       const files = req.files && req.files.foto
       const url = `http://${req.hostname}:2008/absen`
+      console.log(req.files);
 
       const result = await absenService.addAbsenMasuk(body,files,url)
       res.status(201).json({
@@ -575,6 +576,7 @@ const addTokenFCM = async (req,res,next) => {
   try {
     const id_siswa = req.siswa.id
     const token = req.body.tokenFCM
+    console.log(req.siswa);
     const result = await siswaService.addTokenFCM(id_siswa,token)
     res.status(200).json({
         msg : "succes",
