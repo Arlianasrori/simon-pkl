@@ -3,6 +3,7 @@ export const selectSiswaObject = {
     nama : true,
     nis : true,
     status : true,
+    no_telepon : true,
     jenis_kelamin : true,
     tanggal_masuk : true,
     tanggal_keluar : true,

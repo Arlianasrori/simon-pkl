@@ -151,7 +151,8 @@ const findAllSiswa = async (req,res,next) => {
     try {
         const page = req.query.page
         const id_tahun = req.query.tahun
-        const result = await adminService.findAllSiswa(page,req.admin,id_tahun)
+        const nopage = req.query.noPage
+        const result = await adminService.findAllSiswa(page,req.admin,id_tahun,nopage)
 
         res.status(200).json({
             msg : "succes",
@@ -261,9 +262,8 @@ const deleteJurusan = async (req,res,next) => {
 }
 const findAllJurusan = async (req,res,next) => {
     try {
-        const page = req.query.page
         const id_tahun = req.query.tahun
-        const result = await adminService.findAllJurusan(page,req.admin,id_tahun)
+        const result = await adminService.findAllJurusan(req.admin,id_tahun)
 
         res.status(200).json({
             msg : "succes",
@@ -332,9 +332,8 @@ const addKelas = async (req,res,next) => {
 }
 const findAllKelas = async (req,res,next) => {
     try {
-        const page = req.query.page
         const id_tahun = req.query.tahun
-        const result = await adminService.findAllkelas(page,req.admin,id_tahun)
+        const result = await adminService.findAllkelas(req.admin,id_tahun)
     
         res.status(200).json({
             msg : "succes",
@@ -420,7 +419,8 @@ const findAllGuruPembimbing = async (req,res,next) => {
     try {
         const page = req.query.page
         const id_tahun = req.query.tahun
-        const result = await adminService.findAllGuruPembimbing(page,req.admin,id_tahun)
+        const noPage = req.query.noPage
+        const result = await adminService.findAllGuruPembimbing(page,req.admin,id_tahun,noPage)
 
         res.status(200).json({
             msg : "succes",
@@ -522,7 +522,8 @@ const findAllDudi = async (req,res,next) => {
     try {
         const page = req.query.page
         const id_tahun = req.query.tahun
-        const result = await adminService.findAllDudi(page,req.admin,id_tahun)
+        const noPage = req.query.noPage
+        const result = await adminService.findAllDudi(page,req.admin,id_tahun,noPage)
 
         res.status(200).json({
             msg : "succes",
@@ -623,7 +624,8 @@ const findAllPembimbingDudi = async (req,res,next) => {
     try {
         const page = req.query.page
         const id_tahun = req.query.tahun
-        const result = await adminService.findAllPembimbingDudi(req.admin,page,id_tahun)
+        const noPage = req.query.noPage
+        const result = await adminService.findAllPembimbingDudi(req.admin,page,id_tahun,noPage)
 
         res.status(200).json({
             msg : "succes",
@@ -840,7 +842,8 @@ const findLaporanPklSiswaFilter = async (req,res,next) => {
 const findAllAbsen = async (req,res,next) => {
     try {
         const id_tahun = req.query.tahun
-        const result = await adminService.findAllAbsen(req.admin,id_tahun)
+        const page = req.query.page
+        const result = await adminService.findAllAbsen(req.admin,id_tahun,page)
     
         res.status(200).json({
             msg : "succes",
