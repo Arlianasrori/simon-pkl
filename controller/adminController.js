@@ -792,6 +792,15 @@ const findLaporanPklFilter = async (req,res,next) => {
         next(error)
     }
 }
+const downloadlaporanPkl = async (req,res,next) => {
+    try {
+        const fileName = req.params.filename
+
+        res.download(`public/laporan_pkl/${fileName}`)
+    } catch (error) {
+        next(error)
+    }
+}
 
 
 
@@ -834,6 +843,16 @@ const findLaporanPklSiswaFilter = async (req,res,next) => {
             msg : "succes",
             data : result
         })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const downloadlaporanPklSiswa = async (req,res,next) => {
+    try {
+        const fileName = req.params.filename
+
+        res.download(`public/laporan_siswa_pkl/${fileName}`)
     } catch (error) {
         next(error)
     }
@@ -1013,12 +1032,14 @@ export default {
     findAllLaporanPkl,
     findLaporanPklById,
     findLaporanPklFilter,
+    downloadlaporanPkl,
 
 
     // laporan pkl siswa
     findAllLaporanPklSiswa,
     findLaporanPklSiswaById,
     findLaporanPklSiswaFilter,
+    downloadlaporanPklSiswa,
 
 
     // absen

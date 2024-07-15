@@ -89,12 +89,14 @@ adminRouter.get('/findPengajuanPkl/:id',adminController.findPengajuanPklById)
 adminRouter.get('/findAllLaporanPkl',adminController.findAllLaporanPkl)
 adminRouter.get('/findLaporanPkl/:id',adminController.findLaporanPklById)
 adminRouter.get('/findLaporanPklFilter',adminController.findLaporanPklFilter)
+adminRouter.get('/downloadLaporanPkl',adminController.downloadlaporanPkl)
 
 
 // laporan Pkl siswa
 adminRouter.get('/findAllLaporanPklSiswa',adminController.findAllLaporanPklSiswa)
 adminRouter.get('/findLaporanPklSiswa/:id',adminController.findLaporanPklSiswaById)
 adminRouter.get('/findLaporanPklSiswaFilter',adminController.findLaporanPklSiswaFilter)
+adminRouter.get('/donwloadLaporanPklSiswa',adminController.downloadlaporanPklSiswa)
 
 
 // absen
