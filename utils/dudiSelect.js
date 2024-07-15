@@ -7,7 +7,7 @@ export const selectDudiObject = {
     bidang : true,
     alamat : true,
     siswa : true,
-    deksripsi : true,
+    deskripsi : true,
     tersedia : true,
     alamat : true,
     siswa : {

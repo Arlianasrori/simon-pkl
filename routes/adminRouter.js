@@ -101,6 +101,7 @@ adminRouter.get('/findLaporanPklSiswaFilter',adminController.findLaporanPklSiswa
 adminRouter.get('/findAllAbsen',adminController.findAllAbsen)
 adminRouter.get('/findAbsenById/:id',adminController.findAbsenById)
 adminRouter.get('/findAbsenFilter',adminController.findAbsenFilter)
+adminRouter.get('/findAbsenBySiswa/:id_siswa',adminController.findAbsenBySiswa)
 
 // cekToken 
 adminRouter.get('/cekToken', adminController.cekToken)

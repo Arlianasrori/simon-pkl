@@ -2,6 +2,8 @@ export const selectAbsenObject = {
     id : true,
     absen_masuk : true,
     absen_pulang : true,
+    tanggal : true,
+    status : true,
     jadwal_absen : true,
     status_absen_masuk : true,
     status_absen_pulang : true,

@@ -10,7 +10,7 @@ import { validasiAbsen } from "../utils/validasiAbsen.js"
 import { validasiAbsenMasuk } from "../utils/validasiAbsenMasuk.js"
 import axios from "axios"
 import { getQueryAbsen } from "../utils/getQueryAbsen.js"
-
+// deksripsi
 const selectJadwalAbsen = {
     id : true,
     tanggal_mulai : true,
@@ -317,6 +317,18 @@ const absenIzinTelat = async (body,image,url) => {
     const dateNow = Now.toISOString().substring(0, 10)
     const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"}).split(" ")
 
+    if(!image) {
+        throw new responseError(400,"foto is required")
+    }
+
+    const {fullPath,pathSaveFile} = await file(image,url)
+    image.mv(pathSaveFile,(err) => {
+        if(err) {
+            throw new responseError(500,err.message)
+        }
+        body.foto = fullPath
+    })
+
     const findSiswa = await db.siswa.findUnique({
         where : {
             id : body.id_siswa
@@ -566,10 +578,10 @@ const absendiluarRadius = async (body) => {
     }
 
 }
-
 const cekAbsen = async (body,location) => {
     const cekradius = await cekRadiusKoordinat({latitude : location.latitude,longtitude : location.longitude},{id : body.id_siswa})
     const Now = new Date()
+    console.log({body});
 
     const dateNow = Now.toISOString().substring(0, 10)
     const datelocal = Now.toLocaleDateString("id",{hour : "2-digit",minute : "2-digit",weekday : "long"}).split(" ")
@@ -624,7 +636,7 @@ const cekAbsen = async (body,location) => {
         where : {
             AND : [
                 {
-                    id_jadwal : findSiswa.dudi.absen_jadwal[0] //kasi id sy hapus kemarin
+                    id_jadwal : findSiswa.dudi.absen_jadwal[0].id //kasi id sy hapus kemarin
                 },
                 {
                     nama : datelocal[0].toLowerCase()
@@ -636,6 +648,9 @@ const cekAbsen = async (body,location) => {
     if(!findSiswa.absen[0]) {
         if(!findSiswa.dudi.absen_jadwal[0]) {
             return {absen : false,jenis_absen : null,msg : "jadwal absen tidak ditemukan hari ini"}
+        }
+        if(!cekradius.insideRadius) {
+            return {absen : false,jenis_absen : null,msg : "anda berada diluar radius"}  
         }
 
         if(findDay) {
@@ -656,7 +671,7 @@ const cekAbsen = async (body,location) => {
         return {absen : false,jenis_absen : null,msg : "jadwal absen hari ini tidak ditemukan"}
     }
     if(findDay) {
-        if(dateNow > findDay.batas_absen_pulang) {
+        if(datelocal[1] > findDay.batas_absen_pulang) {
             return {absen : true,jenis_absen : "absen telat",msg : "anda telat dalam melakukan absen pulang, silahkan melakukan absen telat"}
         }
     }
@@ -854,6 +869,7 @@ const findAllKordinatAbsen = async (id_pembimbing) => {
 }
 async function cekRadiusKoordinat (body,siswa) {
     body = await validate(absenValidation.cekRadiusKordinatAbsenValidation,body)
+    console.log({koor : body});
 
     const findSiswa = await db.siswa.findUnique({
         where : {
@@ -881,13 +897,13 @@ async function cekRadiusKoordinat (body,siswa) {
 
     for (let index = 0; index < findKordinat.length; index++) {
         const e = findKordinat[index];
-        console.log(e);
+        // console.log(e);
 
         const cekDistance = await axios({
             method : "GET",
             url : `https://api.distancematrix.ai/maps/api/distancematrix/json?origins=${e.latitude},${e.longtitude}&destinations=${body.latitude},${body.longtitude}&key=AE8YE06HZ7XeZEcOsDR4SiShL8zPocpQ7XpgdctgGrECYiA1nLg09ffJxxa1n9M3`,
         })
-        console.log(cekDistance.data.rows[0]);
+        // console.log(cekDistance.data.rows[0]);
         if(cekDistance.status == 200) {
             if(!cekDistance.data.rows[0].elements[0].distance) {
                 return {insideRadius : false,msg : "anda berada diluar radius kordinat absen"}

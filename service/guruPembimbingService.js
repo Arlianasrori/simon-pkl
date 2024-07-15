@@ -11,7 +11,7 @@ import { generatePdf } from "../utils/generatePdf.js";
 import { getQueryAbsen } from "../utils/getQueryAbsen.js";
 import { selectAbsenObject } from "../utils/absenSelect.js";
 
-
+// deksripsi
 const updatePassword = async (id, password) => {
   id = await validate(adminValidation.idValidation, id)
   password = await validate(pembimbingDudiValidation.updatePassword, password)

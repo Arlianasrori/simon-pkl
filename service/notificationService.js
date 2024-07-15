@@ -6,7 +6,7 @@ import notificationValidation from "../validation/notificationValidation.js"
 import { db } from "../config/prismaClient.js"
 import { cekNotif } from "../utils/ceknotif.js"
 import { sendNotification } from "../utils/sendNotification.js"
-
+// deksripsi
 
 const addNotification = async (body) => {
     body.id = generateId()

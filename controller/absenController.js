@@ -58,8 +58,10 @@ const addAbsenMasuk = async (req,res,next) => {
 const addAbsenPulang = async (req,res,next) => {
     try {
         const body = req.body
+        const files = req.files.foto
+        const url = `http://${req.hostname}:2008/absen`
 
-        const result = await absenService.addAbsenPulang(body)
+        const result = await absenService.addAbsenPulang(body,files,url)
         res.status(201).json({
             msg : "succes",
             data : result

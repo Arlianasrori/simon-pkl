@@ -5,7 +5,7 @@ export const siswaMiddleware = async (req,res,next) => {
     const tokenHeader = req.get("Authorization")
     
     const token = tokenHeader && tokenHeader.split(" ")[1]
-    console.log(token);
+    // console.log(token);
 
     if(!token){
         return res.status(401).json({msg : "unauthorized"})

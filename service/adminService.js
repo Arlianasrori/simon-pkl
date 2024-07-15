@@ -247,7 +247,7 @@ const addSiswa = async (siswa,alamat) => {
 const findSiswaById = async (id,admin) => {
     id = await validate(adminValidation.idValidation, id)
 
-    const findSiswa = await db.siswa.findUnique ({
+    const findSiswa = await db.siswa.findFirst ({
         where: {
             AND : [
                 {
@@ -257,7 +257,8 @@ const findSiswaById = async (id,admin) => {
                     id: id
                 }
             ]
-        }
+        },
+        select : selectSiswaObject
     })
     if (!findSiswa) {
         throw new responseError (404, "Siswa tidak ditemukan")
@@ -658,6 +659,7 @@ const findAllJurusan = async (admin,id_tahun) => {
      if(!id_tahun) {
         throw new responseError(400,"tahun is required")
     }
+    console.log('masuk');
 
     return db.jurusan.findMany({
         where : {
@@ -1299,7 +1301,6 @@ const addDudi = async (dudi,alamat) => {
                 nama_instansi_perusahaan : true,
                 no_telepon : true,
                 bidang : true,
-                deksripsi : true
             }
         })
         const addAlamatDudi= await tx.alamat_dudi.create({
@@ -1357,7 +1358,21 @@ const findAllDudi = async (page,admin,id_tahun,noPage) => {
         select : selectDudiObject
     })
 
-    return {dudi: findDudi,page : page,count : findDudi.length}
+    const countdudi = await db.dudi.count({
+        where : {
+            AND : [
+                {
+                    add_by : admin.id_sekolah
+                },
+                {
+                    id_tahun : parseInt(id_tahun)
+                }
+            ]       
+        }
+    })
+
+    const countPage = Math.ceil(countdudi/ 10)
+    return {dudi: findDudi,page : page,count : findDudi.length,countPage}
 }
 
 const findDudiById = async (id,admin) => {
@@ -1383,6 +1398,7 @@ const findDudiById = async (id,admin) => {
 
     return findDudi
 }
+// deksripsi
 const updateDudi = async (data,id,admin) => {
     id = await validate(adminValidation.idValidation,id)
     data = await validate(adminValidation.updateDudiValidation,data)
@@ -2485,6 +2501,7 @@ const findAllAbsen = async (admin,id_tahun,page) => {
 
     return {absen : findAbsen,page : page,count : findAbsen.length,countPage : countPage}
 }
+// const findAllAbsenBySiswa = async ()
 const findAbsenById = async (id,admin) => {
     id = await validate(adminValidation.idValidation,id)
 
@@ -2544,6 +2561,27 @@ const findAbsenFilter = async (query,admin) => {
     })
 
     return {count : findAbsen.length,data : findAbsen}
+}
+const findAbsenBySiswa = async (id_siswa,admin) => {
+    id_siswa = await validate(adminValidation.idValidation,id_siswa)
+
+    const findAbsen = await db.absen.findMany({
+        where : {
+            AND : [
+                {
+                    siswa : {
+                        id_sekolah : admin.id_sekolah
+                    },
+                },
+                {
+                    id_siswa : id_siswa
+                }
+            ]
+        },
+        select : selectAbsenObject
+    })
+
+    return findAbsen
 }
 export default {
     // admin login
@@ -2635,5 +2673,6 @@ export default {
     // absen
     findAllAbsen,
     findAbsenById,
-    findAbsenFilter
+    findAbsenFilter,
+    findAbsenBySiswa
 }

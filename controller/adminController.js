@@ -263,7 +263,9 @@ const deleteJurusan = async (req,res,next) => {
 const findAllJurusan = async (req,res,next) => {
     try {
         const id_tahun = req.query.tahun
+        console.log(id_tahun);
         const result = await adminService.findAllJurusan(req.admin,id_tahun)
+        console.log(result);
 
         res.status(200).json({
             msg : "succes",
@@ -866,6 +868,19 @@ const findAbsenById = async (req,res,next) => {
         next(error)
     }
 }
+const findAbsenBySiswa = async (req,res,next) => {
+    try {  
+        const id_siswa = parseInt(req.params.id_siswa)
+        const result = await adminService.findAbsenBySiswa(id_siswa,req.admin)
+    
+        res.status(200).json({
+            msg : "succes",
+            data : result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 const findAbsenFilter = async (req,res,next) => {
     try {
         const query = req.query
@@ -1011,6 +1026,7 @@ export default {
     findAbsenById,
     findAbsenFilter,
     findAbsenFilter,
+    findAbsenBySiswa,
 
     // cekToken
     cekToken,

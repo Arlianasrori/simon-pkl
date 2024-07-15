@@ -40,7 +40,7 @@ export const adminMiddleware = async (req,res,next) => {
             msg : admin.msg
         })
     }
-    console.log("hahahah");
+    // console.log("hahahah");
     req.admin = findAdmin
     
      next()

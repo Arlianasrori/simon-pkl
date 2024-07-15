@@ -11,13 +11,14 @@ import { fileLaporaPkl } from "../utils/imageSaveUtilsLaporanPkl.js";
 import { selectLaporanPkl } from "../utils/LaporanSiswaPklUtil.js";
 import fs from "fs"
 import absenValidation from "../validation/absenValidation.js";
-import puppeteer from "puppeteer"
-import ejs from 'ejs'
+// import puppeteer from "puppeteer"
+// import ejs from 'ejs'
+import { sendNotification } from "../utils/sendNotification.js";
 import { selectPebimbingDudiObject } from "../utils/pembimbingDudiSelect.js";
 import { getQueryAbsen } from "../utils/getQueryAbsen.js";
 import { generatePdf } from "../utils/generatePdf.js";
 import { selectAbsenObject } from "../utils/absenSelect.js";
-
+// deksripsi
 const updatePassword = async (id, password) => {
   id = await validate(adminValidation.idValidation, id)
   password = await validate(pembimbingDudiValidation.updatePassword, password)

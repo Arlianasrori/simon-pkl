@@ -576,7 +576,7 @@ const addTokenFCM = async (req,res,next) => {
   try {
     const id_siswa = req.siswa.id
     const token = req.body.tokenFCM
-    console.log(req.siswa);
+    // console.log(req.siswa);
     const result = await siswaService.addTokenFCM(id_siswa,token)
     res.status(200).json({
         msg : "succes",
